@@ -2,7 +2,7 @@ name: Daily Price Scrape
 
 on:
   schedule:
-    - cron: '0 19 * * *'   # 21:00 Italy (CEST, UTC+2) / 20:00 CET winter
+    - cron: '0 3 * * *'    # 12:00 Japan (JST, UTC+9)
   workflow_dispatch:        # allow manual trigger from GitHub UI
 
 jobs:
