@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Honda Freed 3rd Gen — Price Tracker</title>
+  <title>Japan Used Car Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -171,6 +171,8 @@
     .stat-cell-value { font-size: 0.82rem; font-weight: 600; }
     .stat-cell-value.min { color: var(--green); }
     .stat-cell-value.max { color: var(--red); }
+    .stat-delta { font-size: 0.65rem; font-weight: 500; margin-top: 2px; display: block; }
+    .stat-delta.muted { color: var(--muted); }
 
     /* listings count bar */
     .card-meta {
@@ -243,8 +245,8 @@
   <div class="logo">
     <div class="logo-icon">🚐</div>
     <div>
-      <div class="logo-text">Honda Freed — Price Tracker</div>
-      <div class="logo-sub">3rd Generation · 2024年06月～ · Japan used market</div>
+      <div class="logo-text">Japan Used Car Tracker</div>
+      <div class="logo-sub">Honda Freed 3rd Gen · 2024年06月～ · CarSensor.net</div>
     </div>
   </div>
   <div class="header-right">
@@ -297,6 +299,21 @@ function pctChange(arr) {
   return ((arr[arr.length - 1] - arr[0]) / arr[0] * 100).toFixed(1);
 }
 
+/* ── Delta badge (vs previous snapshot) ── */
+function deltaBadge(cur, prev, lowerIsBetter = true) {
+  if (prev == null) return '';
+  const d = cur - prev;
+  if (d === 0) return `<span class="stat-delta muted">→ same</span>`;
+  const up = d > 0;
+  const good = lowerIsBetter ? !up : up;
+  const color = good ? 'var(--green)' : 'var(--red)';
+  const arrow = up ? '▲' : '▼';
+  const sign  = up ? '+' : '−';
+  const abs   = Math.abs(d);
+  const label = abs >= 1000 ? '¥' + abs.toLocaleString('en-US') : abs.toLocaleString('en-US');
+  return `<span class="stat-delta" style="color:${color}">${arrow} ${sign}${label}</span>`;
+}
+
 /* ── Month labels ── */
 function monthLabels(n) {
   const out = [], now = new Date();
@@ -346,8 +363,9 @@ function render() {
   }
 
   const { grades, snapshots } = window.FREED_DATA;
-  const snap    = snapshots[snapshots.length - 1];   // latest snapshot
-  const snaps   = snapshots.slice(-period);           // window for chart/sparkline
+  const snap     = snapshots[snapshots.length - 1];        // latest snapshot
+  const prevSnap = snapshots.length >= 2 ? snapshots[snapshots.length - 2] : null;
+  const snaps    = snapshots.slice(-period);                // window for chart/sparkline
   const isSingle = snapshots.length < 2;
 
   // Notice banner
@@ -369,8 +387,9 @@ function render() {
   cardsEl.innerHTML = '';
 
   grades.forEach(grade => {
-    const color = GRADE_COLORS[grade.id];
-    const gSnap = snap.by_grade[grade.id];
+    const color    = GRADE_COLORS[grade.id];
+    const gSnap    = snap.by_grade[grade.id];
+    const gPrev    = prevSnap?.by_grade[grade.id] ?? null;
     if (!gSnap) return;
 
     // History of avg prices across snapshots for this grade
@@ -408,14 +427,17 @@ function render() {
         <div class="stat-cell">
           <div class="stat-cell-label">Min</div>
           <div class="stat-cell-value min">${fmt(gSnap.min)}</div>
+          ${deltaBadge(gSnap.min, gPrev?.min, true)}
         </div>
         <div class="stat-cell">
           <div class="stat-cell-label">Max</div>
           <div class="stat-cell-value max">${fmt(gSnap.max)}</div>
+          ${deltaBadge(gSnap.max, gPrev?.max, true)}
         </div>
         <div class="stat-cell">
           <div class="stat-cell-label">Listings</div>
           <div class="stat-cell-value">${gSnap.count}</div>
+          ${deltaBadge(gSnap.count, gPrev?.count, false)}
         </div>
       </div>
 
