@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Honda Freed 3rd Gen — Price Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Real price data — updated weekly by scraper.py -->
+  <script src="data/freed_data.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0d0f14;
+      --surface: #161b26;
+      --surface2:#1e2536;
+      --border:  #2a3149;
+      --accent:  #4f8ef7;
+      --green:   #34d399;
+      --red:     #f87171;
+      --amber:   #fbbf24;
+      --text:    #e2e8f0;
+      --muted:   #64748b;
+      --radius:  10px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 16px 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .logo-text { font-size: 1rem; font-weight: 700; letter-spacing: -0.2px; }
+    .logo-sub  { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+
+    .header-right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+    .period-selector {
+      display: flex;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 3px;
+      gap: 3px;
+    }
+    .period-btn {
+      background: none; border: none;
+      color: var(--muted);
+      font-size: 0.78rem; font-weight: 500; font-family: inherit;
+      padding: 5px 12px; border-radius: 7px;
+      cursor: pointer; transition: all .15s;
+    }
+    .period-btn.active { background: var(--accent); color: #fff; }
+    .period-btn:not(.active):hover { color: var(--text); }
+
+    .source-link {
+      font-size: 0.72rem; color: var(--muted);
+      border: 1px solid var(--border); border-radius: 20px;
+      padding: 4px 12px; text-decoration: none;
+      transition: border-color .15s;
+    }
+    .source-link:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Main ── */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      flex: 1;
+    }
+
+    /* ── Grade cards ── */
+    .cards-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .grade-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card-header { display: flex; flex-direction: column; gap: 5px; }
+    .card-drive-badge {
+      display: inline-flex; align-items: center;
+      font-size: 0.62rem; font-weight: 700;
+      letter-spacing: .5px; text-transform: uppercase;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 4px; padding: 2px 7px;
+      color: var(--muted); width: fit-content; margin-bottom: 2px;
+    }
+    .card-grade-jp { font-size: 1rem; font-weight: 700; line-height: 1.3; }
+    .card-grade-en { font-size: 0.72rem; color: var(--muted); }
+
+    /* avg price */
+    .card-avg {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .avg-label { font-size: 0.68rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .avg-value { font-size: 1.8rem; font-weight: 700; line-height: 1; }
+    .avg-change {
+      font-size: 0.8rem; font-weight: 600; margin-top: 2px;
+    }
+
+    /* sparkline */
+    .card-spark { width: 100%; height: 48px; }
+
+    /* stats grid */
+    .card-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .stat-cell {
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .stat-cell:not(:last-child) { border-right: 1px solid var(--border); }
+    .stat-cell-label {
+      font-size: 0.62rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .5px;
+      color: var(--muted);
+    }
+    .stat-cell-value { font-size: 0.82rem; font-weight: 600; }
+    .stat-cell-value.min { color: var(--green); }
+    .stat-cell-value.max { color: var(--red); }
+
+    /* listings count bar */
+    .card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--muted);
+      padding-top: 2px;
+    }
+    .listings-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 3px 9px;
+    }
+    .listings-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+    .live-badge {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: .4px;
+      background: rgba(79,142,247,.15); color: var(--accent);
+      border: 1px solid rgba(79,142,247,.3); border-radius: 4px;
+      padding: 2px 5px;
+    }
+
+    /* ── Chart section ── */
+    .chart-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+    }
+    .chart-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+    }
+    .chart-title { font-size: 0.95rem; font-weight: 600; }
+    .chart-legend { display: flex; gap: 16px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--muted); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .chart-wrap { position: relative; height: 260px; }
+
+    /* ── Notice (single snapshot) ── */
+    .notice {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(79,142,247,.07);
+      border: 1px solid rgba(79,142,247,.2);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 0.8rem; color: var(--muted);
+    }
+    .notice-icon { font-size: 1rem; flex-shrink: 0; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center; padding: 20px 32px;
+      font-size: 0.72rem; color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      header, main { padding: 14px 16px; }
+      .cards-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🚐</div>
+    <div>
+      <div class="logo-text">Honda Freed — Price Tracker</div>
+      <div class="logo-sub">3rd Generation · 2024年06月～ · Japan used market</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="period-selector" id="period-sel">
+      <button class="period-btn" data-p="3">3M</button>
+      <button class="period-btn active" data-p="6">6M</button>
+      <button class="period-btn" data-p="12">1Y</button>
+    </div>
+    <a class="source-link" href="https://www.carsensor.net/usedcar/bHO/s083/spH/" target="_blank" rel="noopener">
+      CarSensor.net ↗
+    </a>
+  </div>
+</header>
+
+<main>
+  <div id="notice-area"></div>
+  <div class="cards-row" id="cards-row"></div>
+  <div class="chart-section" id="chart-section">
+    <div class="chart-header">
+      <div class="chart-title">Average Listed Price Comparison (¥)</div>
+      <div class="chart-legend" id="chart-legend"></div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="main-chart"></canvas>
+    </div>
+  </div>
+</main>
+
+<footer>
+  Data sourced from <a href="https://www.carsensor.net/usedcar/bHO/s083/spH/" target="_blank" rel="noopener">CarSensor.net</a> ·
+  Updated weekly by scraper.py · Research purposes only ·
+  <span id="last-snap-date"></span>
+</footer>
+
+<script>
+/* ── Palette: one colour per grade ── */
+const GRADE_COLORS = {
+  ehev_air_ex:       '#4f8ef7',
+  ehev_air_ex_4wd:   '#fbbf24',
+  ehev_crosstar:     '#34d399',
+  ehev_crosstar_4wd: '#a78bfa',
+};
+
+/* ── Formatting helpers ── */
+const fmt  = n => '¥' + Math.round(n).toLocaleString('en-US');
+const fmtM = n => '¥' + (n / 10000).toFixed(1) + '万';
+
+function pctChange(arr) {
+  if (arr.length < 2) return null;
+  return ((arr[arr.length - 1] - arr[0]) / arr[0] * 100).toFixed(1);
+}
+
+/* ── Month labels ── */
+function monthLabels(n) {
+  const out = [], now = new Date();
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    out.push(d.toLocaleString('en-US', { month: 'short', year: '2-digit' }));
+  }
+  return out;
+}
+
+/* ── Sparkline SVG ── */
+function sparkSVG(data, color) {
+  const W = 260, H = 48, pad = 3;
+  if (data.length < 2) {
+    return `<svg viewBox="0 0 ${W} ${H}" class="card-spark" xmlns="http://www.w3.org/2000/svg">
+      <line x1="${pad}" y1="${H/2}" x2="${W-pad}" y2="${H/2}"
+            stroke="var(--border)" stroke-width="1.5" stroke-dasharray="5,4"/>
+      <circle cx="${W/2}" cy="${H/2}" r="4" fill="${color}"/>
+    </svg>`;
+  }
+  const lo = Math.min(...data), hi = Math.max(...data), range = hi - lo || 1;
+  const pts = data.map((v, i) => {
+    const x = pad + (i / (data.length - 1)) * (W - pad * 2);
+    const y = H - pad - ((v - lo) / range) * (H - pad * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  const last = pts[pts.length - 1].split(',');
+  const rising = data[data.length - 1] >= data[0];
+  const lc = rising ? 'var(--red)' : 'var(--green)';
+  return `<svg viewBox="0 0 ${W} ${H}" fill="none" class="card-spark" xmlns="http://www.w3.org/2000/svg">
+    <polyline points="${pts.join(' ')}" stroke="${lc}" stroke-width="2"
+              stroke-linejoin="round" stroke-linecap="round" opacity=".9"/>
+    <circle cx="${last[0]}" cy="${last[1]}" r="3" fill="${lc}"/>
+  </svg>`;
+}
+
+/* ── State ── */
+let period = 6;
+let mainChart = null;
+
+/* ── Render ── */
+function render() {
+  if (!window.FREED_DATA) {
+    document.getElementById('cards-row').innerHTML =
+      '<p style="color:var(--muted);font-size:.85rem">Could not load freed_data.js</p>';
+    return;
+  }
+
+  const { grades, snapshots } = window.FREED_DATA;
+  const snap    = snapshots[snapshots.length - 1];   // latest snapshot
+  const snaps   = snapshots.slice(-period);           // window for chart/sparkline
+  const isSingle = snapshots.length < 2;
+
+  // Notice banner
+  const noticeEl = document.getElementById('notice-area');
+  noticeEl.innerHTML = isSingle
+    ? `<div class="notice">
+        <span class="notice-icon">📅</span>
+        <span>First snapshot captured on <strong>${snap.date}</strong>.
+        Price history will build automatically with each weekly scrape.
+        Run <code>scraper.py</code> again next week to add the next data point.</span>
+       </div>`
+    : '';
+
+  // Footer date
+  document.getElementById('last-snap-date').textContent = `Last snapshot: ${snap.date}`;
+
+  // Cards
+  const cardsEl = document.getElementById('cards-row');
+  cardsEl.innerHTML = '';
+
+  grades.forEach(grade => {
+    const color = GRADE_COLORS[grade.id];
+    const gSnap = snap.by_grade[grade.id];
+    if (!gSnap) return;
+
+    // History of avg prices across snapshots for this grade
+    const history = snaps.map(s => s.by_grade[grade.id]?.avg ?? null).filter(v => v !== null);
+    const pct     = pctChange(history);
+    const rising  = pct !== null && parseFloat(pct) >= 0;
+
+    let changeHTML = '';
+    if (pct === null) {
+      changeHTML = `<span style="color:var(--muted);font-size:.75rem">Awaiting next snapshot</span>`;
+    } else {
+      changeHTML = `<span class="avg-change" style="color:${rising ? 'var(--red)' : 'var(--green)'}">
+        ${rising ? '▲' : '▼'} ${Math.abs(pct)}% over ${snaps.length} snapshots
+      </span>`;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'grade-card';
+    card.innerHTML = `
+      <div class="card-header">
+        <span class="card-drive-badge">${grade.drive}</span>
+        <div class="card-grade-jp">${grade.label}</div>
+        <div class="card-grade-en">${grade.label_en}</div>
+      </div>
+
+      <div class="card-avg">
+        <div class="avg-label">Avg listed price</div>
+        <div class="avg-value" style="color:${color}">${fmt(gSnap.avg)}</div>
+        ${changeHTML}
+      </div>
+
+      ${sparkSVG(history, color)}
+
+      <div class="card-stats">
+        <div class="stat-cell">
+          <div class="stat-cell-label">Min</div>
+          <div class="stat-cell-value min">${fmt(gSnap.min)}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-cell-label">Max</div>
+          <div class="stat-cell-value max">${fmt(gSnap.max)}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-cell-label">Listings</div>
+          <div class="stat-cell-value">${gSnap.count}</div>
+        </div>
+      </div>
+
+      <div class="card-meta">
+        <div class="listings-pill">
+          <div class="listings-dot" style="background:${color}"></div>
+          ${gSnap.count.toLocaleString()} 台 available
+        </div>
+        <span class="live-badge">LIVE</span>
+      </div>`;
+
+    cardsEl.appendChild(card);
+  });
+
+  // Chart
+  renderChart(grades, snaps);
+}
+
+function renderChart(grades, snaps) {
+  const section = document.getElementById('chart-section');
+
+  if (snaps.length < 2) {
+    section.style.opacity = '.45';
+    section.style.pointerEvents = 'none';
+  } else {
+    section.style.opacity = '';
+    section.style.pointerEvents = '';
+  }
+
+  const labels   = snaps.map(s => s.date);
+  const datasets = grades.map(grade => ({
+    label: grade.label,
+    data:  snaps.map(s => s.by_grade[grade.id]?.avg ?? null),
+    borderColor: GRADE_COLORS[grade.id],
+    backgroundColor: GRADE_COLORS[grade.id] + '14',
+    pointBackgroundColor: GRADE_COLORS[grade.id],
+    pointRadius: snaps.length < 4 ? 5 : 3,
+    pointHoverRadius: 6,
+    borderWidth: 2,
+    tension: 0.35,
+    fill: false,
+    spanGaps: true,
+  }));
+
+  if (mainChart) {
+    mainChart.data.labels   = labels;
+    mainChart.data.datasets = datasets;
+    mainChart.update();
+  } else {
+    const ctx = document.getElementById('main-chart').getContext('2d');
+    mainChart = new Chart(ctx, {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1e2536',
+            borderColor: '#2a3149', borderWidth: 1,
+            titleColor: '#e2e8f0', bodyColor: '#94a3b8',
+            padding: 12,
+            callbacks: { label: c => ` ${c.dataset.label}: ${fmt(c.parsed.y)}` }
+          }
+        },
+        scales: {
+          x: { grid: { color: '#2a3149' }, ticks: { color: '#64748b', font: { size: 11 } } },
+          y: {
+            grid: { color: '#2a3149' },
+            ticks: {
+              color: '#64748b', font: { size: 11 },
+              callback: v => '¥' + (v / 1_000_000).toFixed(2) + 'M'
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // Legend
+  const legendEl = document.getElementById('chart-legend');
+  legendEl.innerHTML = '';
+  grades.forEach(g => {
+    const el = document.createElement('div');
+    el.className = 'legend-item';
+    el.innerHTML = `<div class="legend-dot" style="background:${GRADE_COLORS[g.id]}"></div>${g.label}`;
+    legendEl.appendChild(el);
+  });
+}
+
+/* ── Period toggle ── */
+document.getElementById('period-sel').addEventListener('click', e => {
+  const btn = e.target.closest('.period-btn');
+  if (!btn) return;
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  period = parseInt(btn.dataset.p);
+  if (mainChart) { mainChart.destroy(); mainChart = null; }
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
