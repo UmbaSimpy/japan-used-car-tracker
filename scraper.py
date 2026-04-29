@@ -53,7 +53,14 @@ TARGET_GRADES = {
 GRADE_ID_TO_LABEL = {v: k for k, v in TARGET_GRADES.items()}
 
 # Scoring weights (must sum to 1.0)
-WEIGHTS = {"price": 0.35, "mileage": 0.30, "shaken": 0.20, "accident": 0.15}
+WEIGHTS = {
+    "price":       0.30,
+    "mileage":     0.25,
+    "shaken":      0.15,
+    "accident":    0.15,
+    "warranty":    0.10,
+    "maintenance": 0.05,
+}
 
 
 # ── Scraping ─────────────────────────────────────────────────────────────────
@@ -131,6 +138,8 @@ def _extract_details(item) -> dict:
         "mileage_km":    None,
         "shaken_months": None,
         "accident":      None,
+        "warranty":      None,   # True = present, False = none
+        "maintenance":   None,   # True = 法定整備付, False = 法定整備無
     }
 
     # Detail page URL
@@ -170,6 +179,18 @@ def _extract_details(item) -> dict:
             elif "あり" in text:
                 details["accident"] = True
 
+        elif "保証" in text:
+            if "なし" in text:
+                details["warranty"] = False
+            elif "付" in text or "あり" in text:
+                details["warranty"] = True
+
+        elif "整備" in text:
+            if "法定整備付" in text:
+                details["maintenance"] = True
+            elif "法定整備無" in text or "法定整備なし" in text:
+                details["maintenance"] = False
+
     return details
 
 
@@ -205,18 +226,40 @@ def score_vehicle(vehicle: dict, global_stats: dict) -> tuple[float, dict]:
     else:
         accident_score = 5.0   # unknown = neutral
 
+    # Warranty: present = 8, none = 1, unknown = 4
+    warranty = vehicle.get("warranty")
+    if warranty is True:
+        warranty_score = 8.0
+    elif warranty is False:
+        warranty_score = 1.0
+    else:
+        warranty_score = 4.0   # unknown = below neutral
+
+    # Legal maintenance (法定整備): with = 10, without = 3, unknown = 5
+    maintenance = vehicle.get("maintenance")
+    if maintenance is True:
+        maintenance_score = 10.0
+    elif maintenance is False:
+        maintenance_score = 3.0
+    else:
+        maintenance_score = 5.0  # unknown = neutral
+
     total = (
-        price_score    * WEIGHTS["price"]    +
-        mileage_score  * WEIGHTS["mileage"]  +
-        shaken_score   * WEIGHTS["shaken"]   +
-        accident_score * WEIGHTS["accident"]
+        price_score       * WEIGHTS["price"]       +
+        mileage_score     * WEIGHTS["mileage"]     +
+        shaken_score      * WEIGHTS["shaken"]      +
+        accident_score    * WEIGHTS["accident"]    +
+        warranty_score    * WEIGHTS["warranty"]    +
+        maintenance_score * WEIGHTS["maintenance"]
     )
 
     breakdown = {
-        "price":    round(price_score,    1),
-        "mileage":  round(mileage_score,  1),
-        "shaken":   round(shaken_score,   1),
-        "accident": round(accident_score, 1),
+        "price":       round(price_score,       1),
+        "mileage":     round(mileage_score,     1),
+        "shaken":      round(shaken_score,      1),
+        "accident":    round(accident_score,    1),
+        "warranty":    round(warranty_score,    1),
+        "maintenance": round(maintenance_score, 1),
     }
     return round(total, 1), breakdown
 
@@ -250,6 +293,8 @@ def build_snapshot(
             "mileage_km":      v.get("mileage_km"),
             "shaken_months":   v.get("shaken_months"),
             "accident":        v.get("accident"),
+            "warranty":        v.get("warranty"),
+            "maintenance":     v.get("maintenance"),
             "url":             v.get("url"),
         }
         for v in top_vehicles
@@ -349,9 +394,11 @@ def build_telegram_message(snapshot: dict, prev_snapshot: dict | None) -> str:
         for i, v in enumerate(top, 1):
             km    = f"{v['mileage_km']:,} km" if v.get("mileage_km") is not None else "km ?"
             shk   = f"{v['shaken_months']}mo shaken" if v.get("shaken_months") is not None else "shaken ?"
-            acc   = "No accident" if v.get("accident") is False else ("Accident" if v.get("accident") else "?")
+            acc   = "No accident" if v.get("accident") is False else ("Accident" if v.get("accident") else "acc ?")
+            war   = "保証付" if v.get("warranty") is True else ("保証なし" if v.get("warranty") is False else "保証 ?")
+            mnt   = "整備付" if v.get("maintenance") is True else ("整備無" if v.get("maintenance") is False else "整備 ?")
             lines.append(f"  #{i} [{v['score']}/10] {v['grade_label']} — ¥{v['price_man']}万")
-            lines.append(f"      {km} · {shk} · {acc}")
+            lines.append(f"      {km} · {shk} · {acc} · {war} · {mnt}")
             if v.get("url"):
                 lines.append(f"      {v['url']}")
 

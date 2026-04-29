@@ -417,7 +417,7 @@
     .deal-stat-pill.warn   { color: var(--red);   border-color: rgba(245,101,101,.25); background: rgba(245,101,101,.07); }
 
     /* Score breakdown mini-bars */
-    .deal-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; }
+    .deal-bars { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px 12px; }
     .deal-bar-row { display: flex; align-items: center; gap: 6px; }
     .deal-bar-label { font-size: 0.6rem; color: var(--muted); width: 46px; flex-shrink: 0; }
     .deal-bar-track {
@@ -833,10 +833,14 @@ function renderTopDeals(snap, grades) {
     const shaken = v.shaken_months != null ? `${v.shaken_months}mo shaken`          : 'shaken N/A';
     const accClass = v.accident === false ? 'clean' : (v.accident === true ? 'warn' : '');
     const accText  = v.accident === false ? '✓ No accident' : (v.accident === true ? '⚠ Accident' : 'History N/A');
+    const warClass = v.warranty === true ? 'clean' : (v.warranty === false ? 'warn' : '');
+    const warText  = v.warranty === true ? '🛡 保証付' : (v.warranty === false ? '✗ 保証なし' : '保証 N/A');
+    const mntClass = v.maintenance === true ? 'clean' : (v.maintenance === false ? 'warn' : '');
+    const mntText  = v.maintenance === true ? '🔩 整備付' : (v.maintenance === false ? '✗ 整備無' : '整備 N/A');
 
-    const breakdown = ['price','mileage','shaken','accident'].map(key => {
+    const breakdown = ['price','mileage','shaken','accident','warranty','maintenance'].map(key => {
       const val = bd[key] ?? 0;
-      const labels = {price:'Price', mileage:'Mileage', shaken:'Shaken', accident:'History'};
+      const labels = {price:'Price', mileage:'Mileage', shaken:'Shaken', accident:'History', warranty:'Warranty', maintenance:'Maint.'};
       return `<div class="deal-bar-row">
         <span class="deal-bar-label">${labels[key]}</span>
         <div class="deal-bar-track">
@@ -867,6 +871,8 @@ function renderTopDeals(snap, grades) {
           <span class="deal-stat-pill">🛣 ${km}</span>
           <span class="deal-stat-pill">🔧 ${shaken}</span>
           <span class="deal-stat-pill ${accClass}">${accText}</span>
+          <span class="deal-stat-pill ${warClass}">${warText}</span>
+          <span class="deal-stat-pill ${mntClass}">${mntText}</span>
         </div>
         <div class="deal-bars">${breakdown}</div>
       </div>
