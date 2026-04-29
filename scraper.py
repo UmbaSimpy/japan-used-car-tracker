@@ -1,14 +1,14 @@
 """
 CarSensor Honda Freed 3rd-gen price scraper.
-Scrapes the hybrid listing (spH), walks ALL pages, filters to the three
-target grades, and writes a snapshot to data/freed_data.js.
+Scrapes the hybrid listing (spH), walks ALL pages, filters to the four
+target grades, scores each vehicle, and writes a snapshot to data/freed_data.js.
 
 Requirements:
     pip install requests beautifulsoup4
 
 Usage:
     python scraper.py              # scrape all pages (default)
-    python scraper.py --pages 10   # limit pages (faster, less accurate count)
+    python scraper.py --pages 10   # limit pages (faster, for testing)
 """
 
 import argparse
@@ -19,8 +19,6 @@ import time
 from datetime import date
 from pathlib import Path
 
-TELEGRAM_CONFIG_FILE = Path(__file__).parent / "telegram_config.json"
-
 # Force UTF-8 output so Japanese characters print correctly on Windows
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -30,10 +28,10 @@ from bs4 import BeautifulSoup
 
 # ── Config ───────────────────────────────────────────────────────────────────
 
-# Hybrid Freed listing — all 3 target grades appear here
-BASE_URL  = "https://www.carsensor.net/usedcar/bHO/s083/spH/"
-DATA_FILE = Path(__file__).parent / "data" / "freed_data.js"
-HEADERS   = {
+BASE_URL             = "https://www.carsensor.net/usedcar/bHO/s083/spH/"
+DATA_FILE            = Path(__file__).parent / "data" / "freed_data.js"
+TELEGRAM_CONFIG_FILE = Path(__file__).parent / "telegram_config.json"
+HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -41,15 +39,22 @@ HEADERS   = {
     ),
     "Accept-Language": "ja,en;q=0.9",
 }
-DELAY_SEC = 2   # polite delay between page requests
+DELAY_SEC  = 2
+TOP_N      = 5   # number of top-scored vehicles to store per snapshot
 
-# The only three grades we track. Keys match freed_data.js grade ids.
+# Longest names first so substring matching can't misfire
 TARGET_GRADES = {
     "1.5 e:HEV エアー EX 4WD":  "ehev_air_ex_4wd",
     "1.5 e:HEV エアー EX":      "ehev_air_ex",
     "1.5 e:HEV クロスター 4WD": "ehev_crosstar_4wd",
     "1.5 e:HEV クロスター":     "ehev_crosstar",
 }
+
+GRADE_ID_TO_LABEL = {v: k for k, v in TARGET_GRADES.items()}
+
+# Scoring weights (must sum to 1.0)
+WEIGHTS = {"price": 0.35, "mileage": 0.30, "shaken": 0.20, "accident": 0.15}
+
 
 # ── Scraping ─────────────────────────────────────────────────────────────────
 
@@ -70,24 +75,20 @@ def fetch_page(n: int) -> str | None:
 
 
 def total_pages_from_html(html: str) -> int:
-    """Parse total page count from the pagination on page 1."""
-    # CarSensor shows "最後" (last) link — the number in that URL is the page count
     m = re.search(r'index(\d+)\.html[^"]*"[^>]*>最後', html)
     if m:
         return int(m.group(1))
-    # Fallback: find largest page number in pagination links
     nums = re.findall(r'index(\d+)\.html', html)
     return max((int(n) for n in nums), default=1)
 
 
 def parse_listings(html: str) -> list[dict]:
     """
-    Returns list of {"grade_id": str, "price_man": float} for
-    listings whose grade matches one of TARGET_GRADES.
+    Returns list of vehicle dicts with grade_id, price_man,
+    mileage_km, shaken_months, accident, url.
     """
     soup = BeautifulSoup(html, "html.parser")
     results = []
-
     containers = soup.select("div.cassetteWrap")
 
     for item in containers:
@@ -95,17 +96,18 @@ def parse_listings(html: str) -> list[dict]:
         if grade_id is None:
             continue
         price = _extract_price(item)
-        if price:
-            results.append({"grade_id": grade_id, "price_man": price})
+        if not price:
+            continue
+        details = _extract_details(item)
+        results.append({"grade_id": grade_id, "price_man": price, **details})
 
     if not containers:
-        print("  [!] No listing containers found on this page — selectors may need updating")
+        print("  [!] No listing containers found — selectors may need updating")
 
     return results
 
 
 def _match_grade(text: str) -> str | None:
-    # Check longest grade name first so "エアー EX 4WD" matches before "エアー EX"
     for jp, gid in sorted(TARGET_GRADES.items(), key=lambda x: -len(x[0])):
         if jp in text:
             return gid
@@ -113,7 +115,6 @@ def _match_grade(text: str) -> str | None:
 
 
 def _extract_price(tag) -> float | None:
-    # Price and 万円 are on separate lines — use \s* to bridge them
     for sel in ("div.basePrice", "div.totalPrice"):
         el = tag.select_one(sel)
         if el:
@@ -123,21 +124,136 @@ def _extract_price(tag) -> float | None:
     return None
 
 
+def _extract_details(item) -> dict:
+    """Extract URL, mileage, shaken remaining months, and accident flag."""
+    details: dict = {
+        "url":           None,
+        "mileage_km":    None,
+        "shaken_months": None,
+        "accident":      None,
+    }
+
+    # Detail page URL
+    link = item.select_one('a[name="detail_a"]')
+    if link and link.get("href"):
+        href = link["href"].split("?")[0]
+        details["url"] = "https://www.carsensor.net" + href
+
+    # Spec boxes: 走行距離 / 車検 / 修復歴
+    for box in item.select("div.specList__detailBox"):
+        text = box.get_text(" ", strip=True)
+
+        if "走行距離" in text:
+            m = re.search(r"([\d.]+)\s*万\s*km", text)
+            if m:
+                details["mileage_km"] = round(float(m.group(1)) * 10_000)
+            else:
+                m = re.search(r"(\d+)\s*km", text)
+                if m:
+                    details["mileage_km"] = int(m.group(1))
+
+        elif "車検" in text:
+            # e.g. "車検 2029(R11)年04月"
+            m = re.search(r"(\d{4})\(.*?\)年(\d{1,2})月", text)
+            if m:
+                today = date.today()
+                months = (int(m.group(1)) - today.year) * 12 + (int(m.group(2)) - today.month)
+                details["shaken_months"] = max(0, months)
+            elif "整備付" in text or "車検付" in text:
+                details["shaken_months"] = 24   # new shaken included
+            elif "なし" in text:
+                details["shaken_months"] = 0
+
+        elif "修復歴" in text:
+            if "なし" in text:
+                details["accident"] = False
+            elif "あり" in text:
+                details["accident"] = True
+
+    return details
+
+
+# ── Scoring ──────────────────────────────────────────────────────────────────
+
+def score_vehicle(vehicle: dict, grade_stats: dict) -> tuple[float, dict]:
+    """
+    Score a vehicle 0–10 using price (35%), mileage (30%),
+    shaken remaining (20%), accident history (15%).
+    Lower price = better. Lower mileage = better.
+    More shaken months = better. No accident = better.
+    """
+    # Price: best = grade min, worst = grade max
+    g_min = grade_stats["min"]
+    g_max = grade_stats["max"]
+    price_range = max(g_max - g_min, 1.0)
+    price_score = max(0.0, min(10.0, 10.0 * (g_max - vehicle["price_man"]) / price_range))
+
+    # Mileage: 0 km → 10,  ≥ 100,000 km → 0
+    km = vehicle.get("mileage_km")
+    mileage_score = max(0.0, min(10.0, 10.0 - (km / 10_000.0))) if km is not None else 5.0
+
+    # Shaken: 0 months → 2,  ≥ 24 months → 10
+    months = vehicle.get("shaken_months")
+    shaken_score = (2.0 + min(months, 24) / 24.0 * 8.0) if months is not None else 5.0
+
+    # Accident history
+    accident = vehicle.get("accident")
+    if accident is False:
+        accident_score = 10.0
+    elif accident is True:
+        accident_score = 1.0
+    else:
+        accident_score = 5.0   # unknown = neutral
+
+    total = (
+        price_score    * WEIGHTS["price"]    +
+        mileage_score  * WEIGHTS["mileage"]  +
+        shaken_score   * WEIGHTS["shaken"]   +
+        accident_score * WEIGHTS["accident"]
+    )
+
+    breakdown = {
+        "price":    round(price_score,    1),
+        "mileage":  round(mileage_score,  1),
+        "shaken":   round(shaken_score,   1),
+        "accident": round(accident_score, 1),
+    }
+    return round(total, 1), breakdown
+
+
 # ── Statistics ───────────────────────────────────────────────────────────────
 
 def compute_stats(prices: list[float]) -> dict:
     if not prices:
         return {}
-    avg = round(sum(prices) / len(prices) * 10000)
+    avg = round(sum(prices) / len(prices) * 10_000)
     return {
         "avg":   avg,
-        "min":   round(min(prices) * 10000),
-        "max":   round(max(prices) * 10000),
+        "min":   round(min(prices) * 10_000),
+        "max":   round(max(prices) * 10_000),
         "count": len(prices),
     }
 
 
-def build_snapshot(by_grade_prices: dict[str, list[float]], pages_scraped: int) -> dict:
+def build_snapshot(
+    by_grade_prices: dict[str, list[float]],
+    pages_scraped: int,
+    top_vehicles: list[dict],
+) -> dict:
+    top_clean = [
+        {
+            "score":           v["score"],
+            "score_breakdown": v["score_breakdown"],
+            "grade_id":        v["grade_id"],
+            "grade_label":     GRADE_ID_TO_LABEL.get(v["grade_id"], v["grade_id"]),
+            "price_man":       v["price_man"],
+            "mileage_km":      v.get("mileage_km"),
+            "shaken_months":   v.get("shaken_months"),
+            "accident":        v.get("accident"),
+            "url":             v.get("url"),
+        }
+        for v in top_vehicles
+    ]
     return {
         "date":          str(date.today()),
         "pages_scraped": pages_scraped,
@@ -146,6 +262,7 @@ def build_snapshot(by_grade_prices: dict[str, list[float]], pages_scraped: int) 
             for gid, prices in by_grade_prices.items()
             if prices
         },
+        "top_vehicles": top_clean,
     }
 
 
@@ -153,12 +270,10 @@ def build_snapshot(by_grade_prices: dict[str, list[float]], pages_scraped: int) 
 
 def load_telegram_config() -> dict | None:
     import os
-    # GitHub Actions (and any CI): read from environment variables
     env_token   = os.environ.get("TELEGRAM_BOT_TOKEN")
     env_chat_id = os.environ.get("TELEGRAM_CHAT_ID")
     if env_token and env_chat_id:
         return {"bot_token": env_token, "chat_id": env_chat_id}
-    # Local: read from telegram_config.json
     if not TELEGRAM_CONFIG_FILE.exists():
         return None
     try:
@@ -173,14 +288,13 @@ def send_telegram(message: str) -> None:
     if not cfg:
         print("  [!] Telegram config not found — skipping notification")
         return
-    token = cfg.get("bot_token", "")
-    chat_id = cfg.get("chat_id", "")
-    if not token or not chat_id:
-        print("  [!] Telegram config missing bot_token or chat_id — skipping")
-        return
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    url = f"https://api.telegram.org/bot{cfg['bot_token']}/sendMessage"
     try:
-        r = requests.post(url, json={"chat_id": chat_id, "text": message, "parse_mode": "HTML"}, timeout=10)
+        r = requests.post(
+            url,
+            json={"chat_id": cfg["chat_id"], "text": message, "parse_mode": "HTML"},
+            timeout=10,
+        )
         if r.ok:
             print("  Telegram notification sent.")
         else:
@@ -209,7 +323,6 @@ def build_telegram_message(snapshot: dict, prev_snapshot: dict | None) -> str:
         lines.append("")
         lines.append(f"<b>{label}</b>")
 
-        # Vehicle count
         count = cur["count"]
         if pre:
             d_count = count - pre["count"]
@@ -219,7 +332,6 @@ def build_telegram_message(snapshot: dict, prev_snapshot: dict | None) -> str:
         else:
             lines.append(f"  台数: {count:,} 台  (first snapshot)")
 
-        # Average price
         avg = cur["avg"]
         if pre:
             d_avg = avg - pre["avg"]
@@ -228,6 +340,20 @@ def build_telegram_message(snapshot: dict, prev_snapshot: dict | None) -> str:
             lines.append(f"  Avg:  ¥{avg:,}  ({arrow} {sign}¥{d_avg:,})")
         else:
             lines.append(f"  Avg:  ¥{avg:,}")
+
+    # Top 3 deals
+    top = snapshot.get("top_vehicles", [])[:3]
+    if top:
+        lines.append("")
+        lines.append("<b>🏆 Top 3 Deals Today</b>")
+        for i, v in enumerate(top, 1):
+            km    = f"{v['mileage_km']:,} km" if v.get("mileage_km") is not None else "km ?"
+            shk   = f"{v['shaken_months']}mo shaken" if v.get("shaken_months") is not None else "shaken ?"
+            acc   = "No accident" if v.get("accident") is False else ("Accident" if v.get("accident") else "?")
+            lines.append(f"  #{i} [{v['score']}/10] {v['grade_label']} — ¥{v['price_man']}万")
+            lines.append(f"      {km} · {shk} · {acc}")
+            if v.get("url"):
+                lines.append(f"      {v['url']}")
 
     return "\n".join(lines)
 
@@ -248,16 +374,16 @@ def load_existing() -> dict:
 def _default_structure() -> dict:
     return {
         "vehicle": {
-            "make": "Honda",
-            "model": "Freed",
+            "make":          "Honda",
+            "model":         "Freed",
             "carsensor_url": BASE_URL,
-            "generation": "3rd gen (2024年06月～)",
+            "generation":    "3rd gen (2024年06月～)",
         },
         "grades": [
             {"id": "ehev_air_ex",       "label": "e:HEV エアー EX",       "label_en": "e:HEV Air EX",       "drive": "2WD"},
-            {"id": "ehev_air_ex_4wd",  "label": "e:HEV エアー EX 4WD",  "label_en": "e:HEV Air EX 4WD",  "drive": "4WD"},
-            {"id": "ehev_crosstar",    "label": "e:HEV クロスター",      "label_en": "e:HEV Crosstar",    "drive": "2WD"},
-            {"id": "ehev_crosstar_4wd","label": "e:HEV クロスター 4WD", "label_en": "e:HEV Crosstar 4WD","drive": "4WD"},
+            {"id": "ehev_air_ex_4wd",   "label": "e:HEV エアー EX 4WD",   "label_en": "e:HEV Air EX 4WD",   "drive": "4WD"},
+            {"id": "ehev_crosstar",     "label": "e:HEV クロスター",       "label_en": "e:HEV Crosstar",     "drive": "2WD"},
+            {"id": "ehev_crosstar_4wd", "label": "e:HEV クロスター 4WD",  "label_en": "e:HEV Crosstar 4WD", "drive": "4WD"},
         ],
         "snapshots": [],
     }
@@ -267,7 +393,7 @@ def save(data: dict) -> None:
     DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
     js = (
         "// Auto-generated by scraper.py — do not edit manually.\n"
-        "// Prices in yen (JPY). Each snapshot = one weekly scrape of CarSensor.net.\n"
+        "// Prices in yen (JPY). Each snapshot = one daily scrape of CarSensor.net.\n"
         f"window.FREED_DATA = {json.dumps(data, ensure_ascii=False, indent=2)};\n"
     )
     DATA_FILE.write_text(js, encoding="utf-8")
@@ -277,7 +403,6 @@ def save(data: dict) -> None:
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def run(max_pages: int | None) -> None:
-    # ── Page 1: discover total pages ──────────────────────────────────────
     print("Fetching page 1 …")
     html1 = fetch_page(1)
     if not html1:
@@ -288,38 +413,59 @@ def run(max_pages: int | None) -> None:
     limit = min(total, max_pages) if max_pages else total
     print(f"  {total} pages found on CarSensor — will scrape {limit}")
 
-    # ── Collect listings ──────────────────────────────────────────────────
-    by_grade_prices: dict[str, list[float]] = {gid: [] for gid in TARGET_GRADES.values()}
+    # ── Collect all vehicle data ──────────────────────────────────────────
+    all_vehicles: list[dict] = []
 
     for n in range(1, limit + 1):
         html = html1 if n == 1 else fetch_page(n)
         if not html:
             break
         listings = parse_listings(html)
-        for l in listings:
-            by_grade_prices[l["grade_id"]].append(l["price_man"])
-
-        found = sum(len(v) for v in by_grade_prices.values())
-        print(f"  Page {n}/{limit}  — {len(listings)} matches  (running total: {found})")
-
+        all_vehicles.extend(listings)
+        print(f"  Page {n}/{limit}  — {len(listings)} matches  (running total: {len(all_vehicles)})")
         if n < limit:
             time.sleep(DELAY_SEC)
 
-    # ── Save first (before any print that could crash on Windows encoding) ──
-    snapshot = build_snapshot(by_grade_prices, limit)
-    data = load_existing()
-    today = str(date.today())
-    # Keep the previous snapshot for delta calculations before replacing today's
+    # ── Per-grade stats ───────────────────────────────────────────────────
+    by_grade_prices: dict[str, list[float]] = {gid: [] for gid in TARGET_GRADES.values()}
+    for v in all_vehicles:
+        by_grade_prices[v["grade_id"]].append(v["price_man"])
+
+    grade_stats = {
+        gid: {
+            "min": min(prices),
+            "max": max(prices),
+            "avg": sum(prices) / len(prices),
+        }
+        for gid, prices in by_grade_prices.items()
+        if prices
+    }
+
+    # ── Score every vehicle ───────────────────────────────────────────────
+    for v in all_vehicles:
+        gs = grade_stats.get(v["grade_id"])
+        if gs:
+            v["score"], v["score_breakdown"] = score_vehicle(v, gs)
+
+    # ── Top N across all grades ───────────────────────────────────────────
+    top_vehicles = sorted(
+        [v for v in all_vehicles if "score" in v],
+        key=lambda x: -x["score"],
+    )[:TOP_N]
+
+    # ── Save ──────────────────────────────────────────────────────────────
+    snapshot = build_snapshot(by_grade_prices, limit, top_vehicles)
+    data     = load_existing()
+    today    = str(date.today())
+
     existing_today = next((s for s in data["snapshots"] if s["date"] == today), None)
-    prev_snapshot = None
+    prev_snapshot  = None
     if existing_today:
-        # Re-run today: use the snapshot just before today as the baseline
         prev_snapshot = next(
             (s for s in reversed(sorted(data["snapshots"], key=lambda s: s["date"])) if s["date"] < today),
             None,
         )
     else:
-        # First run today: last saved snapshot is the baseline
         if data["snapshots"]:
             prev_snapshot = sorted(data["snapshots"], key=lambda s: s["date"])[-1]
 
@@ -328,26 +474,35 @@ def run(max_pages: int | None) -> None:
     data["snapshots"].sort(key=lambda s: s["date"])
     save(data)
 
-    # ── Telegram notification ─────────────────────────────────────────────
+    # ── Telegram ──────────────────────────────────────────────────────────
     msg = build_telegram_message(snapshot, prev_snapshot)
     send_telegram(msg)
 
-    # ── Summary ───────────────────────────────────────────────────────────
+    # ── Console summary ───────────────────────────────────────────────────
     print("\nResults:")
     for gid, prices in by_grade_prices.items():
         if prices:
             s = compute_stats(prices)
-            print(f"  {gid:20s}  {s['count']:4d} vehicles  "
+            print(f"  {gid:22s}  {s['count']:4d} vehicles  "
                   f"avg Y{s['avg']:,}  min Y{s['min']:,}  max Y{s['max']:,}")
         else:
-            print(f"  {gid:20s}     0 vehicles  (no listings found)")
+            print(f"  {gid:22s}     0 vehicles  (no listings found)")
+
+    print(f"\nTop {TOP_N} vehicles by score:")
+    for i, v in enumerate(top_vehicles, 1):
+        km  = f"{v['mileage_km']:,} km" if v.get("mileage_km") is not None else "km=?"
+        shk = f"{v['shaken_months']}mo"  if v.get("shaken_months") is not None else "shaken=?"
+        acc = "clean" if v.get("accident") is False else ("accident" if v.get("accident") else "acc=?")
+        print(f"  #{i} [{v['score']:4.1f}] {v['grade_id']:22s}  "
+              f"¥{v['price_man']}万  {km}  {shk}  {acc}")
+        print(f"       {v.get('url', '')}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--pages", type=int, default=None,
-        help="Max pages to scrape (default: all pages — gives accurate vehicle count)"
+        help="Max pages to scrape (default: all)"
     )
     args = parser.parse_args()
     run(args.pages)
