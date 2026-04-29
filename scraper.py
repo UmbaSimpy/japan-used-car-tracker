@@ -175,16 +175,16 @@ def _extract_details(item) -> dict:
 
 # ── Scoring ──────────────────────────────────────────────────────────────────
 
-def score_vehicle(vehicle: dict, grade_stats: dict) -> tuple[float, dict]:
+def score_vehicle(vehicle: dict, global_stats: dict) -> tuple[float, dict]:
     """
     Score a vehicle 0–10 using price (35%), mileage (30%),
     shaken remaining (20%), accident history (15%).
-    Lower price = better. Lower mileage = better.
-    More shaken months = better. No accident = better.
+    All criteria use the same scale regardless of grade.
+    Price is normalized against the global min/max across ALL grades.
     """
-    # Price: best = grade min, worst = grade max
-    g_min = grade_stats["min"]
-    g_max = grade_stats["max"]
+    # Price: normalized globally so every vehicle is judged on the same scale
+    g_min = global_stats["min"]
+    g_max = global_stats["max"]
     price_range = max(g_max - g_min, 1.0)
     price_score = max(0.0, min(10.0, 10.0 * (g_max - vehicle["price_man"]) / price_range))
 
@@ -431,21 +431,16 @@ def run(max_pages: int | None) -> None:
     for v in all_vehicles:
         by_grade_prices[v["grade_id"]].append(v["price_man"])
 
-    grade_stats = {
-        gid: {
-            "min": min(prices),
-            "max": max(prices),
-            "avg": sum(prices) / len(prices),
-        }
-        for gid, prices in by_grade_prices.items()
-        if prices
-    }
+    # ── Global price range (shared across ALL grades for fair scoring) ────
+    all_prices = [v["price_man"] for v in all_vehicles]
+    global_stats = {
+        "min": min(all_prices),
+        "max": max(all_prices),
+    } if all_prices else {"min": 0, "max": 1}
 
-    # ── Score every vehicle ───────────────────────────────────────────────
+    # ── Score every vehicle using the same global scale ───────────────────
     for v in all_vehicles:
-        gs = grade_stats.get(v["grade_id"])
-        if gs:
-            v["score"], v["score_breakdown"] = score_vehicle(v, gs)
+        v["score"], v["score_breakdown"] = score_vehicle(v, global_stats)
 
     # ── Top N across all grades ───────────────────────────────────────────
     top_vehicles = sorted(
