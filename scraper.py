@@ -40,7 +40,8 @@ HEADERS = {
     "Accept-Language": "ja,en;q=0.9",
 }
 DELAY_SEC  = 2
-TOP_N      = 15  # number of top-scored vehicles to store per snapshot
+TOP_N           = 15   # number of top-scored vehicles to store per snapshot
+SEAT_CHECK_CAP  = 60   # max detail pages to fetch when filtering 5-seat cars
 
 # Longest names first so substring matching can't misfire
 TARGET_GRADES = {
@@ -205,6 +206,26 @@ def _extract_details(item) -> dict:
     # else: None → not mentioned / unknown
 
     return details
+
+
+def _fetch_seat_count(url: str) -> int | None:
+    """
+    Fetch a vehicle detail page and return its 乗車定員 (seating capacity).
+    Uses a raw-text regex so it's robust to whatever tag structure CarSensor uses.
+    Returns the integer seat count, or None if it can't be determined.
+    """
+    try:
+        r = requests.get(url, headers=HEADERS, timeout=15)
+        r.raise_for_status()
+        r.encoding = "utf-8"
+        # Regex approach: find "乗車定員" followed by the seat count within ~200 chars.
+        # Handles both <dt>/<dd> and <th>/<td> structures without caring about tags.
+        m = re.search(r'乗車定員.{1,200}?(\d+)\s*名', r.text, re.DOTALL)
+        if m:
+            return int(m.group(1))
+    except requests.RequestException as e:
+        print(f"    [!] Seat-check failed for {url}: {e}")
+    return None
 
 
 # ── Scoring ──────────────────────────────────────────────────────────────────
@@ -520,11 +541,34 @@ def run(max_pages: int | None) -> None:
     for v in all_vehicles:
         v["score"], v["score_breakdown"] = score_vehicle(v, global_stats)
 
-    # ── Top N across all grades ───────────────────────────────────────────
-    top_vehicles = sorted(
+    # ── Top N across all grades (excluding 5-seat configurations) ────────
+    # Seating capacity is only on the detail page, so we fetch detail pages
+    # for the top SEAT_CHECK_CAP candidates and skip any with 乗車定員 = 5名.
+    scored_sorted = sorted(
         [v for v in all_vehicles if "score" in v],
         key=lambda x: -x["score"],
-    )[:TOP_N]
+    )
+    candidates = scored_sorted[:SEAT_CHECK_CAP]
+    top_vehicles: list[dict] = []
+
+    print(f"\nChecking seating capacity for top {len(candidates)} candidates "
+          f"(targeting {TOP_N} with 6+ seats) …")
+    for v in candidates:
+        if len(top_vehicles) >= TOP_N:
+            break
+        url = v.get("url")
+        if not url:
+            top_vehicles.append(v)   # no URL → can't check, include anyway
+            continue
+        seats = _fetch_seat_count(url)
+        if seats == 5:
+            print(f"  ✗ skipped  5-seat  ¥{v['price_man']}万  {v['grade_id']}  {url}")
+        else:
+            top_vehicles.append(v)
+            seat_label = f"{seats}名" if seats else "?名"
+            print(f"  ✓ #{len(top_vehicles):2d}  [{v['score']}]  {seat_label}  "
+                  f"¥{v['price_man']}万  {v['grade_id']}")
+        time.sleep(DELAY_SEC)
 
     # ── Save ──────────────────────────────────────────────────────────────
     snapshot = build_snapshot(by_grade_prices, limit, top_vehicles)
