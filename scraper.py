@@ -40,7 +40,7 @@ HEADERS = {
     "Accept-Language": "ja,en;q=0.9",
 }
 DELAY_SEC  = 2
-TOP_N      = 5   # number of top-scored vehicles to store per snapshot
+TOP_N      = 15  # number of top-scored vehicles to store per snapshot
 
 # Longest names first so substring matching can't misfire
 TARGET_GRADES = {
@@ -132,7 +132,8 @@ def _extract_price(tag) -> float | None:
 
 
 def _extract_details(item) -> dict:
-    """Extract URL, mileage, shaken remaining months, and accident flag."""
+    """Extract URL, mileage, shaken remaining months, accident, warranty,
+    maintenance, and OEM navigation flag from a cassette card."""
     details: dict = {
         "url":           None,
         "mileage_km":    None,
@@ -140,6 +141,7 @@ def _extract_details(item) -> dict:
         "accident":      None,
         "warranty":      None,   # True = present, False = none
         "maintenance":   None,   # True = 法定整備付, False = 法定整備無
+        "navi":          None,   # True = メーカー純正ナビ present, False = ナビレス, None = unknown
     }
 
     # Detail page URL
@@ -148,7 +150,7 @@ def _extract_details(item) -> dict:
         href = link["href"].split("?")[0]
         details["url"] = "https://www.carsensor.net" + href
 
-    # Spec boxes: 走行距離 / 車検 / 修復歴
+    # Spec boxes: 走行距離 / 車検 / 修復歴 / 保証 / 整備
     for box in item.select("div.specList__detailBox"):
         text = box.get_text(" ", strip=True)
 
@@ -190,6 +192,16 @@ def _extract_details(item) -> dict:
                 details["maintenance"] = True
             elif "法定整備無" in text or "法定整備なし" in text:
                 details["maintenance"] = False
+
+    # OEM Navigation: detected from the free-text title/description of the card.
+    # CarSensor embeds equipment keywords (e.g. "純正8型ナビ") in the headline text,
+    # not in a structured field. We scan the full card text for known patterns.
+    full_text = item.get_text(" ", strip=True)
+    if re.search(r'純正.{0,6}ナビ|ナビ.{0,6}純正|Gathers.{0,4}ナビ|メーカー.{0,4}ナビ', full_text):
+        details["navi"] = True
+    elif re.search(r'ナビレス|オーディオレス', full_text):
+        details["navi"] = False
+    # else: None → not mentioned / unknown
 
     return details
 
@@ -295,6 +307,7 @@ def build_snapshot(
             "accident":        v.get("accident"),
             "warranty":        v.get("warranty"),
             "maintenance":     v.get("maintenance"),
+            "navi":            v.get("navi"),
             "url":             v.get("url"),
         }
         for v in top_vehicles
@@ -397,8 +410,9 @@ def build_telegram_message(snapshot: dict, prev_snapshot: dict | None) -> str:
             acc   = "No accident" if v.get("accident") is False else ("Accident" if v.get("accident") else "acc ?")
             war   = "保証付" if v.get("warranty") is True else ("保証なし" if v.get("warranty") is False else "保証 ?")
             mnt   = "整備付" if v.get("maintenance") is True else ("整備無" if v.get("maintenance") is False else "整備 ?")
+            navi  = "純正ナビ" if v.get("navi") is True else ("ナビレス" if v.get("navi") is False else "ナビ ?")
             lines.append(f"  #{i} [{v['score']}/10] {v['grade_label']} — ¥{v['price_man']}万")
-            lines.append(f"      {km} · {shk} · {acc} · {war} · {mnt}")
+            lines.append(f"      {km} · {shk} · {acc} · {war} · {mnt} · {navi}")
             if v.get("url"):
                 lines.append(f"      {v['url']}")
 
@@ -532,11 +546,12 @@ def run(max_pages: int | None) -> None:
 
     print(f"\nTop {TOP_N} vehicles by score:")
     for i, v in enumerate(top_vehicles, 1):
-        km  = f"{v['mileage_km']:,} km" if v.get("mileage_km") is not None else "km=?"
-        shk = f"{v['shaken_months']}mo"  if v.get("shaken_months") is not None else "shaken=?"
-        acc = "clean" if v.get("accident") is False else ("accident" if v.get("accident") else "acc=?")
+        km   = f"{v['mileage_km']:,} km" if v.get("mileage_km") is not None else "km=?"
+        shk  = f"{v['shaken_months']}mo"  if v.get("shaken_months") is not None else "shaken=?"
+        acc  = "clean"    if v.get("accident")    is False else ("accident" if v.get("accident")    else "acc=?")
+        navi = "純正ナビ" if v.get("navi")        is True  else ("ナビレス" if v.get("navi") is False else "navi=?")
         print(f"  #{i} [{v['score']:4.1f}] {v['grade_id']:22s}  "
-              f"¥{v['price_man']}万  {km}  {shk}  {acc}")
+              f"¥{v['price_man']}万  {km}  {shk}  {acc}  {navi}")
         print(f"       {v.get('url', '')}")
 
 

@@ -371,99 +371,104 @@
     .score-legend-item { display: flex; align-items: center; gap: 5px; }
     .score-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
 
-    .deal-list { display: flex; flex-direction: column; }
-
-    .deal-row {
+    /* ── Deal grid (3 × 5) ── */
+    .deal-grid {
       display: grid;
-      grid-template-columns: 56px 1fr auto;
-      align-items: center;
-      gap: 16px;
-      padding: 16px 24px;
-      border-bottom: 1px solid var(--border);
-      transition: background .15s;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 20px 24px;
     }
-    .deal-row:last-child { border-bottom: none; }
-    .deal-row:hover { background: var(--surface2); }
 
-    /* Score circle */
-    .deal-score-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-    .deal-rank { font-size: 0.62rem; font-weight: 700; color: var(--muted); letter-spacing: .5px; }
-    .deal-score-circle {
-      width: 44px; height: 44px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
+    .deal-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .deal-card:hover {
+      border-color: var(--border2);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+    }
+
+    /* Card header: rank left, score badge right */
+    .deal-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .deal-card-rank { font-size: 0.6rem; font-weight: 700; color: var(--muted); letter-spacing: .5px; }
+    .deal-card-score {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 1rem; font-weight: 700;
-      border: 2px solid;
+      font-size: 0.88rem; font-weight: 700;
+      padding: 3px 9px; border-radius: 6px; border: 1.5px solid; line-height: 1.4;
     }
 
-    /* Vehicle info */
-    .deal-info { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-    .deal-top-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .deal-grade {
-      font-size: 0.88rem; font-weight: 600;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .deal-grade-en { font-size: 0.68rem; color: var(--text2); }
+    /* Grade name */
+    .deal-card-grade { font-size: 0.82rem; font-weight: 600; line-height: 1.3; }
+    .deal-card-grade-en { font-size: 0.63rem; color: var(--text2); margin-top: 1px; }
 
-    .deal-stats { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-    .deal-stat-pill {
-      display: inline-flex; align-items: center; gap: 4px;
-      font-size: 0.68rem; font-weight: 500; color: var(--text2);
+    /* Price */
+    .deal-card-price {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem; font-weight: 700;
+    }
+
+    /* Thin divider */
+    .deal-card-divider { height: 1px; background: var(--border); margin: 2px 0; }
+
+    /* km + shaken pills */
+    .deal-card-pills { display: flex; gap: 5px; flex-wrap: wrap; }
+    .deal-card-pill {
+      font-size: 0.63rem; font-weight: 500; color: var(--text2);
       background: var(--surface3); border: 1px solid var(--border);
-      border-radius: 20px; padding: 2px 9px;
+      border-radius: 20px; padding: 2px 8px;
     }
 
     /* Quality indicator badges (binary/categorical) */
-    .quality-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+    .quality-badges { display: flex; gap: 5px; flex-wrap: wrap; }
     .qbadge {
-      display: inline-flex; align-items: center; gap: 5px;
-      font-size: 0.68rem; font-weight: 600;
-      padding: 4px 10px; border-radius: 7px; border: 1px solid;
-      line-height: 1;
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 0.62rem; font-weight: 600;
+      padding: 3px 8px; border-radius: 6px; border: 1px solid; line-height: 1;
     }
     .qbadge svg { flex-shrink: 0; }
     .qbadge.good    { color: var(--green); border-color: rgba(45,212,160,.3);  background: rgba(45,212,160,.07);  }
     .qbadge.bad     { color: var(--red);   border-color: rgba(245,101,101,.3); background: rgba(245,101,101,.07); }
     .qbadge.neutral { color: var(--muted); border-color: var(--border);        background: transparent; }
 
-    /* Score breakdown mini-bars (price, mileage, shaken only) */
-    .deal-bars { display: flex; flex-direction: column; gap: 5px; }
-    .deal-bar-row { display: flex; align-items: center; gap: 8px; }
-    .deal-bar-label { font-size: 0.6rem; color: var(--muted); width: 44px; flex-shrink: 0; }
-    .deal-bar-track {
-      flex: 1; height: 4px; background: var(--surface3);
-      border-radius: 2px; overflow: hidden; min-width: 60px;
-    }
+    /* Score breakdown mini-bars (price, mileage, shaken) */
+    .deal-bars { display: flex; flex-direction: column; gap: 4px; }
+    .deal-bar-row { display: flex; align-items: center; gap: 7px; }
+    .deal-bar-label { font-size: 0.57rem; color: var(--muted); width: 38px; flex-shrink: 0; }
+    .deal-bar-track { flex: 1; height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
     .deal-bar-fill { height: 100%; border-radius: 2px; }
-    .deal-bar-val { font-size: 0.6rem; color: var(--text2); width: 22px; text-align: right; flex-shrink: 0; }
+    .deal-bar-val { font-size: 0.57rem; color: var(--text2); width: 20px; text-align: right; flex-shrink: 0; }
 
-    /* Right side: price + link */
-    .deal-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-    .deal-price {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.1rem; font-weight: 700;
-      white-space: nowrap;
-    }
-    .deal-link {
-      display: inline-flex; align-items: center; gap: 4px;
-      font-size: 0.7rem; font-weight: 600;
+    /* View link pinned to card bottom */
+    .deal-card-link {
+      display: block; text-align: center;
+      font-size: 0.68rem; font-weight: 600;
       color: var(--accent); text-decoration: none;
       border: 1px solid rgba(79,142,247,.3);
       background: rgba(79,142,247,.06);
-      border-radius: 6px; padding: 5px 10px;
-      transition: all .15s; white-space: nowrap;
+      border-radius: 6px; padding: 6px 10px;
+      transition: all .15s;
+      margin-top: auto;
     }
-    .deal-link:hover { background: rgba(79,142,247,.14); border-color: var(--accent); }
+    .deal-card-link:hover { background: rgba(79,142,247,.14); border-color: var(--accent); }
 
     /* ── Responsive ── */
+    @media (max-width: 860px) {
+      .avg-value { font-size: 1.6rem; }
+      .deal-grid { grid-template-columns: repeat(2, 1fr); }
+    }
     @media (max-width: 600px) {
       header { padding: 0 16px; }
       main { padding: 20px 16px; }
       .cards-row { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 860px) {
-      .avg-value { font-size: 1.6rem; }
+      .deal-grid { grid-template-columns: 1fr; padding: 12px 16px; }
     }
   </style>
 </head>
@@ -499,7 +504,7 @@
     <div class="top-deals-header">
       <div class="top-deals-title-wrap">
         <div class="top-deals-title">🏆 Best Value Listings</div>
-        <div class="top-deals-subtitle">Scored on price · mileage · shaken · accident history · warranty · maintenance — updated daily</div>
+        <div class="top-deals-subtitle">Scored on price · mileage · shaken · accident history · warranty · maintenance · OEM nav indicator — updated daily</div>
       </div>
       <div class="score-legend">
         <div class="score-legend-item"><div class="score-legend-dot" style="background:#2dd4a0"></div>8–10 Excellent</div>
@@ -507,7 +512,7 @@
         <div class="score-legend-item"><div class="score-legend-dot" style="background:#f56565"></div>&lt;5 Fair</div>
       </div>
     </div>
-    <div class="deal-list" id="deal-list"></div>
+    <div id="deal-list"></div>
   </div>
 
   <div class="chart-section" id="chart-section">
@@ -823,10 +828,13 @@ function barColor(s) {
 function renderTopDeals(snap, grades) {
   const listEl = document.getElementById('deal-list');
   listEl.innerHTML = '';
+  listEl.className = 'deal-grid';
 
   const vehicles = snap.top_vehicles;
   if (!vehicles || vehicles.length === 0) {
-    listEl.innerHTML = `<div style="padding:24px;color:var(--muted);font-size:.82rem;text-align:center">
+    listEl.className = '';
+    listEl.style.padding = '24px';
+    listEl.innerHTML = `<div style="color:var(--muted);font-size:.82rem;text-align:center">
       No vehicle data yet — run a full scrape to populate this section.</div>`;
     return;
   }
@@ -834,13 +842,15 @@ function renderTopDeals(snap, grades) {
   const gradeMap = {};
   grades.forEach(g => { gradeMap[g.id] = g; });
 
-  /* ── Inline SVG icon set ── */
-  const icoCircleCheck = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="7 12 10 15 17 9"/></svg>`;
-  const icoCircleX     = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="8" x2="16" y2="16"/><line x1="16" y1="8" x2="8" y2="16"/></svg>`;
-  const icoShieldCheck = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="7 12 10 15 17 9"/></svg>`;
-  const icoShieldX     = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`;
-  const icoCheckSq     = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><polyline points="7 12 10 15 17 9"/></svg>`;
-  const icoXSq         = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`;
+  /* ── Inline SVG icons ── */
+  const icoCircleCheck = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="7 12 10 15 17 9"/></svg>`;
+  const icoCircleX     = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="8" x2="16" y2="16"/><line x1="16" y1="8" x2="8" y2="16"/></svg>`;
+  const icoShieldCheck = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="7 12 10 15 17 9"/></svg>`;
+  const icoShieldX     = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`;
+  const icoCheckSq     = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><polyline points="7 12 10 15 17 9"/></svg>`;
+  const icoXSq         = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`;
+  const icoMonitorOk   = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
+  const icoMonitorX    = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="9" y1="8" x2="15" y2="14"/><line x1="15" y1="8" x2="9" y2="14"/></svg>`;
 
   vehicles.forEach((v, i) => {
     const color = scoreColor(v.score);
@@ -850,25 +860,31 @@ function renderTopDeals(snap, grades) {
     const km     = v.mileage_km != null   ? `${v.mileage_km.toLocaleString()} km` : 'N/A';
     const shaken = v.shaken_months != null ? `${v.shaken_months} mo`               : 'N/A';
 
-    /* Accident badge — binary: clean history / accident recorded / unknown */
+    /* Accident badge */
     let accBadge;
     if      (v.accident === false) accBadge = `<span class="qbadge good">${icoCircleCheck} No Accident</span>`;
     else if (v.accident === true)  accBadge = `<span class="qbadge bad">${icoCircleX} Accident</span>`;
-    else                           accBadge = `<span class="qbadge neutral">${icoCircleX} History N/A</span>`;
+    else                           accBadge = `<span class="qbadge neutral">${icoCircleX} Acc N/A</span>`;
 
-    /* Warranty badge — shield icon: included / not included / unknown */
+    /* Warranty badge */
     let warBadge;
     if      (v.warranty === true)  warBadge = `<span class="qbadge good">${icoShieldCheck} 保証付</span>`;
     else if (v.warranty === false) warBadge = `<span class="qbadge bad">${icoShieldX} 保証なし</span>`;
     else                           warBadge = `<span class="qbadge neutral">${icoShieldX} 保証 N/A</span>`;
 
-    /* Maintenance badge — checkbox icon: serviced / not serviced / unknown */
+    /* Maintenance badge */
     let mntBadge;
     if      (v.maintenance === true)  mntBadge = `<span class="qbadge good">${icoCheckSq} 法定整備付</span>`;
     else if (v.maintenance === false) mntBadge = `<span class="qbadge bad">${icoXSq} 法定整備無</span>`;
     else                              mntBadge = `<span class="qbadge neutral">${icoXSq} 整備 N/A</span>`;
 
-    /* Score bars — price, mileage, shaken only */
+    /* OEM Navigation badge */
+    let naviBadge;
+    if      (v.navi === true)  naviBadge = `<span class="qbadge good">${icoMonitorOk} 純正ナビ</span>`;
+    else if (v.navi === false) naviBadge = `<span class="qbadge bad">${icoMonitorX} ナビレス</span>`;
+    else                       naviBadge = `<span class="qbadge neutral">${icoMonitorX} ナビ不明</span>`;
+
+    /* Score bars — price, mileage, shaken */
     const barKeys   = ['price', 'mileage', 'shaken'];
     const barLabels = { price: 'Price', mileage: 'Mileage', shaken: 'Shaken' };
     const breakdown = barKeys.map(key => {
@@ -882,43 +898,31 @@ function renderTopDeals(snap, grades) {
       </div>`;
     }).join('');
 
-    const row = document.createElement('div');
-    row.className = 'deal-row';
-    row.innerHTML = `
-      <div class="deal-score-wrap">
-        <div class="deal-rank">#${i + 1}</div>
-        <div class="deal-score-circle" style="color:${color};border-color:${color};background:${color}18">
-          ${v.score}
-        </div>
+    const card = document.createElement('div');
+    card.className = 'deal-card';
+    card.innerHTML = `
+      <div class="deal-card-header">
+        <span class="deal-card-rank">#${i + 1}</span>
+        <span class="deal-card-score" style="color:${color};border-color:${color};background:${color}18">${v.score}</span>
       </div>
-
-      <div class="deal-info">
-        <div class="deal-top-row">
-          <span class="deal-grade" style="color:${GRADE_COLORS[v.grade_id] || 'var(--text)'}">
-            ${grade.label || v.grade_label}
-          </span>
-          <span class="deal-grade-en">${grade.label_en || ''}</span>
-        </div>
-        <div class="deal-stats">
-          <span class="deal-stat-pill">🛣 ${km}</span>
-          <span class="deal-stat-pill">🔧 ${shaken} shaken</span>
-        </div>
-        <div class="quality-badges">
-          ${accBadge}${warBadge}${mntBadge}
-        </div>
-        <div class="deal-bars">${breakdown}</div>
+      <div>
+        <div class="deal-card-grade" style="color:${GRADE_COLORS[v.grade_id] || 'var(--text)'}">${grade.label || v.grade_label}</div>
+        <div class="deal-card-grade-en">${grade.label_en || ''}</div>
       </div>
+      <div class="deal-card-price" style="color:${GRADE_COLORS[v.grade_id] || 'var(--text)'}">¥${v.price_man}万</div>
+      <div class="deal-card-divider"></div>
+      <div class="deal-card-pills">
+        <span class="deal-card-pill">🛣 ${km}</span>
+        <span class="deal-card-pill">🔧 ${shaken} shaken</span>
+      </div>
+      <div class="quality-badges">
+        ${accBadge}${warBadge}${mntBadge}${naviBadge}
+      </div>
+      <div class="deal-bars">${breakdown}</div>
+      ${v.url ? `<a class="deal-card-link" href="${v.url}" target="_blank" rel="noopener">View on CarSensor ↗</a>` : ''}
+    `;
 
-      <div class="deal-right">
-        <div class="deal-price" style="color:${GRADE_COLORS[v.grade_id] || 'var(--text)'}">
-          ¥${v.price_man}万
-        </div>
-        ${v.url
-          ? `<a class="deal-link" href="${v.url}" target="_blank" rel="noopener">View ↗</a>`
-          : ''}
-      </div>`;
-
-    listEl.appendChild(row);
+    listEl.appendChild(card);
   });
 }
 
