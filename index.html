@@ -406,23 +406,34 @@
     }
     .deal-grade-en { font-size: 0.68rem; color: var(--text2); }
 
-    .deal-stats { display: flex; gap: 8px; flex-wrap: wrap; }
+    .deal-stats { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
     .deal-stat-pill {
       display: inline-flex; align-items: center; gap: 4px;
       font-size: 0.68rem; font-weight: 500; color: var(--text2);
       background: var(--surface3); border: 1px solid var(--border);
-      border-radius: 20px; padding: 2px 8px;
+      border-radius: 20px; padding: 2px 9px;
     }
-    .deal-stat-pill.clean  { color: var(--green); border-color: rgba(45,212,160,.25); background: rgba(45,212,160,.07); }
-    .deal-stat-pill.warn   { color: var(--red);   border-color: rgba(245,101,101,.25); background: rgba(245,101,101,.07); }
 
-    /* Score breakdown mini-bars */
-    .deal-bars { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px 12px; }
-    .deal-bar-row { display: flex; align-items: center; gap: 6px; }
-    .deal-bar-label { font-size: 0.6rem; color: var(--muted); width: 46px; flex-shrink: 0; }
+    /* Quality indicator badges (binary/categorical) */
+    .quality-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+    .qbadge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 0.68rem; font-weight: 600;
+      padding: 4px 10px; border-radius: 7px; border: 1px solid;
+      line-height: 1;
+    }
+    .qbadge svg { flex-shrink: 0; }
+    .qbadge.good    { color: var(--green); border-color: rgba(45,212,160,.3);  background: rgba(45,212,160,.07);  }
+    .qbadge.bad     { color: var(--red);   border-color: rgba(245,101,101,.3); background: rgba(245,101,101,.07); }
+    .qbadge.neutral { color: var(--muted); border-color: var(--border);        background: transparent; }
+
+    /* Score breakdown mini-bars (price, mileage, shaken only) */
+    .deal-bars { display: flex; flex-direction: column; gap: 5px; }
+    .deal-bar-row { display: flex; align-items: center; gap: 8px; }
+    .deal-bar-label { font-size: 0.6rem; color: var(--muted); width: 44px; flex-shrink: 0; }
     .deal-bar-track {
       flex: 1; height: 4px; background: var(--surface3);
-      border-radius: 2px; overflow: hidden;
+      border-radius: 2px; overflow: hidden; min-width: 60px;
     }
     .deal-bar-fill { height: 100%; border-radius: 2px; }
     .deal-bar-val { font-size: 0.6rem; color: var(--text2); width: 22px; text-align: right; flex-shrink: 0; }
@@ -488,7 +499,7 @@
     <div class="top-deals-header">
       <div class="top-deals-title-wrap">
         <div class="top-deals-title">🏆 Best Value Listings</div>
-        <div class="top-deals-subtitle">Scored on price · mileage · shaken · accident history — updated daily</div>
+        <div class="top-deals-subtitle">Scored on price · mileage · shaken · accident history · warranty · maintenance — updated daily</div>
       </div>
       <div class="score-legend">
         <div class="score-legend-item"><div class="score-legend-dot" style="background:#2dd4a0"></div>8–10 Excellent</div>
@@ -820,31 +831,52 @@ function renderTopDeals(snap, grades) {
     return;
   }
 
-  // Build a lookup for grade label_en
   const gradeMap = {};
   grades.forEach(g => { gradeMap[g.id] = g; });
 
+  /* ── Inline SVG icon set ── */
+  const icoCircleCheck = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="7 12 10 15 17 9"/></svg>`;
+  const icoCircleX     = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="8" x2="16" y2="16"/><line x1="16" y1="8" x2="8" y2="16"/></svg>`;
+  const icoShieldCheck = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="7 12 10 15 17 9"/></svg>`;
+  const icoShieldX     = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`;
+  const icoCheckSq     = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><polyline points="7 12 10 15 17 9"/></svg>`;
+  const icoXSq         = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`;
+
   vehicles.forEach((v, i) => {
-    const color  = scoreColor(v.score);
-    const grade  = gradeMap[v.grade_id] || {};
-    const bd     = v.score_breakdown || {};
+    const color = scoreColor(v.score);
+    const grade = gradeMap[v.grade_id] || {};
+    const bd    = v.score_breakdown || {};
 
-    const km     = v.mileage_km != null   ? `${v.mileage_km.toLocaleString()} km` : 'km N/A';
-    const shaken = v.shaken_months != null ? `${v.shaken_months}mo shaken`          : 'shaken N/A';
-    const accClass = v.accident === false ? 'clean' : (v.accident === true ? 'warn' : '');
-    const accText  = v.accident === false ? '✓ No accident' : (v.accident === true ? '⚠ Accident' : 'History N/A');
-    const warClass = v.warranty === true ? 'clean' : (v.warranty === false ? 'warn' : '');
-    const warText  = v.warranty === true ? '🛡 保証付' : (v.warranty === false ? '✗ 保証なし' : '保証 N/A');
-    const mntClass = v.maintenance === true ? 'clean' : (v.maintenance === false ? 'warn' : '');
-    const mntText  = v.maintenance === true ? '🔩 整備付' : (v.maintenance === false ? '✗ 整備無' : '整備 N/A');
+    const km     = v.mileage_km != null   ? `${v.mileage_km.toLocaleString()} km` : 'N/A';
+    const shaken = v.shaken_months != null ? `${v.shaken_months} mo`               : 'N/A';
 
-    const breakdown = ['price','mileage','shaken','accident','warranty','maintenance'].map(key => {
+    /* Accident badge — binary: clean history / accident recorded / unknown */
+    let accBadge;
+    if      (v.accident === false) accBadge = `<span class="qbadge good">${icoCircleCheck} No Accident</span>`;
+    else if (v.accident === true)  accBadge = `<span class="qbadge bad">${icoCircleX} Accident</span>`;
+    else                           accBadge = `<span class="qbadge neutral">${icoCircleX} History N/A</span>`;
+
+    /* Warranty badge — shield icon: included / not included / unknown */
+    let warBadge;
+    if      (v.warranty === true)  warBadge = `<span class="qbadge good">${icoShieldCheck} 保証付</span>`;
+    else if (v.warranty === false) warBadge = `<span class="qbadge bad">${icoShieldX} 保証なし</span>`;
+    else                           warBadge = `<span class="qbadge neutral">${icoShieldX} 保証 N/A</span>`;
+
+    /* Maintenance badge — checkbox icon: serviced / not serviced / unknown */
+    let mntBadge;
+    if      (v.maintenance === true)  mntBadge = `<span class="qbadge good">${icoCheckSq} 法定整備付</span>`;
+    else if (v.maintenance === false) mntBadge = `<span class="qbadge bad">${icoXSq} 法定整備無</span>`;
+    else                              mntBadge = `<span class="qbadge neutral">${icoXSq} 整備 N/A</span>`;
+
+    /* Score bars — price, mileage, shaken only */
+    const barKeys   = ['price', 'mileage', 'shaken'];
+    const barLabels = { price: 'Price', mileage: 'Mileage', shaken: 'Shaken' };
+    const breakdown = barKeys.map(key => {
       const val = bd[key] ?? 0;
-      const labels = {price:'Price', mileage:'Mileage', shaken:'Shaken', accident:'History', warranty:'Warranty', maintenance:'Maint.'};
       return `<div class="deal-bar-row">
-        <span class="deal-bar-label">${labels[key]}</span>
+        <span class="deal-bar-label">${barLabels[key]}</span>
         <div class="deal-bar-track">
-          <div class="deal-bar-fill" style="width:${val*10}%;background:${barColor(val)}"></div>
+          <div class="deal-bar-fill" style="width:${val * 10}%;background:${barColor(val)}"></div>
         </div>
         <span class="deal-bar-val">${val}</span>
       </div>`;
@@ -869,10 +901,10 @@ function renderTopDeals(snap, grades) {
         </div>
         <div class="deal-stats">
           <span class="deal-stat-pill">🛣 ${km}</span>
-          <span class="deal-stat-pill">🔧 ${shaken}</span>
-          <span class="deal-stat-pill ${accClass}">${accText}</span>
-          <span class="deal-stat-pill ${warClass}">${warText}</span>
-          <span class="deal-stat-pill ${mntClass}">${mntText}</span>
+          <span class="deal-stat-pill">🔧 ${shaken} shaken</span>
+        </div>
+        <div class="quality-badges">
+          ${accBadge}${warBadge}${mntBadge}
         </div>
         <div class="deal-bars">${breakdown}</div>
       </div>
@@ -882,9 +914,7 @@ function renderTopDeals(snap, grades) {
           ¥${v.price_man}万
         </div>
         ${v.url
-          ? `<a class="deal-link" href="${v.url}" target="_blank" rel="noopener">
-               View ↗
-             </a>`
+          ? `<a class="deal-link" href="${v.url}" target="_blank" rel="noopener">View ↗</a>`
           : ''}
       </div>`;
 
