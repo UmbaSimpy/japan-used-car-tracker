@@ -146,6 +146,36 @@ window.FREED_DATA = {
           "count": 391
         }
       }
+    },
+    {
+      "date": "2026-04-29",
+      "pages_scraped": 106,
+      "by_grade": {
+        "ehev_air_ex_4wd": {
+          "avg": 3565347,
+          "min": 3161000,
+          "max": 3709000,
+          "count": 49
+        },
+        "ehev_air_ex": {
+          "avg": 3198372,
+          "min": 2280000,
+          "max": 3770000,
+          "count": 696
+        },
+        "ehev_crosstar_4wd": {
+          "avg": 3601265,
+          "min": 2798000,
+          "max": 4200000,
+          "count": 34
+        },
+        "ehev_crosstar": {
+          "avg": 3327705,
+          "min": 2290000,
+          "max": 5355000,
+          "count": 393
+        }
+      }
     }
   ]
 };
