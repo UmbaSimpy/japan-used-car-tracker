@@ -54,12 +54,13 @@ GRADE_ID_TO_LABEL = {v: k for k, v in TARGET_GRADES.items()}
 
 # Scoring weights (must sum to 1.0)
 WEIGHTS = {
-    "price":       0.30,
-    "mileage":     0.25,
-    "shaken":      0.15,
-    "accident":    0.15,
+    "price":       0.28,
+    "mileage":     0.24,
+    "shaken":      0.14,
+    "accident":    0.14,
     "warranty":    0.10,
     "maintenance": 0.05,
+    "navi":        0.05,   # small bonus for OEM nav presence
 }
 
 
@@ -221,9 +222,14 @@ def score_vehicle(vehicle: dict, global_stats: dict) -> tuple[float, dict]:
     price_range = max(g_max - g_min, 1.0)
     price_score = max(0.0, min(10.0, 10.0 * (g_max - vehicle["price_man"]) / price_range))
 
-    # Mileage: 0 km → 10,  ≥ 100,000 km → 0
+    # Mileage: 0–3,000 km all score 10 (flat max zone — brand-new vs demo-car irrelevant).
+    # Above 3,000 km the score decays linearly: 10 at 3,000 km → 0 at 103,000 km.
     km = vehicle.get("mileage_km")
-    mileage_score = max(0.0, min(10.0, 10.0 - (km / 10_000.0))) if km is not None else 5.0
+    if km is None:
+        mileage_score = 5.0
+    else:
+        effective_km = max(0, km - 3_000)
+        mileage_score = max(0.0, min(10.0, 10.0 - (effective_km / 10_000.0)))
 
     # Shaken: 0 months → 2,  ≥ 24 months → 10
     months = vehicle.get("shaken_months")
@@ -256,13 +262,23 @@ def score_vehicle(vehicle: dict, global_stats: dict) -> tuple[float, dict]:
     else:
         maintenance_score = 5.0  # unknown = neutral
 
+    # OEM Navigation (メーカー純正ナビ): present = 10, absent = 2, unknown = 5 (neutral)
+    navi = vehicle.get("navi")
+    if navi is True:
+        navi_score = 10.0
+    elif navi is False:
+        navi_score = 2.0
+    else:
+        navi_score = 5.0  # not mentioned → neutral
+
     total = (
         price_score       * WEIGHTS["price"]       +
         mileage_score     * WEIGHTS["mileage"]     +
         shaken_score      * WEIGHTS["shaken"]      +
         accident_score    * WEIGHTS["accident"]    +
         warranty_score    * WEIGHTS["warranty"]    +
-        maintenance_score * WEIGHTS["maintenance"]
+        maintenance_score * WEIGHTS["maintenance"] +
+        navi_score        * WEIGHTS["navi"]
     )
 
     breakdown = {
@@ -272,6 +288,7 @@ def score_vehicle(vehicle: dict, global_stats: dict) -> tuple[float, dict]:
         "accident":    round(accident_score,    1),
         "warranty":    round(warranty_score,    1),
         "maintenance": round(maintenance_score, 1),
+        "navi":        round(navi_score,        1),
     }
     return round(total, 1), breakdown
 
