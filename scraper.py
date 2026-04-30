@@ -342,29 +342,31 @@ def compute_stats(prices: list[float]) -> dict:
     }
 
 
+def _clean_vehicle(v: dict) -> dict:
+    """Serialize a scored vehicle dict for storage in freed_data.js."""
+    return {
+        "score":           v["score"],
+        "score_breakdown": v["score_breakdown"],
+        "grade_id":        v["grade_id"],
+        "grade_label":     GRADE_ID_TO_LABEL.get(v["grade_id"], v["grade_id"]),
+        "price_man":       v["price_man"],
+        "mileage_km":      v.get("mileage_km"),
+        "shaken_months":   v.get("shaken_months"),
+        "accident":        v.get("accident"),
+        "warranty":        v.get("warranty"),
+        "maintenance":     v.get("maintenance"),
+        "navi":            v.get("navi"),
+        "camera":          v.get("camera"),
+        "url":             v.get("url"),
+    }
+
+
 def build_snapshot(
     by_grade_prices: dict[str, list[float]],
     pages_scraped: int,
     top_vehicles: list[dict],
+    category_gems: dict[str, list[dict]],
 ) -> dict:
-    top_clean = [
-        {
-            "score":           v["score"],
-            "score_breakdown": v["score_breakdown"],
-            "grade_id":        v["grade_id"],
-            "grade_label":     GRADE_ID_TO_LABEL.get(v["grade_id"], v["grade_id"]),
-            "price_man":       v["price_man"],
-            "mileage_km":      v.get("mileage_km"),
-            "shaken_months":   v.get("shaken_months"),
-            "accident":        v.get("accident"),
-            "warranty":        v.get("warranty"),
-            "maintenance":     v.get("maintenance"),
-            "navi":            v.get("navi"),
-            "camera":          v.get("camera"),
-            "url":             v.get("url"),
-        }
-        for v in top_vehicles
-    ]
     return {
         "date":          str(date.today()),
         "pages_scraped": pages_scraped,
@@ -373,7 +375,11 @@ def build_snapshot(
             for gid, prices in by_grade_prices.items()
             if prices
         },
-        "top_vehicles": top_clean,
+        "top_vehicles": [_clean_vehicle(v) for v in top_vehicles],
+        "category_gems": {
+            key: [_clean_vehicle(v) for v in gems]
+            for key, gems in category_gems.items()
+        },
     }
 
 
@@ -587,8 +593,49 @@ def run(max_pages: int | None) -> None:
                   f"¥{v['price_man']}万  {v['grade_id']}")
         time.sleep(DELAY_SEC)
 
+    # ── Category Gems ─────────────────────────────────────────────────────
+    # Vehicles that excel in ONE specific parameter but aren't in the top-15.
+    # Seat filtering is not applied here — these are supplementary picks.
+    top_urls = {v.get("url") for v in top_vehicles}
+    non_top  = [v for v in scored_sorted if v.get("url") not in top_urls]
+
+    # Price gems: cheapest cars (highest price score) not in top-15.
+    # These likely have trade-offs like higher mileage or shorter shaken.
+    price_gems = sorted(
+        non_top,
+        key=lambda x: (-x["score_breakdown"]["price"], -x["score"]),
+    )[:3]
+
+    # Mileage gems: lowest mileage not in top-15 (may be pricier or lack extras).
+    mileage_gems = sorted(
+        non_top,
+        key=lambda x: (-x["score_breakdown"]["mileage"], -x["score"]),
+    )[:3]
+
+    # Accident gems: cars WITH accident history, ranked by overall score.
+    # These are naturally excluded from top-15 by the accident penalty,
+    # but may offer compelling value on price, mileage, and shaken.
+    accident_gems = sorted(
+        [v for v in scored_sorted if v.get("accident") is True],
+        key=lambda x: -x["score"],
+    )[:3]
+
+    category_gems = {
+        "price":    price_gems,
+        "mileage":  mileage_gems,
+        "accident": accident_gems,
+    }
+
+    print("\nCategory gems:")
+    for cat, gems in category_gems.items():
+        print(f"  {cat}:")
+        for g in gems:
+            km  = f"{g['mileage_km']:,} km" if g.get("mileage_km") is not None else "km=?"
+            acc = "accident" if g.get("accident") else "clean"
+            print(f"    [{g['score']}] ¥{g['price_man']}万  {km}  {acc}  {g.get('url','')}")
+
     # ── Save ──────────────────────────────────────────────────────────────
-    snapshot = build_snapshot(by_grade_prices, limit, top_vehicles)
+    snapshot = build_snapshot(by_grade_prices, limit, top_vehicles, category_gems)
     data     = load_existing()
     today    = str(date.today())
 

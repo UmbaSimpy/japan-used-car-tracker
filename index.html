@@ -459,16 +459,54 @@
     }
     .deal-card-link:hover { background: rgba(79,142,247,.14); border-color: var(--accent); }
 
+    /* ── Deal tab bar ── */
+    .deal-tab-bar {
+      display: flex; gap: 4px;
+      padding: 12px 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .deal-tab {
+      background: none; border: none; cursor: pointer;
+      font-family: inherit; font-size: 0.78rem; font-weight: 600;
+      color: var(--muted); padding: 8px 18px 10px;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      border-radius: 6px 6px 0 0;
+      transition: color .15s, border-color .15s;
+    }
+    .deal-tab:hover { color: var(--text2); }
+    .deal-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ── Hidden Gems tab ── */
+    .gems-section { padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
+    .gems-category { display: flex; flex-direction: column; gap: 10px; }
+    .gems-category-header {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .gems-category-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.82rem; font-weight: 600; color: var(--text);
+    }
+    .gems-category-desc { font-size: 0.67rem; color: var(--muted); }
+    .gems-category-divider { flex: 1; height: 1px; background: var(--border); }
+    .gems-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 860px) {
       .avg-value { font-size: 1.6rem; }
       .deal-grid { grid-template-columns: repeat(2, 1fr); }
+      .gems-row  { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 600px) {
       header { padding: 0 16px; }
       main { padding: 20px 16px; }
       .cards-row { grid-template-columns: 1fr; }
       .deal-grid { grid-template-columns: 1fr; padding: 12px 16px; }
+      .gems-section { padding: 12px 16px; }
+      .gems-row  { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -504,7 +542,7 @@
     <div class="top-deals-header">
       <div class="top-deals-title-wrap">
         <div class="top-deals-title">🏆 Best Value Listings</div>
-        <div class="top-deals-subtitle">Scored on price · mileage · shaken · accident history · warranty · maintenance · OEM nav indicator — updated daily</div>
+        <div class="top-deals-subtitle">Scored on price · mileage · shaken · accident history · warranty · maintenance · OEM nav — updated daily</div>
       </div>
       <div class="score-legend">
         <div class="score-legend-item"><div class="score-legend-dot" style="background:#2dd4a0"></div>8–10 Excellent</div>
@@ -512,7 +550,13 @@
         <div class="score-legend-item"><div class="score-legend-dot" style="background:#f56565"></div>&lt;5 Fair</div>
       </div>
     </div>
+    <!-- Tab bar -->
+    <div class="deal-tab-bar">
+      <button class="deal-tab active" data-tab="top">🏆 Best Overall</button>
+      <button class="deal-tab" data-tab="gems">💎 Hidden Gems</button>
+    </div>
     <div id="deal-list"></div>
+    <div id="gems-list" style="display:none"></div>
   </div>
 
   <div class="chart-section" id="chart-section">
@@ -721,6 +765,7 @@ function render() {
 
   renderChart(grades, snaps);
   renderTopDeals(snap, grades);
+  renderGems(snap, grades);
 }
 
 function renderChart(grades, snaps) {
@@ -930,6 +975,142 @@ function renderTopDeals(snap, grades) {
     listEl.appendChild(card);
   });
 }
+
+/* ── Gems renderer ── */
+function renderGems(snap, grades) {
+  const el = document.getElementById('gems-list');
+  el.innerHTML = '';
+
+  const gems = snap.category_gems;
+  if (!gems) {
+    el.innerHTML = `<div style="padding:24px;color:var(--muted);font-size:.82rem;text-align:center">
+      Hidden Gems data not available — will populate on next daily scrape.</div>`;
+    return;
+  }
+
+  const gradeMap = {};
+  grades.forEach(g => { gradeMap[g.id] = g; });
+
+  const CATEGORIES = [
+    {
+      key:   'price',
+      icon:  '💰',
+      title: 'Best Price',
+      desc:  'Cheapest cars on the market — trade-offs may include mileage or shaken',
+      accent: 'var(--green)',
+    },
+    {
+      key:   'mileage',
+      icon:  '📍',
+      title: 'Low Mileage',
+      desc:  'Lowest km listings not in the top-15 — often newer but pricier',
+      accent: 'var(--accent)',
+    },
+    {
+      key:   'accident',
+      icon:  '🔧',
+      title: 'Accident History — Best Otherwise',
+      desc:  'These cars have repair history but score well on everything else',
+      accent: 'var(--amber)',
+    },
+  ];
+
+  const section = document.createElement('div');
+  section.className = 'gems-section';
+
+  CATEGORIES.forEach(cat => {
+    const vehicles = gems[cat.key] || [];
+    const catEl = document.createElement('div');
+    catEl.className = 'gems-category';
+    catEl.innerHTML = `
+      <div class="gems-category-header">
+        <span class="gems-category-title">${cat.icon} ${cat.title}</span>
+        <span class="gems-category-desc">${cat.desc}</span>
+        <div class="gems-category-divider"></div>
+      </div>`;
+
+    const row = document.createElement('div');
+    row.className = 'gems-row';
+
+    if (vehicles.length === 0) {
+      row.innerHTML = `<div style="grid-column:1/-1;color:var(--muted);font-size:.78rem">No data yet.</div>`;
+    } else {
+      vehicles.forEach(v => {
+        const grade  = gradeMap[v.grade_id] || {};
+        const color  = scoreColor(v.score);
+        const bd     = v.score_breakdown || {};
+        const km     = v.mileage_km != null   ? `${v.mileage_km.toLocaleString()} km` : 'N/A';
+        const shaken = v.shaken_months != null ? `${v.shaken_months} mo`               : 'N/A';
+
+        // Highlight the category's own sub-score in amber to call it out
+        const highlightKey = { price: 'price', mileage: 'mileage', accident: null }[cat.key];
+
+        const barKeys   = ['price', 'mileage', 'shaken'];
+        const barLabels = { price: 'Price', mileage: 'Mileage', shaken: 'Shaken' };
+        const breakdown = barKeys.map(key => {
+          const val = bd[key] ?? 0;
+          const isHighlight = key === highlightKey;
+          const fill = isHighlight ? cat.accent : barColor(val);
+          return `<div class="deal-bar-row">
+            <span class="deal-bar-label" style="${isHighlight ? `color:${cat.accent};font-weight:700` : ''}">${barLabels[key]}</span>
+            <div class="deal-bar-track">
+              <div class="deal-bar-fill" style="width:${val*10}%;background:${fill}"></div>
+            </div>
+            <span class="deal-bar-val" style="${isHighlight ? `color:${cat.accent};font-weight:700` : ''}">${val}</span>
+          </div>`;
+        }).join('');
+
+        // Accident badge (always show explicitly in gems)
+        const icoCircleCheck = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="7 12 10 15 17 9"/></svg>`;
+        const icoCircleX     = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="8" x2="16" y2="16"/><line x1="16" y1="8" x2="8" y2="16"/></svg>`;
+        let accBadge;
+        if      (v.accident === false) accBadge = `<span class="qbadge good">${icoCircleCheck} Clean</span>`;
+        else if (v.accident === true)  accBadge = `<span class="qbadge bad">${icoCircleX} Accident</span>`;
+        else                           accBadge = `<span class="qbadge neutral">${icoCircleX} Acc N/A</span>`;
+
+        const card = document.createElement('div');
+        card.className = 'deal-card';
+        card.style.borderColor = `color-mix(in srgb, ${cat.accent} 30%, var(--border))`;
+        card.innerHTML = `
+          <div class="deal-card-header">
+            <span class="deal-card-rank" style="color:${cat.accent}">${cat.icon}</span>
+            <span class="deal-card-score" style="color:${color};border-color:${color};background:${color}18">${v.score}</span>
+          </div>
+          <div>
+            <div class="deal-card-grade" style="color:${GRADE_COLORS[v.grade_id] || 'var(--text)'}">${grade.label || v.grade_label}</div>
+            <div class="deal-card-grade-en">${grade.label_en || ''}</div>
+          </div>
+          <div class="deal-card-price" style="color:${GRADE_COLORS[v.grade_id] || 'var(--text)'}">¥${v.price_man}万</div>
+          <div class="deal-card-divider"></div>
+          <div class="deal-card-pills">
+            <span class="deal-card-pill">🛣 ${km}</span>
+            <span class="deal-card-pill">🔧 ${shaken} shaken</span>
+          </div>
+          <div class="quality-badges">${accBadge}</div>
+          <div class="deal-bars">${breakdown}</div>
+          ${v.url ? `<a class="deal-card-link" href="${v.url}" target="_blank" rel="noopener">View on CarSensor ↗</a>` : ''}
+        `;
+        row.appendChild(card);
+      });
+    }
+
+    catEl.appendChild(row);
+    section.appendChild(catEl);
+  });
+
+  el.appendChild(section);
+}
+
+/* ── Tab switching ── */
+document.getElementById('top-deals').addEventListener('click', e => {
+  const tab = e.target.closest('.deal-tab');
+  if (!tab) return;
+  document.querySelectorAll('.deal-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  const which = tab.dataset.tab;
+  document.getElementById('deal-list').style.display  = which === 'top'  ? '' : 'none';
+  document.getElementById('gems-list').style.display  = which === 'gems' ? '' : 'none';
+});
 
 /* ── Period toggle ── */
 document.getElementById('period-sel').addEventListener('click', e => {
