@@ -494,6 +494,34 @@
       gap: 12px;
     }
 
+    /* ── Favourite / Watchlist ── */
+    .fav-btn {
+      background: none; border: none; cursor: pointer;
+      padding: 3px 4px; border-radius: 5px;
+      color: var(--muted);
+      line-height: 1; flex-shrink: 0;
+      transition: color .15s, transform .12s;
+    }
+    .fav-btn:hover { color: var(--amber); transform: scale(1.2); }
+    .fav-btn.active { color: var(--amber); }
+    .fav-btn svg { display: block; transition: fill .15s; }
+    .fav-btn.active svg { fill: var(--amber); stroke: var(--amber); }
+
+    .watchlist-panel { padding: 20px 24px; }
+    .watchlist-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .watchlist-empty {
+      text-align: center;
+      padding: 44px 20px 40px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.9;
+    }
+    .watchlist-empty-icon { font-size: 2.2rem; margin-bottom: 6px; }
+
     /* ── Responsive ── */
     @media (max-width: 860px) {
       .avg-value { font-size: 1.6rem; }
@@ -554,9 +582,11 @@
     <div class="deal-tab-bar">
       <button class="deal-tab active" data-tab="top">🏆 Best Overall</button>
       <button class="deal-tab" data-tab="gems">💎 Hidden Gems</button>
+      <button class="deal-tab" data-tab="watchlist">⭐ Watchlist</button>
     </div>
     <div id="deal-list"></div>
     <div id="gems-list" style="display:none"></div>
+    <div id="watchlist-panel" class="watchlist-panel" style="display:none"></div>
   </div>
 
   <div class="chart-section" id="chart-section">
@@ -657,7 +687,44 @@ function sparkSVG(data, color) {
 
 /* ── State ── */
 let period = 6;
-let mainChart = null;
+let mainChart    = null;
+let currentGrades = null;
+
+/* ── Watchlist (localStorage) ── */
+const VMAP   = {};   // url → vehicle snapshot
+const WL_KEY = 'freed_watchlist';
+
+function getWatchlist()      { try { return JSON.parse(localStorage.getItem(WL_KEY) || '[]'); } catch { return []; } }
+function saveWatchlist(list) { localStorage.setItem(WL_KEY, JSON.stringify(list)); }
+function isInWatchlist(url)  { return !!url && getWatchlist().some(e => e.url === url); }
+
+function toggleFav(btn) {
+  const url = btn.dataset.url;
+  if (!url) return;
+  let list = getWatchlist();
+  const idx = list.findIndex(e => e.url === url);
+  const adding = idx === -1;
+  if (adding) { const v = VMAP[url]; if (v) list.push(v); }
+  else        { list.splice(idx, 1); }
+  saveWatchlist(list);
+
+  // Sync all star buttons that share this URL (across tabs)
+  document.querySelectorAll('.fav-btn').forEach(b => {
+    if (b.dataset.url === url) b.classList.toggle('active', adding);
+  });
+
+  // Refresh watchlist panel if it's currently shown
+  const wlPanel = document.getElementById('watchlist-panel');
+  if (wlPanel && wlPanel.style.display !== 'none') renderWatchlist();
+}
+
+const icoStarSVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+
+function favBtn(url) {
+  const active = isInWatchlist(url) ? ' active' : '';
+  const title  = active ? 'Remove from watchlist' : 'Add to watchlist';
+  return `<button class="fav-btn${active}" data-url="${url || ''}" title="${title}" onclick="toggleFav(this)">${icoStarSVG}</button>`;
+}
 
 /* ── Render ── */
 function render() {
@@ -668,6 +735,7 @@ function render() {
   }
 
   const { grades, snapshots } = window.FREED_DATA;
+  currentGrades = grades;
   const snap     = snapshots[snapshots.length - 1];
   const prevSnap = snapshots.length >= 2 ? snapshots[snapshots.length - 2] : null;
   const snaps    = snapshots.slice(-period);
@@ -898,6 +966,8 @@ function renderTopDeals(snap, grades) {
   const icoMonitorX    = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="9" y1="8" x2="15" y2="14"/><line x1="15" y1="8" x2="9" y2="14"/></svg>`;
 
   vehicles.forEach((v, i) => {
+    if (v.url) VMAP[v.url] = v;   // register for watchlist
+
     const color = scoreColor(v.score);
     const grade = gradeMap[v.grade_id] || {};
     const bd    = v.score_breakdown || {};
@@ -953,7 +1023,10 @@ function renderTopDeals(snap, grades) {
     card.innerHTML = `
       <div class="deal-card-header">
         <span class="deal-card-rank">#${i + 1}</span>
-        <span class="deal-card-score" style="color:${color};border-color:${color};background:${color}18">${v.score}</span>
+        <div style="display:flex;align-items:center;gap:5px">
+          ${v.url ? favBtn(v.url) : ''}
+          <span class="deal-card-score" style="color:${color};border-color:${color};background:${color}18">${v.score}</span>
+        </div>
       </div>
       <div>
         <div class="deal-card-grade" style="color:${GRADE_COLORS[v.grade_id] || 'var(--text)'}">${grade.label || v.grade_label}</div>
@@ -1036,6 +1109,8 @@ function renderGems(snap, grades) {
       row.innerHTML = `<div style="grid-column:1/-1;color:var(--muted);font-size:.78rem">No data yet.</div>`;
     } else {
       vehicles.forEach(v => {
+        if (v.url) VMAP[v.url] = v;   // register for watchlist
+
         const grade  = gradeMap[v.grade_id] || {};
         const color  = scoreColor(v.score);
         const bd     = v.score_breakdown || {};
@@ -1074,7 +1149,10 @@ function renderGems(snap, grades) {
         card.innerHTML = `
           <div class="deal-card-header">
             <span class="deal-card-rank" style="color:${cat.accent}">${cat.icon}</span>
-            <span class="deal-card-score" style="color:${color};border-color:${color};background:${color}18">${v.score}</span>
+            <div style="display:flex;align-items:center;gap:5px">
+              ${v.url ? favBtn(v.url) : ''}
+              <span class="deal-card-score" style="color:${color};border-color:${color};background:${color}18">${v.score}</span>
+            </div>
           </div>
           <div>
             <div class="deal-card-grade" style="color:${GRADE_COLORS[v.grade_id] || 'var(--text)'}">${grade.label || v.grade_label}</div>
@@ -1101,6 +1179,114 @@ function renderGems(snap, grades) {
   el.appendChild(section);
 }
 
+/* ── Watchlist renderer ── */
+function renderWatchlist() {
+  const panel = document.getElementById('watchlist-panel');
+  panel.innerHTML = '';
+  const list = getWatchlist();
+
+  if (list.length === 0) {
+    panel.innerHTML = `
+      <div class="watchlist-empty">
+        <div class="watchlist-empty-icon">⭐</div>
+        <div style="font-weight:600;color:var(--text2)">No saved vehicles yet</div>
+        <div style="margin-top:4px;font-size:0.74rem">
+          Tap the ★ on any card in Best Overall or Hidden Gems to save it here.
+        </div>
+      </div>`;
+    return;
+  }
+
+  const grades = currentGrades || [];
+  const gradeMap = {};
+  grades.forEach(g => { gradeMap[g.id] = g; });
+
+  /* shared inline SVGs */
+  const icoCircleCheck = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="7 12 10 15 17 9"/></svg>`;
+  const icoCircleX     = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="8" x2="16" y2="16"/><line x1="16" y1="8" x2="8" y2="16"/></svg>`;
+  const icoShieldCheck = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="7 12 10 15 17 9"/></svg>`;
+  const icoShieldX     = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`;
+  const icoCheckSq     = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><polyline points="7 12 10 15 17 9"/></svg>`;
+  const icoXSq         = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`;
+  const icoMonitorOk   = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
+  const icoMonitorX    = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="9" y1="8" x2="15" y2="14"/><line x1="15" y1="8" x2="9" y2="14"/></svg>`;
+
+  const grid = document.createElement('div');
+  grid.className = 'watchlist-grid';
+
+  list.forEach(v => {
+    const color = scoreColor(v.score);
+    const grade = gradeMap[v.grade_id] || {};
+    const bd    = v.score_breakdown || {};
+    const km     = v.mileage_km != null   ? `${v.mileage_km.toLocaleString()} km` : 'N/A';
+    const shaken = v.shaken_months != null ? `${v.shaken_months} mo`               : 'N/A';
+
+    let accBadge;
+    if      (v.accident === false) accBadge = `<span class="qbadge good">${icoCircleCheck} No Accident</span>`;
+    else if (v.accident === true)  accBadge = `<span class="qbadge bad">${icoCircleX} Accident</span>`;
+    else                           accBadge = `<span class="qbadge neutral">${icoCircleX} Acc N/A</span>`;
+
+    let warBadge;
+    if      (v.warranty === true)  warBadge = `<span class="qbadge good">${icoShieldCheck} 保証付</span>`;
+    else if (v.warranty === false) warBadge = `<span class="qbadge bad">${icoShieldX} 保証なし</span>`;
+    else                           warBadge = `<span class="qbadge neutral">${icoShieldX} 保証 N/A</span>`;
+
+    let mntBadge;
+    if      (v.maintenance === true)  mntBadge = `<span class="qbadge good">${icoCheckSq} 法定整備付</span>`;
+    else if (v.maintenance === false) mntBadge = `<span class="qbadge bad">${icoXSq} 法定整備無</span>`;
+    else                              mntBadge = `<span class="qbadge neutral">${icoXSq} 整備 N/A</span>`;
+
+    let naviBadge;
+    if      (v.navi === true)  naviBadge = `<span class="qbadge good">${icoMonitorOk} 純正ナビ</span>`;
+    else if (v.navi === false) naviBadge = `<span class="qbadge bad">${icoMonitorX} ナビレス</span>`;
+    else                       naviBadge = `<span class="qbadge neutral">${icoMonitorX} ナビ不明</span>`;
+
+    const camBadge = v.camera === true
+      ? `<span class="qbadge good"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> マルチビュー</span>`
+      : '';
+
+    const barKeys   = ['price', 'mileage', 'shaken'];
+    const barLabels = { price: 'Price', mileage: 'Mileage', shaken: 'Shaken' };
+    const breakdown = barKeys.map(key => {
+      const val = bd[key] ?? 0;
+      return `<div class="deal-bar-row">
+        <span class="deal-bar-label">${barLabels[key]}</span>
+        <div class="deal-bar-track"><div class="deal-bar-fill" style="width:${val*10}%;background:${barColor(val)}"></div></div>
+        <span class="deal-bar-val">${val}</span>
+      </div>`;
+    }).join('');
+
+    const card = document.createElement('div');
+    card.className = 'deal-card';
+    card.style.borderColor = 'color-mix(in srgb, var(--amber) 25%, var(--border))';
+    card.innerHTML = `
+      <div class="deal-card-header">
+        <span class="deal-card-rank" style="color:var(--amber);font-size:0.68rem">⭐ Saved</span>
+        <div style="display:flex;align-items:center;gap:5px">
+          <button class="fav-btn active" data-url="${v.url || ''}" title="Remove from watchlist" onclick="toggleFav(this)">${icoStarSVG}</button>
+          <span class="deal-card-score" style="color:${color};border-color:${color};background:${color}18">${v.score}</span>
+        </div>
+      </div>
+      <div>
+        <div class="deal-card-grade" style="color:${GRADE_COLORS[v.grade_id] || 'var(--text)'}">${grade.label || v.grade_label}</div>
+        <div class="deal-card-grade-en">${grade.label_en || ''}</div>
+      </div>
+      <div class="deal-card-price" style="color:${GRADE_COLORS[v.grade_id] || 'var(--text)'}">¥${v.price_man}万</div>
+      <div class="deal-card-divider"></div>
+      <div class="deal-card-pills">
+        <span class="deal-card-pill">🛣 ${km}</span>
+        <span class="deal-card-pill">🔧 ${shaken} shaken</span>
+      </div>
+      <div class="quality-badges">${accBadge}${warBadge}${mntBadge}${naviBadge}${camBadge}</div>
+      <div class="deal-bars">${breakdown}</div>
+      ${v.url ? `<a class="deal-card-link" href="${v.url}" target="_blank" rel="noopener">View on CarSensor ↗</a>` : ''}
+    `;
+    grid.appendChild(card);
+  });
+
+  panel.appendChild(grid);
+}
+
 /* ── Tab switching ── */
 document.getElementById('top-deals').addEventListener('click', e => {
   const tab = e.target.closest('.deal-tab');
@@ -1108,8 +1294,10 @@ document.getElementById('top-deals').addEventListener('click', e => {
   document.querySelectorAll('.deal-tab').forEach(t => t.classList.remove('active'));
   tab.classList.add('active');
   const which = tab.dataset.tab;
-  document.getElementById('deal-list').style.display  = which === 'top'  ? '' : 'none';
-  document.getElementById('gems-list').style.display  = which === 'gems' ? '' : 'none';
+  document.getElementById('deal-list').style.display       = which === 'top'       ? '' : 'none';
+  document.getElementById('gems-list').style.display       = which === 'gems'      ? '' : 'none';
+  document.getElementById('watchlist-panel').style.display = which === 'watchlist' ? '' : 'none';
+  if (which === 'watchlist') renderWatchlist();
 });
 
 /* ── Period toggle ── */
