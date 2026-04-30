@@ -884,6 +884,11 @@ function renderTopDeals(snap, grades) {
     else if (v.navi === false) naviBadge = `<span class="qbadge bad">${icoMonitorX} ナビレス</span>`;
     else                       naviBadge = `<span class="qbadge neutral">${icoMonitorX} ナビ不明</span>`;
 
+    /* Multi-view camera badge — only shown when detected; absence is silent */
+    const camBadge = v.camera === true
+      ? `<span class="qbadge good"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> マルチビュー</span>`
+      : '';
+
     /* Score bars — price, mileage, shaken */
     const barKeys   = ['price', 'mileage', 'shaken'];
     const barLabels = { price: 'Price', mileage: 'Mileage', shaken: 'Shaken' };
@@ -916,7 +921,7 @@ function renderTopDeals(snap, grades) {
         <span class="deal-card-pill">🔧 ${shaken} shaken</span>
       </div>
       <div class="quality-badges">
-        ${accBadge}${warBadge}${mntBadge}${naviBadge}
+        ${accBadge}${warBadge}${mntBadge}${naviBadge}${camBadge}
       </div>
       <div class="deal-bars">${breakdown}</div>
       ${v.url ? `<a class="deal-card-link" href="${v.url}" target="_blank" rel="noopener">View on CarSensor ↗</a>` : ''}

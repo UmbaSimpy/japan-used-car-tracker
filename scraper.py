@@ -55,13 +55,14 @@ GRADE_ID_TO_LABEL = {v: k for k, v in TARGET_GRADES.items()}
 
 # Scoring weights (must sum to 1.0)
 WEIGHTS = {
-    "price":       0.28,
-    "mileage":     0.24,
-    "shaken":      0.14,
-    "accident":    0.14,
-    "warranty":    0.10,
+    "price":       0.33,   # up from 0.28 — price spread matters more
+    "mileage":     0.19,   # down from 0.24 — 0–3k km flat zone reduces its impact
+    "shaken":      0.13,
+    "accident":    0.13,
+    "warranty":    0.09,
     "maintenance": 0.05,
     "navi":        0.05,   # small bonus for OEM nav presence
+    "camera":      0.03,   # slight bonus for マルチビューカメラ
 }
 
 
@@ -144,6 +145,7 @@ def _extract_details(item) -> dict:
         "warranty":      None,   # True = present, False = none
         "maintenance":   None,   # True = 法定整備付, False = 法定整備無
         "navi":          None,   # True = メーカー純正ナビ present, False = ナビレス, None = unknown
+        "camera":        None,   # True = マルチビューカメラ detected, None = not mentioned
     }
 
     # Detail page URL
@@ -195,15 +197,21 @@ def _extract_details(item) -> dict:
             elif "法定整備無" in text or "法定整備なし" in text:
                 details["maintenance"] = False
 
-    # OEM Navigation: detected from the free-text title/description of the card.
-    # CarSensor embeds equipment keywords (e.g. "純正8型ナビ") in the headline text,
-    # not in a structured field. We scan the full card text for known patterns.
+    # Both navi and camera are detected from the free-text headline of the listing card.
+    # CarSensor embeds equipment keywords in the title, not in structured spec fields.
     full_text = item.get_text(" ", strip=True)
+
+    # OEM Navigation
     if re.search(r'純正.{0,6}ナビ|ナビ.{0,6}純正|Gathers.{0,4}ナビ|メーカー.{0,4}ナビ', full_text):
         details["navi"] = True
     elif re.search(r'ナビレス|オーディオレス', full_text):
         details["navi"] = False
     # else: None → not mentioned / unknown
+
+    # Multi-view camera (マルチビューカメラ / 全周囲カメラ / アラウンドビューモニター)
+    if re.search(r'マルチビューカメラ|マルチビュー|アラウンドビュー|全周囲カメラ|パノラミックビュー', full_text):
+        details["camera"] = True
+    # else: None → not mentioned (can't reliably detect absence from listing text)
 
     return details
 
@@ -292,6 +300,10 @@ def score_vehicle(vehicle: dict, global_stats: dict) -> tuple[float, dict]:
     else:
         navi_score = 5.0  # not mentioned → neutral
 
+    # Multi-view camera: detected = 8, not mentioned = 5 (neutral — can't detect absence)
+    camera = vehicle.get("camera")
+    camera_score = 8.0 if camera is True else 5.0
+
     total = (
         price_score       * WEIGHTS["price"]       +
         mileage_score     * WEIGHTS["mileage"]     +
@@ -299,7 +311,8 @@ def score_vehicle(vehicle: dict, global_stats: dict) -> tuple[float, dict]:
         accident_score    * WEIGHTS["accident"]    +
         warranty_score    * WEIGHTS["warranty"]    +
         maintenance_score * WEIGHTS["maintenance"] +
-        navi_score        * WEIGHTS["navi"]
+        navi_score        * WEIGHTS["navi"]        +
+        camera_score      * WEIGHTS["camera"]
     )
 
     breakdown = {
@@ -310,6 +323,7 @@ def score_vehicle(vehicle: dict, global_stats: dict) -> tuple[float, dict]:
         "warranty":    round(warranty_score,    1),
         "maintenance": round(maintenance_score, 1),
         "navi":        round(navi_score,        1),
+        "camera":      round(camera_score,      1),
     }
     return round(total, 1), breakdown
 
@@ -346,6 +360,7 @@ def build_snapshot(
             "warranty":        v.get("warranty"),
             "maintenance":     v.get("maintenance"),
             "navi":            v.get("navi"),
+            "camera":          v.get("camera"),
             "url":             v.get("url"),
         }
         for v in top_vehicles
@@ -448,9 +463,11 @@ def build_telegram_message(snapshot: dict, prev_snapshot: dict | None) -> str:
             acc   = "No accident" if v.get("accident") is False else ("Accident" if v.get("accident") else "acc ?")
             war   = "保証付" if v.get("warranty") is True else ("保証なし" if v.get("warranty") is False else "保証 ?")
             mnt   = "整備付" if v.get("maintenance") is True else ("整備無" if v.get("maintenance") is False else "整備 ?")
-            navi  = "純正ナビ" if v.get("navi") is True else ("ナビレス" if v.get("navi") is False else "ナビ ?")
+            navi   = "純正ナビ" if v.get("navi") is True else ("ナビレス" if v.get("navi") is False else "ナビ ?")
+            cam    = "マルチビュー" if v.get("camera") is True else ""
+            extras = " · ".join(x for x in [navi, cam] if x)
             lines.append(f"  #{i} [{v['score']}/10] {v['grade_label']} — ¥{v['price_man']}万")
-            lines.append(f"      {km} · {shk} · {acc} · {war} · {mnt} · {navi}")
+            lines.append(f"      {km} · {shk} · {acc} · {war} · {mnt} · {extras}")
             if v.get("url"):
                 lines.append(f"      {v['url']}")
 
@@ -610,9 +627,10 @@ def run(max_pages: int | None) -> None:
         km   = f"{v['mileage_km']:,} km" if v.get("mileage_km") is not None else "km=?"
         shk  = f"{v['shaken_months']}mo"  if v.get("shaken_months") is not None else "shaken=?"
         acc  = "clean"    if v.get("accident")    is False else ("accident" if v.get("accident")    else "acc=?")
-        navi = "純正ナビ" if v.get("navi")        is True  else ("ナビレス" if v.get("navi") is False else "navi=?")
+        navi   = "純正ナビ"   if v.get("navi")   is True else ("ナビレス" if v.get("navi") is False else "navi=?")
+        cam    = "マルチビュー" if v.get("camera") is True else ""
         print(f"  #{i} [{v['score']:4.1f}] {v['grade_id']:22s}  "
-              f"¥{v['price_man']}万  {km}  {shk}  {acc}  {navi}")
+              f"¥{v['price_man']}万  {km}  {shk}  {acc}  {navi}  {cam}")
         print(f"       {v.get('url', '')}")
 
 
