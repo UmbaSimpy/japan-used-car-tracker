@@ -494,6 +494,19 @@
       gap: 12px;
     }
 
+    /* ── Trend comment chip ── */
+    .trend-comment {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 0.69rem; line-height: 1.55;
+      padding: 9px 11px;
+      border-radius: var(--radius-sm);
+      border: 1px solid;
+    }
+    .trend-comment-icon { font-size: 0.85rem; flex-shrink: 0; line-height: 1.4; }
+    .trend-comment.flat { background: rgba(160,174,192,.05); border-color: var(--border);        color: var(--text2); }
+    .trend-comment.down { background: rgba(45,212,160,.06);  border-color: rgba(45,212,160,.25); color: var(--text2); }
+    .trend-comment.up   { background: rgba(245,101,101,.06); border-color: rgba(245,101,101,.25);color: var(--text2); }
+
     /* ── Favourite / Watchlist ── */
     .fav-btn {
       background: none; border: none; cursor: pointer;
@@ -726,6 +739,82 @@ function favBtn(url) {
   return `<button class="fav-btn${active}" data-url="${url || ''}" title="${title}" onclick="toggleFav(this)">${icoStarSVG}</button>`;
 }
 
+/* ── Price trend comment ── */
+function buildTrendComment(grade_id, allSnapshots) {
+  // Build full history for this grade (not limited by period selector)
+  const vals = allSnapshots
+    .map(s => ({ date: s.date, avg: s.by_grade[grade_id]?.avg ?? null }))
+    .filter(x => x.avg !== null);
+
+  if (vals.length < 3) {
+    return { cls: 'flat', icon: '📊',
+      text: 'Building price history — check back after a few more daily snapshots.' };
+  }
+
+  const latest     = vals[vals.length - 1];
+  const latestDate = new Date(latest.date);
+
+  // Find snapshot closest to N days ago (within a ±5-day tolerance)
+  function findNearest(daysAgo) {
+    const target = new Date(latestDate);
+    target.setDate(target.getDate() - daysAgo);
+    let best = null, bestDiff = Infinity;
+    for (const v of vals.slice(0, -1)) {
+      const diff = Math.abs(new Date(v.date) - target);
+      if (diff < bestDiff) { bestDiff = diff; best = v; }
+    }
+    return (best && bestDiff <= 5 * 86_400_000) ? best : null;
+  }
+
+  const snap90 = findNearest(90);
+  const snap30 = findNearest(30);
+  const snap7  = findNearest(7);
+
+  // Best available reference window: 30d → 7d → all data
+  let ref, refDays;
+  if (snap30)      { ref = snap30; refDays = 30; }
+  else if (snap7)  { ref = snap7;  refDays = 7;  }
+  else {
+    ref = vals[0];
+    refDays = Math.round((latestDate - new Date(ref.date)) / 86_400_000);
+  }
+
+  const pct    = ((latest.avg - ref.avg) / ref.avg) * 100;
+  const absPct = Math.abs(pct);
+  const sign   = pct >= 0 ? '+' : '−';
+
+  const periodLabel = refDays >= 80 ? 'past 3 months'
+                    : refDays >= 25 ? 'past month'
+                    : refDays >= 10 ? 'past 2 weeks'
+                    : `past ${refDays} day${refDays !== 1 ? 's' : ''}`;
+
+  // Optional 3-month context suffix
+  let longCtx = '';
+  if (snap90 && refDays < 60) {
+    const p90 = ((latest.avg - snap90.avg) / snap90.avg) * 100;
+    if (Math.abs(p90) >= 2) {
+      longCtx = ` 3-month trend: ${p90 > 0 ? '+' : '−'}${Math.abs(p90).toFixed(1)}%.`;
+    }
+  }
+
+  if (absPct < 1.5) {
+    return { cls: 'flat', icon: '〰️',
+      text: `Prices are <strong>stable</strong> over the ${periodLabel} (${sign}${absPct.toFixed(1)}%). No significant movement detected.${longCtx}` };
+  } else if (pct <= -5) {
+    return { cls: 'down', icon: '📉',
+      text: `Prices are <strong>falling</strong> — down ${absPct.toFixed(1)}% over the ${periodLabel}. The market is softening; a good time to shop.${longCtx}` };
+  } else if (pct < -1.5) {
+    return { cls: 'down', icon: '↘',
+      text: `<strong>Gradual price decline</strong> of ${absPct.toFixed(1)}% over the ${periodLabel}. Worth monitoring for further drops.${longCtx}` };
+  } else if (pct >= 5) {
+    return { cls: 'up', icon: '📈',
+      text: `Prices are <strong>rising</strong> — up ${absPct.toFixed(1)}% over the ${periodLabel}. Act sooner if you're interested.${longCtx}` };
+  } else {
+    return { cls: 'up', icon: '↗',
+      text: `<strong>Slight upward pressure</strong> — prices up ${absPct.toFixed(1)}% over the ${periodLabel}.${longCtx}` };
+  }
+}
+
 /* ── Render ── */
 function render() {
   if (!window.FREED_DATA) {
@@ -779,6 +868,12 @@ function render() {
       </span>`;
     }
 
+    const tc = buildTrendComment(grade.id, snapshots);
+    const trendHTML = `<div class="trend-comment ${tc.cls}">
+      <span class="trend-comment-icon">${tc.icon}</span>
+      <span>${tc.text}</span>
+    </div>`;
+
     const card = document.createElement('div');
     card.className = 'grade-card';
     card.innerHTML = `
@@ -818,6 +913,8 @@ function render() {
             ${deltaBadge(gSnap.count, gPrev?.count, false)}
           </div>
         </div>
+
+        ${trendHTML}
 
       </div>
       <div class="card-footer">
