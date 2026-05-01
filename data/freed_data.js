@@ -1041,6 +1041,622 @@ window.FREED_DATA = {
           }
         ]
       }
+    },
+    {
+      "date": "2026-05-01",
+      "pages_scraped": 107,
+      "by_grade": {
+        "ehev_air_ex_4wd": {
+          "avg": 3559771,
+          "min": 3161000,
+          "max": 3709000,
+          "count": 48
+        },
+        "ehev_air_ex": {
+          "avg": 3197613,
+          "min": 2280000,
+          "max": 3770000,
+          "count": 706
+        },
+        "ehev_crosstar_4wd": {
+          "avg": 3613824,
+          "min": 2798000,
+          "max": 4265000,
+          "count": 34
+        },
+        "ehev_crosstar": {
+          "avg": 3320356,
+          "min": 2250000,
+          "max": 5355000,
+          "count": 385
+        }
+      },
+      "top_vehicles": [
+        {
+          "score": 9.0,
+          "score_breakdown": {
+            "price": 9.3,
+            "mileage": 9.4,
+            "shaken": 7.3,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "camera": 5.0
+          },
+          "grade_id": "ehev_crosstar",
+          "grade_label": "1.5 e:HEV クロスター",
+          "price_man": 246.8,
+          "mileage_km": 9000,
+          "shaken_months": 16,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "camera": null,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6982104839/index.html"
+        },
+        {
+          "score": 8.8,
+          "score_breakdown": {
+            "price": 7.3,
+            "mileage": 10.0,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "camera": 5.0
+          },
+          "grade_id": "ehev_air_ex",
+          "grade_label": "1.5 e:HEV エアー EX",
+          "price_man": 307.7,
+          "mileage_km": 8,
+          "shaken_months": 32,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "camera": null,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6911824286/index.html"
+        },
+        {
+          "score": 8.8,
+          "score_breakdown": {
+            "price": 7.7,
+            "mileage": 10.0,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 5.0,
+            "camera": 8.0
+          },
+          "grade_id": "ehev_air_ex",
+          "grade_label": "1.5 e:HEV エアー EX",
+          "price_man": 295.0,
+          "mileage_km": 22,
+          "shaken_months": 34,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": null,
+          "camera": true,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6942468518/index.html"
+        },
+        {
+          "score": 8.7,
+          "score_breakdown": {
+            "price": 7.0,
+            "mileage": 10.0,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "camera": 5.0
+          },
+          "grade_id": "ehev_air_ex",
+          "grade_label": "1.5 e:HEV エアー EX",
+          "price_man": 318.8,
+          "mileage_km": 30,
+          "shaken_months": 34,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "camera": null,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6971688091/index.html"
+        },
+        {
+          "score": 8.7,
+          "score_breakdown": {
+            "price": 7.7,
+            "mileage": 10.0,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 5.0,
+            "camera": 5.0
+          },
+          "grade_id": "ehev_air_ex",
+          "grade_label": "1.5 e:HEV エアー EX",
+          "price_man": 295.4,
+          "mileage_km": 5,
+          "shaken_months": 34,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": null,
+          "camera": null,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6942785513/index.html"
+        },
+        {
+          "score": 8.7,
+          "score_breakdown": {
+            "price": 7.4,
+            "mileage": 10.0,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 5.0,
+            "camera": 8.0
+          },
+          "grade_id": "ehev_air_ex",
+          "grade_label": "1.5 e:HEV エアー EX",
+          "price_man": 305.6,
+          "mileage_km": 10,
+          "shaken_months": 34,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": null,
+          "camera": true,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6976440593/index.html"
+        },
+        {
+          "score": 8.7,
+          "score_breakdown": {
+            "price": 7.1,
+            "mileage": 10.0,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "camera": 5.0
+          },
+          "grade_id": "ehev_crosstar",
+          "grade_label": "1.5 e:HEV クロスター",
+          "price_man": 315.8,
+          "mileage_km": 32,
+          "shaken_months": 29,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "camera": null,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6971904530/index.html"
+        },
+        {
+          "score": 8.7,
+          "score_breakdown": {
+            "price": 7.1,
+            "mileage": 10.0,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "camera": 5.0
+          },
+          "grade_id": "ehev_crosstar",
+          "grade_label": "1.5 e:HEV クロスター",
+          "price_man": 316.1,
+          "mileage_km": 8,
+          "shaken_months": 29,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "camera": null,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6649013760/index.html"
+        },
+        {
+          "score": 8.7,
+          "score_breakdown": {
+            "price": 7.2,
+            "mileage": 10.0,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "camera": 5.0
+          },
+          "grade_id": "ehev_air_ex",
+          "grade_label": "1.5 e:HEV エアー EX",
+          "price_man": 311.6,
+          "mileage_km": 350,
+          "shaken_months": 33,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "camera": null,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6969903074/index.html"
+        },
+        {
+          "score": 8.7,
+          "score_breakdown": {
+            "price": 7.0,
+            "mileage": 10.0,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "camera": 5.0
+          },
+          "grade_id": "ehev_air_ex",
+          "grade_label": "1.5 e:HEV エアー EX",
+          "price_man": 318.6,
+          "mileage_km": 10,
+          "shaken_months": 31,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "camera": null,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6895393650/index.html"
+        },
+        {
+          "score": 8.7,
+          "score_breakdown": {
+            "price": 6.9,
+            "mileage": 10.0,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "camera": 5.0
+          },
+          "grade_id": "ehev_air_ex",
+          "grade_label": "1.5 e:HEV エアー EX",
+          "price_man": 320.1,
+          "mileage_km": 10,
+          "shaken_months": 30,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "camera": null,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6679363278/index.html"
+        },
+        {
+          "score": 8.7,
+          "score_breakdown": {
+            "price": 7.0,
+            "mileage": 10.0,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "camera": 5.0
+          },
+          "grade_id": "ehev_air_ex",
+          "grade_label": "1.5 e:HEV エアー EX",
+          "price_man": 319.1,
+          "mileage_km": 4,
+          "shaken_months": 29,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "camera": null,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6943713230/index.html"
+        },
+        {
+          "score": 8.7,
+          "score_breakdown": {
+            "price": 7.0,
+            "mileage": 10.0,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "camera": 5.0
+          },
+          "grade_id": "ehev_air_ex",
+          "grade_label": "1.5 e:HEV エアー EX",
+          "price_man": 319.1,
+          "mileage_km": 7,
+          "shaken_months": 31,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "camera": null,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6694255368/index.html"
+        },
+        {
+          "score": 8.7,
+          "score_breakdown": {
+            "price": 7.0,
+            "mileage": 10.0,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "camera": 5.0
+          },
+          "grade_id": "ehev_air_ex",
+          "grade_label": "1.5 e:HEV エアー EX",
+          "price_man": 319.0,
+          "mileage_km": 6,
+          "shaken_months": 31,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "camera": null,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6760658403/index.html"
+        },
+        {
+          "score": 8.7,
+          "score_breakdown": {
+            "price": 7.0,
+            "mileage": 10.0,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "camera": 5.0
+          },
+          "grade_id": "ehev_air_ex",
+          "grade_label": "1.5 e:HEV エアー EX",
+          "price_man": 318.0,
+          "mileage_km": 4,
+          "shaken_months": 31,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "camera": null,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6780846849/index.html"
+        }
+      ],
+      "category_gems": {
+        "price": [
+          {
+            "score": 8.5,
+            "score_breakdown": {
+              "price": 10.0,
+              "mileage": 10.0,
+              "shaken": 10.0,
+              "accident": 1.0,
+              "warranty": 8.0,
+              "maintenance": 10.0,
+              "navi": 10.0,
+              "camera": 5.0
+            },
+            "grade_id": "ehev_crosstar",
+            "grade_label": "1.5 e:HEV クロスター",
+            "price_man": 225.0,
+            "mileage_km": 2000,
+            "shaken_months": 24,
+            "accident": true,
+            "warranty": true,
+            "maintenance": true,
+            "navi": true,
+            "camera": null,
+            "url": "https://www.carsensor.net/usedcar/detail/AU6865940059/index.html"
+          },
+          {
+            "score": 7.6,
+            "score_breakdown": {
+              "price": 9.9,
+              "mileage": 9.3,
+              "shaken": 10.0,
+              "accident": 1.0,
+              "warranty": 4.0,
+              "maintenance": 3.0,
+              "navi": 10.0,
+              "camera": 5.0
+            },
+            "grade_id": "ehev_air_ex",
+            "grade_label": "1.5 e:HEV エアー EX",
+            "price_man": 228.0,
+            "mileage_km": 10000,
+            "shaken_months": 24,
+            "accident": true,
+            "warranty": null,
+            "maintenance": false,
+            "navi": true,
+            "camera": null,
+            "url": "https://www.carsensor.net/usedcar/detail/AU6975810805/index.html"
+          },
+          {
+            "score": 6.5,
+            "score_breakdown": {
+              "price": 9.7,
+              "mileage": 8.5,
+              "shaken": 5.0,
+              "accident": 1.0,
+              "warranty": 4.0,
+              "maintenance": 3.0,
+              "navi": 5.0,
+              "camera": 5.0
+            },
+            "grade_id": "ehev_crosstar",
+            "grade_label": "1.5 e:HEV クロスター",
+            "price_man": 235.0,
+            "mileage_km": 18000,
+            "shaken_months": null,
+            "accident": true,
+            "warranty": null,
+            "maintenance": false,
+            "navi": null,
+            "camera": null,
+            "url": "https://www.carsensor.net/usedcar/detail/AU6927613479/index.html"
+          }
+        ],
+        "mileage": [
+          {
+            "score": 8.9,
+            "score_breakdown": {
+              "price": 7.6,
+              "mileage": 10.0,
+              "shaken": 10.0,
+              "accident": 10.0,
+              "warranty": 8.0,
+              "maintenance": 10.0,
+              "navi": 10.0,
+              "camera": 5.0
+            },
+            "grade_id": "ehev_crosstar",
+            "grade_label": "1.5 e:HEV クロスター",
+            "price_man": 298.9,
+            "mileage_km": 600,
+            "shaken_months": 32,
+            "accident": false,
+            "warranty": true,
+            "maintenance": true,
+            "navi": true,
+            "camera": null,
+            "url": "https://www.carsensor.net/usedcar/detail/AU6966696695/index.html"
+          },
+          {
+            "score": 8.7,
+            "score_breakdown": {
+              "price": 6.9,
+              "mileage": 10.0,
+              "shaken": 10.0,
+              "accident": 10.0,
+              "warranty": 8.0,
+              "maintenance": 10.0,
+              "navi": 10.0,
+              "camera": 5.0
+            },
+            "grade_id": "ehev_air_ex",
+            "grade_label": "1.5 e:HEV エアー EX",
+            "price_man": 319.8,
+            "mileage_km": 17,
+            "shaken_months": 28,
+            "accident": false,
+            "warranty": true,
+            "maintenance": true,
+            "navi": true,
+            "camera": null,
+            "url": "https://www.carsensor.net/usedcar/detail/AU6943448077/index.html"
+          },
+          {
+            "score": 8.7,
+            "score_breakdown": {
+              "price": 7.9,
+              "mileage": 10.0,
+              "shaken": 10.0,
+              "accident": 10.0,
+              "warranty": 8.0,
+              "maintenance": 10.0,
+              "navi": 5.0,
+              "camera": 5.0
+            },
+            "grade_id": "ehev_air_ex",
+            "grade_label": "1.5 e:HEV エアー EX",
+            "price_man": 289.8,
+            "mileage_km": 5,
+            "shaken_months": 33,
+            "accident": false,
+            "warranty": true,
+            "maintenance": true,
+            "navi": null,
+            "camera": null,
+            "url": "https://www.carsensor.net/usedcar/detail/AU6935737391/index.html"
+          }
+        ],
+        "accident": [
+          {
+            "score": 8.5,
+            "score_breakdown": {
+              "price": 10.0,
+              "mileage": 10.0,
+              "shaken": 10.0,
+              "accident": 1.0,
+              "warranty": 8.0,
+              "maintenance": 10.0,
+              "navi": 10.0,
+              "camera": 5.0
+            },
+            "grade_id": "ehev_crosstar",
+            "grade_label": "1.5 e:HEV クロスター",
+            "price_man": 225.0,
+            "mileage_km": 2000,
+            "shaken_months": 24,
+            "accident": true,
+            "warranty": true,
+            "maintenance": true,
+            "navi": true,
+            "camera": null,
+            "url": "https://www.carsensor.net/usedcar/detail/AU6865940059/index.html"
+          },
+          {
+            "score": 8.2,
+            "score_breakdown": {
+              "price": 9.2,
+              "mileage": 9.8,
+              "shaken": 10.0,
+              "accident": 1.0,
+              "warranty": 8.0,
+              "maintenance": 10.0,
+              "navi": 10.0,
+              "camera": 5.0
+            },
+            "grade_id": "ehev_crosstar",
+            "grade_label": "1.5 e:HEV クロスター",
+            "price_man": 249.8,
+            "mileage_km": 5000,
+            "shaken_months": 24,
+            "accident": true,
+            "warranty": true,
+            "maintenance": true,
+            "navi": true,
+            "camera": null,
+            "url": "https://www.carsensor.net/usedcar/detail/AU6981929424/index.html"
+          },
+          {
+            "score": 8.0,
+            "score_breakdown": {
+              "price": 8.4,
+              "mileage": 10.0,
+              "shaken": 10.0,
+              "accident": 1.0,
+              "warranty": 8.0,
+              "maintenance": 10.0,
+              "navi": 10.0,
+              "camera": 5.0
+            },
+            "grade_id": "ehev_air_ex",
+            "grade_label": "1.5 e:HEV エアー EX",
+            "price_man": 275.0,
+            "mileage_km": 2000,
+            "shaken_months": 24,
+            "accident": true,
+            "warranty": true,
+            "maintenance": true,
+            "navi": true,
+            "camera": null,
+            "url": "https://www.carsensor.net/usedcar/detail/AU6973558406/index.html"
+          }
+        ]
+      }
     }
   ]
 };
