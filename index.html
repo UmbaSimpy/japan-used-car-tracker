@@ -1,46 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Japan Used Car Tracker</title>
+  <title>Freed.Market — Honda Freed Used Car Intelligence</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
   <script src="data/freed_data.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #07090f;
-      --bg2:      #0c1018;
-      --surface:  #0f1520;
-      --surface2: #141c2e;
-      --surface3: #1a2338;
-      --border:   #1e2d47;
-      --border2:  #253450;
-      --accent:   #4f8ef7;
-      --accent2:  #3b7ef5;
-      --green:    #2dd4a0;
-      --red:      #f56565;
-      --amber:    #f6ad55;
-      --purple:   #a78bfa;
-      --text:     #e8edf5;
-      --text2:    #a0aec0;
-      --muted:    #4a5568;
-      --radius:   12px;
-      --radius-sm: 8px;
+      --bg:       #070708;
+      --bg2:      #0B0B0D;
+      --surface:  #0F0F13;
+      --surface2: #141419;
+      --surface3: #1B1B22;
+      --border:   #212128;
+      --border2:  #2D2D3A;
+      --red:      #E8272A;
+      --red2:     #B81E21;
+      --green:    #19C37D;
+      --amber:    #F5A623;
+      --purple:   #9F7AEA;
+      --blue:     #4492FF;
+      --text:     #EEEEF3;
+      --text2:    #888899;
+      --muted:    #3E3E50;
+      --radius:   6px;
+      --radius-sm:4px;
     }
 
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      background-image:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(79,142,247,0.07) 0%, transparent 60%);
+    }
+
+    /* Signature red top stripe */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--red);
+      z-index: 200;
     }
 
     /* ── Header ── */
@@ -50,40 +58,65 @@
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 12px;
-      padding: 0 32px;
-      height: 64px;
+      padding: 0 40px;
+      height: 66px;
+      margin-top: 3px;
       border-bottom: 1px solid var(--border);
-      background: rgba(7,9,15,0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: var(--bg);
       position: sticky;
-      top: 0;
+      top: 3px;
       z-index: 100;
     }
 
     .logo {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
     }
-    .logo-mark {
-      width: 34px; height: 34px;
-      background: linear-gradient(135deg, #4f8ef7 0%, #7c3aed 100%);
-      border-radius: 9px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-      box-shadow: 0 0 16px rgba(79,142,247,0.35);
+    .logo-nameplate {
+      display: flex;
+      align-items: baseline;
+      gap: 1px;
+    }
+    .logo-freed {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.65rem;
+      letter-spacing: 2px;
+      color: var(--text);
+      line-height: 1;
+    }
+    .logo-dot { color: var(--red); }
+    .logo-market {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.65rem;
+      letter-spacing: 2px;
+      color: var(--red);
+      line-height: 1;
+    }
+    .logo-rule {
+      width: 1px; height: 26px;
+      background: var(--border2);
       flex-shrink: 0;
     }
-    .logo-text {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1rem; font-weight: 700;
-      letter-spacing: -0.3px;
-      color: var(--text);
+    .logo-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
     }
-    .logo-sub { font-size: 0.68rem; color: var(--muted); margin-top: 1px; letter-spacing: 0.1px; }
+    .logo-model {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text2);
+    }
+    .logo-source {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.6rem; font-weight: 500;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+    }
 
-    .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
 
     .period-selector {
       display: flex;
@@ -96,190 +129,213 @@
     .period-btn {
       background: none; border: none;
       color: var(--text2);
-      font-size: 0.75rem; font-weight: 600; font-family: inherit;
-      padding: 5px 14px; border-radius: 6px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.78rem; font-weight: 700;
+      letter-spacing: 0.8px; text-transform: uppercase;
+      padding: 5px 16px; border-radius: 3px;
       cursor: pointer; transition: all .15s;
-      letter-spacing: 0.2px;
     }
-    .period-btn.active {
-      background: linear-gradient(135deg, var(--accent2), #6366f1);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(79,142,247,0.3);
-    }
+    .period-btn.active { background: var(--red); color: #fff; }
     .period-btn:not(.active):hover { color: var(--text); background: var(--surface3); }
 
     .source-link {
       display: flex; align-items: center; gap: 6px;
-      font-size: 0.72rem; font-weight: 500; color: var(--text2);
-      border: 1px solid var(--border); border-radius: 20px;
-      padding: 5px 14px; text-decoration: none;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.8px; text-transform: uppercase;
+      color: var(--text2);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 6px 16px; text-decoration: none;
       transition: all .15s;
     }
-    .source-link:hover { border-color: var(--accent); color: var(--accent); background: rgba(79,142,247,0.06); }
+    .source-link:hover { border-color: var(--red); color: var(--red); background: rgba(232,39,42,.04); }
 
     /* ── Main ── */
     main {
-      max-width: 1120px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 32px;
+      padding: 44px 40px;
       display: flex;
       flex-direction: column;
-      gap: 28px;
+      gap: 48px;
       flex: 1;
       width: 100%;
     }
 
-    /* ── Section label ── */
+    /* ── Section label — magazine rubric style ── */
     .section-label {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 0.7rem; font-weight: 600;
-      color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
-      margin-bottom: -12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: -32px;
     }
-    .section-label::after {
-      content: ''; flex: 1; height: 1px; background: var(--border);
+    .section-label-bar {
+      width: 20px; height: 2px;
+      background: var(--red);
+      flex-shrink: 0;
+    }
+    .section-label-text {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.65rem; font-weight: 700;
+      color: var(--text2);
+      text-transform: uppercase; letter-spacing: 2.5px;
+      white-space: nowrap;
+    }
+    .section-label-line {
+      flex: 1; height: 1px;
+      background: var(--border);
     }
 
     /* ── Grade cards ── */
     .cards-row {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
     }
 
     .grade-card {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
       display: flex;
       flex-direction: column;
-      transition: border-color .2s, transform .2s, box-shadow .2s;
+      transition: background .2s;
       position: relative;
+      border-left: 3px solid var(--card-color, var(--border2));
     }
-    .grade-card:hover {
-      border-color: var(--border2);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    }
+    .grade-card:hover { background: var(--surface2); }
 
-    /* Colored accent bar at top */
-    .card-accent-bar {
-      height: 3px;
-      width: 100%;
-    }
+    /* Accent bar kept but hidden — left border does the job now */
+    .card-accent-bar { display: none; }
 
     .card-body {
-      padding: 20px;
+      padding: 22px 22px 18px 24px;
       display: flex;
       flex-direction: column;
       gap: 18px;
       flex: 1;
     }
 
-    /* Header row: grade name + drive badge */
     .card-header {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
       gap: 8px;
     }
-    .card-grade-info { display: flex; flex-direction: column; gap: 3px; }
-    .card-grade-jp { font-size: 0.97rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.1px; }
-    .card-grade-en { font-size: 0.7rem; color: var(--text2); }
+    .card-grade-info { display: flex; flex-direction: column; gap: 2px; }
+    .card-grade-jp {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .card-grade-en {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.65rem; color: var(--text2);
+    }
     .card-drive-badge {
-      display: inline-flex; align-items: center;
+      font-family: 'Barlow Condensed', sans-serif;
       font-size: 0.6rem; font-weight: 700;
-      letter-spacing: .6px; text-transform: uppercase;
+      letter-spacing: 1px; text-transform: uppercase;
       background: var(--surface3); border: 1px solid var(--border2);
-      border-radius: 5px; padding: 3px 8px;
+      border-radius: 3px; padding: 3px 10px;
       color: var(--text2); white-space: nowrap; flex-shrink: 0;
     }
 
-    /* Avg price hero */
-    .card-avg { display: flex; flex-direction: column; gap: 5px; }
+    .card-avg { display: flex; flex-direction: column; gap: 2px; }
     .avg-label {
-      font-size: 0.65rem; font-weight: 600; color: var(--muted);
-      text-transform: uppercase; letter-spacing: .8px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.6rem; font-weight: 700;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 2px;
     }
     .avg-value {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 2rem; font-weight: 700; line-height: 1;
-      letter-spacing: -0.5px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.7rem; font-weight: 400; line-height: 0.92;
+      letter-spacing: 1px;
     }
-    .avg-change { font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+    .avg-change {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.76rem; font-weight: 600;
+      display: flex; align-items: center; gap: 5px;
+      margin-top: 6px;
+    }
 
-    /* Sparkline */
-    .card-spark { width: 100%; height: 52px; }
+    .card-spark { width: 100%; height: 48px; }
 
-    /* Stats grid */
     .card-stats {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px;
-    }
-    .stat-cell {
-      background: var(--surface2);
+      gap: 0;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      padding: 10px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
+      overflow: hidden;
     }
+    .stat-cell {
+      padding: 9px 12px;
+      display: flex; flex-direction: column; gap: 2px;
+      border-right: 1px solid var(--border);
+    }
+    .stat-cell:last-child { border-right: none; }
     .stat-cell-label {
-      font-size: 0.6rem; font-weight: 600;
-      text-transform: uppercase; letter-spacing: .7px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.57rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1.2px;
       color: var(--muted);
     }
     .stat-cell-value {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.85rem; font-weight: 600;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.05rem; letter-spacing: 0.5px;
     }
     .stat-cell-value.min { color: var(--green); }
     .stat-cell-value.max { color: var(--red); }
-    .stat-delta { font-size: 0.63rem; font-weight: 500; margin-top: 1px; display: block; }
+    .stat-delta {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.6rem; font-weight: 600; margin-top: 1px; display: block;
+    }
     .stat-delta.muted { color: var(--muted); }
 
-    /* Footer row */
+    /* Trend comment */
+    .trend-comment {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.69rem; line-height: 1.55;
+      padding: 9px 11px;
+      border-radius: var(--radius-sm);
+      border: 1px solid;
+    }
+    .trend-comment-icon { font-size: 0.85rem; flex-shrink: 0; line-height: 1.4; }
+    .trend-comment.flat { background: rgba(255,255,255,.02); border-color: var(--border2); color: var(--text2); }
+    .trend-comment.down { background: rgba(25,195,125,.05); border-color: rgba(25,195,125,.22); color: var(--text2); }
+    .trend-comment.up   { background: rgba(232,39,42,.05);  border-color: rgba(232,39,42,.22); color: var(--text2); }
+
     .card-footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 20px;
+      padding: 9px 22px 9px 24px;
       border-top: 1px solid var(--border);
-      background: var(--surface2);
     }
     .listings-pill {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 0.7rem; font-weight: 500; color: var(--text2);
+      display: inline-flex; align-items: center; gap: 7px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.68rem; font-weight: 500; color: var(--text2); letter-spacing: 0.2px;
     }
-    .listings-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      animation: pulse-dot 2s ease-in-out infinite;
-    }
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50%       { opacity: 0.6; transform: scale(0.85); }
-    }
+    .listings-dot { width: 6px; height: 6px; border-radius: 50%; animation: pulse-dot 2s ease-in-out infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(.75)} }
     .live-badge {
       display: flex; align-items: center; gap: 5px;
-      font-size: 0.6rem; font-weight: 700; letter-spacing: .5px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 1.2px;
       color: var(--green);
-      padding: 3px 8px;
-      background: rgba(45,212,160,0.08);
-      border: 1px solid rgba(45,212,160,0.2);
-      border-radius: 20px;
+      padding: 3px 9px;
+      background: rgba(25,195,125,.07);
+      border: 1px solid rgba(25,195,125,.2);
+      border-radius: 3px;
+      text-transform: uppercase;
     }
-    .live-dot {
-      width: 5px; height: 5px; border-radius: 50%;
-      background: var(--green);
-      animation: pulse-live 1.8s ease-in-out infinite;
-    }
-    @keyframes pulse-live {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.3; }
-    }
+    .live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: pulse-live 1.8s ease-in-out infinite; }
+    @keyframes pulse-live { 0%,100%{opacity:1} 50%{opacity:.25} }
 
     /* ── Chart section ── */
     .chart-section {
@@ -291,57 +347,62 @@
     .chart-header {
       display: flex; align-items: center;
       justify-content: space-between;
-      padding: 18px 24px;
+      padding: 18px 26px;
       border-bottom: 1px solid var(--border);
       flex-wrap: wrap; gap: 12px;
+      background: var(--surface2);
     }
     .chart-title-wrap { display: flex; flex-direction: column; gap: 2px; }
     .chart-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.95rem; font-weight: 600; letter-spacing: -0.1px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.35rem; letter-spacing: 1.5px;
     }
-    .chart-subtitle { font-size: 0.68rem; color: var(--muted); }
-    .chart-legend { display: flex; gap: 14px; flex-wrap: wrap; }
+    .chart-subtitle {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.63rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .chart-legend { display: flex; gap: 16px; flex-wrap: wrap; }
     .legend-item {
       display: flex; align-items: center; gap: 7px;
-      font-size: 0.72rem; font-weight: 500; color: var(--text2);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.7rem; font-weight: 500; color: var(--text2); letter-spacing: 0.2px;
     }
     .legend-line {
-      width: 18px; height: 2px; border-radius: 2px;
-      position: relative;
+      width: 16px; height: 2px; border-radius: 2px; position: relative;
     }
     .legend-line::after {
       content: '';
-      position: absolute;
-      left: 50%; top: 50%;
+      position: absolute; left: 50%; top: 50%;
       transform: translate(-50%,-50%);
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: inherit;
+      width: 5px; height: 5px; border-radius: 50%; background: inherit;
     }
-    .chart-body { padding: 20px 24px 24px; }
-    .chart-wrap { position: relative; height: 260px; }
+    .chart-body { padding: 22px 26px 26px; }
+    .chart-wrap { position: relative; height: 255px; }
 
-    /* ── Notice (single snapshot) ── */
+    /* ── Notice ── */
     .notice {
       display: flex; align-items: flex-start; gap: 12px;
-      background: rgba(79,142,247,0.05);
-      border: 1px solid rgba(79,142,247,0.15);
+      background: rgba(232,39,42,.03);
+      border: 1px solid rgba(232,39,42,.14);
+      border-left: 3px solid var(--red);
       border-radius: var(--radius);
       padding: 14px 18px;
-      font-size: 0.8rem; color: var(--text2); line-height: 1.5;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.79rem; color: var(--text2); line-height: 1.5;
     }
     .notice-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
 
     /* ── Footer ── */
     footer {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 18px 32px;
-      font-size: 0.68rem; color: var(--muted);
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 18px 40px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.67rem; color: var(--muted);
       border-top: 1px solid var(--border);
-      flex-wrap: wrap;
+      letter-spacing: 0.5px; text-transform: uppercase; flex-wrap: wrap;
     }
-    footer a { color: var(--accent); text-decoration: none; }
+    footer a { color: var(--red); text-decoration: none; }
     footer a:hover { text-decoration: underline; }
     .footer-sep { color: var(--border2); }
 
@@ -354,165 +415,172 @@
     }
     .top-deals-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 24px;
+      padding: 18px 26px;
       border-bottom: 1px solid var(--border);
       flex-wrap: wrap; gap: 10px;
+      background: var(--surface2);
     }
     .top-deals-title-wrap { display: flex; flex-direction: column; gap: 2px; }
     .top-deals-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.95rem; font-weight: 600; letter-spacing: -0.1px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.45rem; letter-spacing: 1.5px; color: var(--text);
     }
-    .top-deals-subtitle { font-size: 0.68rem; color: var(--muted); }
-    .score-legend {
-      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
-      font-size: 0.68rem; color: var(--muted);
+    .top-deals-subtitle {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.63rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.8px;
     }
-    .score-legend-item { display: flex; align-items: center; gap: 5px; }
-    .score-legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .score-legend { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .score-legend-item {
+      display: flex; align-items: center; gap: 5px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.65rem; color: var(--muted); letter-spacing: 0.3px;
+    }
+    .score-legend-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
-    /* ── Deal grid (3 × 5) ── */
+    /* ── Deal tab bar ── */
+    .deal-tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+    }
+    .deal-tab {
+      background: none; border: none; cursor: pointer;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted); padding: 12px 22px;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color .15s, border-color .15s;
+    }
+    .deal-tab:hover { color: var(--text2); }
+    .deal-tab.active { color: var(--text); border-bottom-color: var(--red); }
+
+    /* ── Deal grid (3×5) ── */
     .deal-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      padding: 20px 24px;
+      gap: 1px;
+      background: var(--border);
     }
 
     .deal-card {
       background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 14px;
+      padding: 16px 17px;
       display: flex;
       flex-direction: column;
       gap: 9px;
-      transition: border-color .15s, box-shadow .15s;
+      transition: background .15s;
+      position: relative;
+      border-left: 2px solid var(--card-grade-color, var(--border2));
     }
-    .deal-card:hover {
-      border-color: var(--border2);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.35);
-    }
+    .deal-card:hover { background: var(--surface3); }
 
-    /* Card header: rank left, score badge right */
     .deal-card-header {
       display: flex; align-items: center; justify-content: space-between;
     }
-    .deal-card-rank { font-size: 0.6rem; font-weight: 700; color: var(--muted); letter-spacing: .5px; }
+    .deal-card-rank {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem; letter-spacing: 1px; color: var(--muted);
+    }
     .deal-card-score {
-      font-family: 'Space Grotesk', sans-serif;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.95rem; letter-spacing: 0.5px;
+      padding: 1px 9px; border-radius: 3px; border: 1px solid; line-height: 1.7;
+    }
+
+    .deal-card-grade {
+      font-family: 'Barlow Condensed', sans-serif;
       font-size: 0.88rem; font-weight: 700;
-      padding: 3px 9px; border-radius: 6px; border: 1.5px solid; line-height: 1.4;
+      text-transform: uppercase; letter-spacing: 0.3px; line-height: 1.2;
+    }
+    .deal-card-grade-en {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.6rem; color: var(--text2); margin-top: 1px;
     }
 
-    /* Grade name */
-    .deal-card-grade { font-size: 0.82rem; font-weight: 600; line-height: 1.3; }
-    .deal-card-grade-en { font-size: 0.63rem; color: var(--text2); margin-top: 1px; }
-
-    /* Price */
     .deal-card-price {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.1rem; font-weight: 700;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.65rem; letter-spacing: 0.5px; line-height: 1;
     }
 
-    /* Thin divider */
-    .deal-card-divider { height: 1px; background: var(--border); margin: 2px 0; }
+    .deal-card-divider { height: 1px; background: var(--border); margin: 1px 0; }
 
-    /* km + shaken pills */
     .deal-card-pills { display: flex; gap: 5px; flex-wrap: wrap; }
     .deal-card-pill {
-      font-size: 0.63rem; font-weight: 500; color: var(--text2);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.63rem; font-weight: 500; color: var(--text2); letter-spacing: 0.2px;
       background: var(--surface3); border: 1px solid var(--border);
-      border-radius: 20px; padding: 2px 8px;
+      border-radius: 3px; padding: 2px 8px;
     }
 
-    /* Quality indicator badges (binary/categorical) */
-    .quality-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+    .quality-badges { display: flex; gap: 4px; flex-wrap: wrap; }
     .qbadge {
-      display: inline-flex; align-items: center; gap: 4px;
-      font-size: 0.62rem; font-weight: 600;
-      padding: 3px 8px; border-radius: 6px; border: 1px solid; line-height: 1;
+      display: inline-flex; align-items: center; gap: 3px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.62rem; font-weight: 600; letter-spacing: 0.2px;
+      padding: 2px 6px; border-radius: 3px; border: 1px solid; line-height: 1.3;
     }
     .qbadge svg { flex-shrink: 0; }
-    .qbadge.good    { color: var(--green); border-color: rgba(45,212,160,.3);  background: rgba(45,212,160,.07);  }
-    .qbadge.bad     { color: var(--red);   border-color: rgba(245,101,101,.3); background: rgba(245,101,101,.07); }
-    .qbadge.neutral { color: var(--muted); border-color: var(--border);        background: transparent; }
+    .qbadge.good    { color: var(--green);  border-color: rgba(25,195,125,.3);  background: rgba(25,195,125,.06);  }
+    .qbadge.bad     { color: var(--red);    border-color: rgba(232,39,42,.3);   background: rgba(232,39,42,.06);   }
+    .qbadge.neutral { color: var(--muted);  border-color: var(--border);        background: transparent; }
 
-    /* Score breakdown mini-bars (price, mileage, shaken) */
     .deal-bars { display: flex; flex-direction: column; gap: 4px; }
     .deal-bar-row { display: flex; align-items: center; gap: 7px; }
-    .deal-bar-label { font-size: 0.57rem; color: var(--muted); width: 38px; flex-shrink: 0; }
-    .deal-bar-track { flex: 1; height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
-    .deal-bar-fill { height: 100%; border-radius: 2px; }
-    .deal-bar-val { font-size: 0.57rem; color: var(--text2); width: 20px; text-align: right; flex-shrink: 0; }
+    .deal-bar-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.56rem; color: var(--muted); width: 38px; flex-shrink: 0;
+      text-transform: uppercase; letter-spacing: 0.6px;
+    }
+    .deal-bar-track { flex: 1; height: 2px; background: var(--surface3); border-radius: 1px; overflow: hidden; }
+    .deal-bar-fill { height: 100%; border-radius: 1px; }
+    .deal-bar-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.7rem; color: var(--text2); width: 22px; text-align: right; flex-shrink: 0;
+      letter-spacing: 0.5px;
+    }
 
-    /* View link pinned to card bottom */
     .deal-card-link {
       display: block; text-align: center;
-      font-size: 0.68rem; font-weight: 600;
-      color: var(--accent); text-decoration: none;
-      border: 1px solid rgba(79,142,247,.3);
-      background: rgba(79,142,247,.06);
-      border-radius: 6px; padding: 6px 10px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.8px;
+      color: var(--text2); text-decoration: none;
+      border: 1px solid var(--border);
+      background: transparent;
+      border-radius: 3px; padding: 6px 10px;
       transition: all .15s;
       margin-top: auto;
+      text-transform: uppercase;
     }
-    .deal-card-link:hover { background: rgba(79,142,247,.14); border-color: var(--accent); }
-
-    /* ── Deal tab bar ── */
-    .deal-tab-bar {
-      display: flex; gap: 4px;
-      padding: 12px 24px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .deal-tab {
-      background: none; border: none; cursor: pointer;
-      font-family: inherit; font-size: 0.78rem; font-weight: 600;
-      color: var(--muted); padding: 8px 18px 10px;
-      border-bottom: 2px solid transparent; margin-bottom: -1px;
-      border-radius: 6px 6px 0 0;
-      transition: color .15s, border-color .15s;
-    }
-    .deal-tab:hover { color: var(--text2); }
-    .deal-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .deal-card-link:hover { background: var(--red); border-color: var(--red); color: #fff; }
 
     /* ── Hidden Gems tab ── */
-    .gems-section { padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
-    .gems-category { display: flex; flex-direction: column; gap: 10px; }
-    .gems-category-header {
-      display: flex; align-items: center; gap: 10px;
-    }
+    .gems-section { padding: 22px 26px; display: flex; flex-direction: column; gap: 22px; }
+    .gems-category { display: flex; flex-direction: column; gap: 11px; }
+    .gems-category-header { display: flex; align-items: center; gap: 12px; }
     .gems-category-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.82rem; font-weight: 600; color: var(--text);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.1rem; letter-spacing: 1px; color: var(--text);
+      white-space: nowrap;
     }
-    .gems-category-desc { font-size: 0.67rem; color: var(--muted); }
+    .gems-category-desc {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.66rem; color: var(--muted); letter-spacing: 0.2px;
+    }
     .gems-category-divider { flex: 1; height: 1px; background: var(--border); }
     .gems-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      gap: 1px;
+      background: var(--border);
     }
-
-    /* ── Trend comment chip ── */
-    .trend-comment {
-      display: flex; align-items: flex-start; gap: 8px;
-      font-size: 0.69rem; line-height: 1.55;
-      padding: 9px 11px;
-      border-radius: var(--radius-sm);
-      border: 1px solid;
-    }
-    .trend-comment-icon { font-size: 0.85rem; flex-shrink: 0; line-height: 1.4; }
-    .trend-comment.flat { background: rgba(160,174,192,.05); border-color: var(--border);        color: var(--text2); }
-    .trend-comment.down { background: rgba(45,212,160,.06);  border-color: rgba(45,212,160,.25); color: var(--text2); }
-    .trend-comment.up   { background: rgba(245,101,101,.06); border-color: rgba(245,101,101,.25);color: var(--text2); }
 
     /* ── Favourite / Watchlist ── */
     .fav-btn {
       background: none; border: none; cursor: pointer;
-      padding: 3px 4px; border-radius: 5px;
-      color: var(--muted);
-      line-height: 1; flex-shrink: 0;
+      padding: 3px 4px; border-radius: 3px;
+      color: var(--muted); line-height: 1; flex-shrink: 0;
       transition: color .15s, transform .12s;
     }
     .fav-btn:hover { color: var(--amber); transform: scale(1.2); }
@@ -520,34 +588,28 @@
     .fav-btn svg { display: block; transition: fill .15s; }
     .fav-btn.active svg { fill: var(--amber); stroke: var(--amber); }
 
-    .watchlist-panel { padding: 20px 24px; }
+    .watchlist-panel { padding: 22px 26px; }
     .watchlist-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--border);
     }
     .watchlist-empty {
-      text-align: center;
-      padding: 44px 20px 40px;
-      color: var(--muted);
-      font-size: 0.82rem;
-      line-height: 1.9;
+      text-align: center; padding: 48px 20px 44px;
+      color: var(--muted); font-size: 0.8rem; line-height: 2;
     }
-    .watchlist-empty-icon { font-size: 2.2rem; margin-bottom: 6px; }
+    .watchlist-empty-icon { font-size: 2rem; margin-bottom: 6px; }
 
     /* ── Responsive ── */
     @media (max-width: 860px) {
-      .avg-value { font-size: 1.6rem; }
-      .deal-grid { grid-template-columns: repeat(2, 1fr); }
-      .gems-row  { grid-template-columns: repeat(2, 1fr); }
+      .avg-value { font-size: 2.1rem; }
+      .deal-grid, .gems-row, .watchlist-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 600px) {
-      header { padding: 0 16px; }
-      main { padding: 20px 16px; }
+      header { padding: 0 18px; }
+      main { padding: 28px 18px; gap: 36px; }
       .cards-row { grid-template-columns: 1fr; }
-      .deal-grid { grid-template-columns: 1fr; padding: 12px 16px; }
-      .gems-section { padding: 12px 16px; }
-      .gems-row  { grid-template-columns: 1fr; }
+      .deal-grid, .gems-row, .watchlist-grid { grid-template-columns: 1fr; }
+      .gems-section, .watchlist-panel { padding: 18px; }
     }
   </style>
 </head>
@@ -555,10 +617,13 @@
 
 <header>
   <div class="logo">
-    <div class="logo-mark">🚗</div>
-    <div>
-      <div class="logo-text">Japan Used Car Tracker</div>
-      <div class="logo-sub">Honda Freed 3rd Gen · 2024年06月～ · CarSensor.net</div>
+    <div class="logo-nameplate">
+      <span class="logo-freed">FREED</span><span class="logo-dot">.</span><span class="logo-market">MARKET</span>
+    </div>
+    <div class="logo-rule"></div>
+    <div class="logo-meta">
+      <div class="logo-model">Honda Freed 3rd Gen · e:HEV</div>
+      <div class="logo-source">Used Car Intelligence · CarSensor.net · Japan</div>
     </div>
   </div>
   <div class="header-right">
@@ -568,30 +633,38 @@
       <button class="period-btn" data-p="12">1Y</button>
     </div>
     <a class="source-link" href="https://www.carsensor.net/usedcar/bHO/s083/spH/" target="_blank" rel="noopener">
-      CarSensor.net ↗
+      CarSensor ↗
     </a>
   </div>
 </header>
 
 <main>
   <div id="notice-area"></div>
-  <div class="section-label">Grade Overview</div>
+
+  <div class="section-label">
+    <div class="section-label-bar"></div>
+    <span class="section-label-text">市場分析 &nbsp;·&nbsp; Grade Overview</span>
+    <div class="section-label-line"></div>
+  </div>
   <div class="cards-row" id="cards-row"></div>
 
-  <div class="section-label">Top Deals Today</div>
+  <div class="section-label">
+    <div class="section-label-bar"></div>
+    <span class="section-label-text">注目車両 &nbsp;·&nbsp; Best Value Listings</span>
+    <div class="section-label-line"></div>
+  </div>
   <div class="top-deals" id="top-deals">
     <div class="top-deals-header">
       <div class="top-deals-title-wrap">
-        <div class="top-deals-title">🏆 Best Value Listings</div>
-        <div class="top-deals-subtitle">Scored on price · mileage · shaken · accident history · warranty · maintenance · OEM nav — updated daily</div>
+        <div class="top-deals-title">🏆 Top Picks</div>
+        <div class="top-deals-subtitle">Scored: price · mileage · shaken · accident · warranty · maintenance · OEM nav · camera — daily refresh</div>
       </div>
       <div class="score-legend">
-        <div class="score-legend-item"><div class="score-legend-dot" style="background:#2dd4a0"></div>8–10 Excellent</div>
-        <div class="score-legend-item"><div class="score-legend-dot" style="background:#f6ad55"></div>5–7 Good</div>
-        <div class="score-legend-item"><div class="score-legend-dot" style="background:#f56565"></div>&lt;5 Fair</div>
+        <div class="score-legend-item"><div class="score-legend-dot" style="background:#19C37D"></div>8–10 Excellent</div>
+        <div class="score-legend-item"><div class="score-legend-dot" style="background:#F5A623"></div>5–7 Good</div>
+        <div class="score-legend-item"><div class="score-legend-dot" style="background:#E8272A"></div>&lt;5 Fair</div>
       </div>
     </div>
-    <!-- Tab bar -->
     <div class="deal-tab-bar">
       <button class="deal-tab active" data-tab="top">🏆 Best Overall</button>
       <button class="deal-tab" data-tab="gems">💎 Hidden Gems</button>
@@ -602,11 +675,16 @@
     <div id="watchlist-panel" class="watchlist-panel" style="display:none"></div>
   </div>
 
+  <div class="section-label">
+    <div class="section-label-bar"></div>
+    <span class="section-label-text">価格推移 &nbsp;·&nbsp; Price History</span>
+    <div class="section-label-line"></div>
+  </div>
   <div class="chart-section" id="chart-section">
     <div class="chart-header">
       <div class="chart-title-wrap">
-        <div class="chart-title">Average Listed Price Comparison</div>
-        <div class="chart-subtitle">All grades · Prices in JPY (¥)</div>
+        <div class="chart-title">Average Listed Price</div>
+        <div class="chart-subtitle">All grades · Prices in JPY (¥) · CarSensor.net</div>
       </div>
       <div class="chart-legend" id="chart-legend"></div>
     </div>
@@ -627,12 +705,12 @@
 </footer>
 
 <script>
-/* ── Palette: one colour per grade ── */
+/* ── Grade palette ── */
 const GRADE_COLORS = {
-  ehev_air_ex:       '#4f8ef7',
-  ehev_air_ex_4wd:   '#f6ad55',
-  ehev_crosstar:     '#2dd4a0',
-  ehev_crosstar_4wd: '#a78bfa',
+  ehev_air_ex:       '#4492FF',
+  ehev_air_ex_4wd:   '#F5A623',
+  ehev_crosstar:     '#19C37D',
+  ehev_crosstar_4wd: '#9F7AEA',
 };
 
 /* ── Formatting helpers ── */
@@ -644,7 +722,7 @@ function pctChange(arr) {
   return ((arr[arr.length - 1] - arr[0]) / arr[0] * 100).toFixed(1);
 }
 
-/* ── Delta badge (vs previous snapshot) ── */
+/* ── Delta badge ── */
 function deltaBadge(cur, prev, lowerIsBetter = true) {
   if (prev == null) return '';
   const d = cur - prev;
@@ -661,12 +739,12 @@ function deltaBadge(cur, prev, lowerIsBetter = true) {
 
 /* ── Sparkline SVG ── */
 function sparkSVG(data, color) {
-  const W = 300, H = 52, pad = 4;
+  const W = 300, H = 48, pad = 4;
   if (data.length < 2) {
     return `<svg viewBox="0 0 ${W} ${H}" class="card-spark" xmlns="http://www.w3.org/2000/svg">
       <line x1="${pad}" y1="${H/2}" x2="${W-pad}" y2="${H/2}"
-            stroke="var(--border2)" stroke-width="1.5" stroke-dasharray="5,4"/>
-      <circle cx="${W/2}" cy="${H/2}" r="4" fill="${color}" opacity="0.7"/>
+            stroke="var(--border2)" stroke-width="1.5" stroke-dasharray="4,4"/>
+      <circle cx="${W/2}" cy="${H/2}" r="3.5" fill="${color}" opacity="0.6"/>
     </svg>`;
   }
   const lo = Math.min(...data), hi = Math.max(...data), range = hi - lo || 1;
@@ -679,7 +757,6 @@ function sparkSVG(data, color) {
   const last    = pts[pts.length - 1];
   const rising  = data[data.length - 1] >= data[0];
   const lc      = rising ? 'var(--red)' : 'var(--green)';
-  // Filled area path
   const fillPath = `M${pts[0][0]},${H} ` +
     pts.map(p => `L${p[0]},${p[1]}`).join(' ') +
     ` L${pts[pts.length-1][0]},${H} Z`;
@@ -687,24 +764,24 @@ function sparkSVG(data, color) {
   return `<svg viewBox="0 0 ${W} ${H}" fill="none" class="card-spark" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="${lc}" stop-opacity="0.18"/>
+        <stop offset="0%" stop-color="${lc}" stop-opacity="0.15"/>
         <stop offset="100%" stop-color="${lc}" stop-opacity="0"/>
       </linearGradient>
     </defs>
     <path d="${fillPath}" fill="url(#${gradId})"/>
-    <polyline points="${polyPts}" stroke="${lc}" stroke-width="2"
+    <polyline points="${polyPts}" stroke="${lc}" stroke-width="1.8"
               stroke-linejoin="round" stroke-linecap="round"/>
-    <circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${lc}" opacity="0.9"/>
+    <circle cx="${last[0]}" cy="${last[1]}" r="3" fill="${lc}" opacity="0.9"/>
   </svg>`;
 }
 
 /* ── State ── */
-let period = 6;
+let period       = 6;
 let mainChart    = null;
 let currentGrades = null;
 
 /* ── Watchlist (localStorage) ── */
-const VMAP   = {};   // url → vehicle snapshot
+const VMAP   = {};
 const WL_KEY = 'freed_watchlist';
 
 function getWatchlist()      { try { return JSON.parse(localStorage.getItem(WL_KEY) || '[]'); } catch { return []; } }
@@ -720,18 +797,14 @@ function toggleFav(btn) {
   if (adding) { const v = VMAP[url]; if (v) list.push(v); }
   else        { list.splice(idx, 1); }
   saveWatchlist(list);
-
-  // Sync all star buttons that share this URL (across tabs)
   document.querySelectorAll('.fav-btn').forEach(b => {
     if (b.dataset.url === url) b.classList.toggle('active', adding);
   });
-
-  // Refresh watchlist panel if it's currently shown
   const wlPanel = document.getElementById('watchlist-panel');
   if (wlPanel && wlPanel.style.display !== 'none') renderWatchlist();
 }
 
-const icoStarSVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+const icoStarSVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
 
 function favBtn(url) {
   const active = isInWatchlist(url) ? ' active' : '';
@@ -741,7 +814,6 @@ function favBtn(url) {
 
 /* ── Price trend comment ── */
 function buildTrendComment(grade_id, allSnapshots) {
-  // Build full history for this grade (not limited by period selector)
   const vals = allSnapshots
     .map(s => ({ date: s.date, avg: s.by_grade[grade_id]?.avg ?? null }))
     .filter(x => x.avg !== null);
@@ -754,7 +826,6 @@ function buildTrendComment(grade_id, allSnapshots) {
   const latest     = vals[vals.length - 1];
   const latestDate = new Date(latest.date);
 
-  // Find snapshot closest to N days ago (within a ±5-day tolerance)
   function findNearest(daysAgo) {
     const target = new Date(latestDate);
     target.setDate(target.getDate() - daysAgo);
@@ -770,7 +841,6 @@ function buildTrendComment(grade_id, allSnapshots) {
   const snap30 = findNearest(30);
   const snap7  = findNearest(7);
 
-  // Best available reference window: 30d → 7d → all data
   let ref, refDays;
   if (snap30)      { ref = snap30; refDays = 30; }
   else if (snap7)  { ref = snap7;  refDays = 7;  }
@@ -788,7 +858,6 @@ function buildTrendComment(grade_id, allSnapshots) {
                     : refDays >= 10 ? 'past 2 weeks'
                     : `past ${refDays} day${refDays !== 1 ? 's' : ''}`;
 
-  // Optional 3-month context suffix
   let longCtx = '';
   if (snap90 && refDays < 60) {
     const p90 = ((latest.avg - snap90.avg) / snap90.avg) * 100;
@@ -819,7 +888,7 @@ function buildTrendComment(grade_id, allSnapshots) {
 function render() {
   if (!window.FREED_DATA) {
     document.getElementById('cards-row').innerHTML =
-      '<p style="color:var(--muted);font-size:.85rem">Could not load freed_data.js</p>';
+      '<p style="color:var(--muted);font-size:.85rem;padding:20px">Could not load freed_data.js</p>';
     return;
   }
 
@@ -830,7 +899,6 @@ function render() {
   const snaps    = snapshots.slice(-period);
   const isSingle = snapshots.length < 2;
 
-  // Notice banner
   const noticeEl = document.getElementById('notice-area');
   noticeEl.innerHTML = isSingle
     ? `<div class="notice">
@@ -841,10 +909,8 @@ function render() {
        </div>`
     : '';
 
-  // Footer date
   document.getElementById('last-snap-date').textContent = `Last updated: ${snap.date}`;
 
-  // Cards
   const cardsEl = document.getElementById('cards-row');
   cardsEl.innerHTML = '';
 
@@ -876,8 +942,9 @@ function render() {
 
     const card = document.createElement('div');
     card.className = 'grade-card';
+    card.style.setProperty('--card-color', color);
     card.innerHTML = `
-      <div class="card-accent-bar" style="background:linear-gradient(90deg,${color},${color}88)"></div>
+      <div class="card-accent-bar"></div>
       <div class="card-body">
 
         <div class="card-header">
@@ -889,7 +956,7 @@ function render() {
         </div>
 
         <div class="card-avg">
-          <div class="avg-label">Avg listed price</div>
+          <div class="avg-label">Avg Listed Price</div>
           <div class="avg-value" style="color:${color}">${fmt(gSnap.avg)}</div>
           ${changeHTML}
         </div>
@@ -920,9 +987,9 @@ function render() {
       <div class="card-footer">
         <div class="listings-pill">
           <div class="listings-dot" style="background:${color}"></div>
-          ${gSnap.count.toLocaleString()} 台 available on CarSensor
+          ${gSnap.count.toLocaleString()} 台 on CarSensor
         </div>
-        <span class="live-badge"><span class="live-dot"></span>LIVE</span>
+        <span class="live-badge"><span class="live-dot"></span>Live</span>
       </div>`;
 
     cardsEl.appendChild(card);
@@ -935,9 +1002,8 @@ function render() {
 
 function renderChart(grades, snaps) {
   const section = document.getElementById('chart-section');
-
   if (snaps.length < 2) {
-    section.style.opacity = '.4';
+    section.style.opacity = '.35';
     section.style.pointerEvents = 'none';
   } else {
     section.style.opacity = '';
@@ -949,13 +1015,13 @@ function renderChart(grades, snaps) {
     label: grade.label,
     data:  snaps.map(s => s.by_grade[grade.id]?.avg ?? null),
     borderColor: GRADE_COLORS[grade.id],
-    backgroundColor: GRADE_COLORS[grade.id] + '18',
+    backgroundColor: GRADE_COLORS[grade.id] + '14',
     pointBackgroundColor: GRADE_COLORS[grade.id],
-    pointBorderColor: '#0f1520',
+    pointBorderColor: '#0F0F13',
     pointBorderWidth: 2,
     pointRadius: snaps.length < 5 ? 5 : 3,
     pointHoverRadius: 7,
-    borderWidth: 2.5,
+    borderWidth: 2,
     tension: 0.4,
     fill: false,
     spanGaps: true,
@@ -977,61 +1043,98 @@ function renderChart(grades, snaps) {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#141c2e',
-            borderColor: '#1e2d47', borderWidth: 1,
-            titleColor: '#e8edf5', bodyColor: '#a0aec0',
-            padding: 14,
-            cornerRadius: 10,
-            titleFont: { family: 'Space Grotesk', weight: '600', size: 12 },
-            bodyFont: { family: 'Inter', size: 12 },
-            callbacks: {
-              label: c => `  ${c.dataset.label}:  ${fmt(c.parsed.y)}`
-            }
+            backgroundColor: '#141419',
+            borderColor: '#2D2D3A', borderWidth: 1,
+            titleColor: '#EEEEF3', bodyColor: '#888899',
+            padding: 14, cornerRadius: 6,
+            titleFont: { family: 'Barlow Condensed', weight: '700', size: 13 },
+            bodyFont:  { family: 'Barlow Condensed', size: 13 },
+            callbacks: { label: c => `  ${c.dataset.label}:  ${fmt(c.parsed.y)}` }
           }
         },
         scales: {
           x: {
-            grid: { color: 'rgba(30,45,71,0.8)' },
-            ticks: { color: '#4a5568', font: { size: 11, family: 'Inter' } },
-            border: { color: '#1e2d47' }
+            grid: { color: 'rgba(33,33,40,0.9)' },
+            ticks: { color: '#3E3E50', font: { size: 11, family: 'Barlow Condensed' } },
+            border: { color: '#212128' }
           },
           y: {
-            grid: { color: 'rgba(30,45,71,0.8)' },
+            grid: { color: 'rgba(33,33,40,0.9)' },
             ticks: {
-              color: '#4a5568', font: { size: 11, family: 'Inter' },
+              color: '#3E3E50', font: { size: 11, family: 'Barlow Condensed' },
               callback: v => '¥' + (v / 1_000_000).toFixed(2) + 'M'
             },
-            border: { color: '#1e2d47' }
+            border: { color: '#212128' }
           }
         }
       }
     });
   }
 
-  // Legend
   const legendEl = document.getElementById('chart-legend');
   legendEl.innerHTML = '';
   grades.forEach(g => {
     const el = document.createElement('div');
     el.className = 'legend-item';
-    el.innerHTML = `
-      <div class="legend-line" style="background:${GRADE_COLORS[g.id]}"></div>
-      ${g.label}`;
+    el.innerHTML = `<div class="legend-line" style="background:${GRADE_COLORS[g.id]}"></div>${g.label}`;
     legendEl.appendChild(el);
   });
 }
 
 /* ── Score helpers ── */
 function scoreColor(s) {
-  if (s >= 8) return 'var(--green)';
-  if (s >= 5) return 'var(--amber)';
-  return 'var(--red)';
+  if (s >= 8) return '#19C37D';
+  if (s >= 5) return '#F5A623';
+  return '#E8272A';
+}
+function barColor(s) {
+  if (s >= 8) return '#19C37D';
+  if (s >= 5) return '#F5A623';
+  return '#E8272A';
 }
 
-function barColor(s) {
-  if (s >= 8) return '#2dd4a0';
-  if (s >= 5) return '#f6ad55';
-  return '#f56565';
+/* ── Shared SVG icons ── */
+const _ico = {
+  circleCheck: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="7 12 10 15 17 9"/></svg>`,
+  circleX:     `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="8" x2="16" y2="16"/><line x1="16" y1="8" x2="8" y2="16"/></svg>`,
+  shieldCheck: `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="7 12 10 15 17 9"/></svg>`,
+  shieldX:     `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`,
+  checkSq:     `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><polyline points="7 12 10 15 17 9"/></svg>`,
+  xSq:         `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`,
+  monitorOk:   `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
+  monitorX:    `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="9" y1="8" x2="15" y2="14"/><line x1="15" y1="8" x2="9" y2="14"/></svg>`,
+  camera:      `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`,
+};
+
+function buildBadges(v, showAll = true) {
+  const accBadge = v.accident === false ? `<span class="qbadge good">${_ico.circleCheck} No Accident</span>`
+                 : v.accident === true  ? `<span class="qbadge bad">${_ico.circleX} Accident</span>`
+                 :                        `<span class="qbadge neutral">${_ico.circleX} Acc N/A</span>`;
+  if (!showAll) return accBadge;
+  const warBadge = v.warranty === true  ? `<span class="qbadge good">${_ico.shieldCheck} 保証付</span>`
+                 : v.warranty === false  ? `<span class="qbadge bad">${_ico.shieldX} 保証なし</span>`
+                 :                        `<span class="qbadge neutral">${_ico.shieldX} 保証 N/A</span>`;
+  const mntBadge = v.maintenance === true  ? `<span class="qbadge good">${_ico.checkSq} 法定整備付</span>`
+                 : v.maintenance === false  ? `<span class="qbadge bad">${_ico.xSq} 法定整備無</span>`
+                 :                           `<span class="qbadge neutral">${_ico.xSq} 整備 N/A</span>`;
+  const naviBadge= v.navi === true  ? `<span class="qbadge good">${_ico.monitorOk} 純正ナビ</span>`
+                 : v.navi === false  ? `<span class="qbadge bad">${_ico.monitorX} ナビレス</span>`
+                 :                    `<span class="qbadge neutral">${_ico.monitorX} ナビ不明</span>`;
+  const camBadge = v.camera === true ? `<span class="qbadge good">${_ico.camera} マルチビュー</span>` : '';
+  return accBadge + warBadge + mntBadge + naviBadge + camBadge;
+}
+
+function buildBars(bd, highlightKey, highlightColor) {
+  return ['price', 'mileage', 'shaken'].map(key => {
+    const val  = bd[key] ?? 0;
+    const hi   = key === highlightKey;
+    const fill = hi ? highlightColor : barColor(val);
+    return `<div class="deal-bar-row">
+      <span class="deal-bar-label" style="${hi ? `color:${highlightColor}` : ''}">${key}</span>
+      <div class="deal-bar-track"><div class="deal-bar-fill" style="width:${val*10}%;background:${fill}"></div></div>
+      <span class="deal-bar-val" style="${hi ? `color:${highlightColor}` : ''}">${val}</span>
+    </div>`;
+  }).join('');
 }
 
 /* ── Top Deals renderer ── */
@@ -1052,96 +1155,41 @@ function renderTopDeals(snap, grades) {
   const gradeMap = {};
   grades.forEach(g => { gradeMap[g.id] = g; });
 
-  /* ── Inline SVG icons ── */
-  const icoCircleCheck = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="7 12 10 15 17 9"/></svg>`;
-  const icoCircleX     = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="8" x2="16" y2="16"/><line x1="16" y1="8" x2="8" y2="16"/></svg>`;
-  const icoShieldCheck = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="7 12 10 15 17 9"/></svg>`;
-  const icoShieldX     = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`;
-  const icoCheckSq     = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><polyline points="7 12 10 15 17 9"/></svg>`;
-  const icoXSq         = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`;
-  const icoMonitorOk   = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
-  const icoMonitorX    = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="9" y1="8" x2="15" y2="14"/><line x1="15" y1="8" x2="9" y2="14"/></svg>`;
-
   vehicles.forEach((v, i) => {
-    if (v.url) VMAP[v.url] = v;   // register for watchlist
+    if (v.url) VMAP[v.url] = v;
 
     const color = scoreColor(v.score);
     const grade = gradeMap[v.grade_id] || {};
     const bd    = v.score_breakdown || {};
-
     const km     = v.mileage_km != null   ? `${v.mileage_km.toLocaleString()} km` : 'N/A';
     const shaken = v.shaken_months != null ? `${v.shaken_months} mo`               : 'N/A';
-
-    /* Accident badge */
-    let accBadge;
-    if      (v.accident === false) accBadge = `<span class="qbadge good">${icoCircleCheck} No Accident</span>`;
-    else if (v.accident === true)  accBadge = `<span class="qbadge bad">${icoCircleX} Accident</span>`;
-    else                           accBadge = `<span class="qbadge neutral">${icoCircleX} Acc N/A</span>`;
-
-    /* Warranty badge */
-    let warBadge;
-    if      (v.warranty === true)  warBadge = `<span class="qbadge good">${icoShieldCheck} 保証付</span>`;
-    else if (v.warranty === false) warBadge = `<span class="qbadge bad">${icoShieldX} 保証なし</span>`;
-    else                           warBadge = `<span class="qbadge neutral">${icoShieldX} 保証 N/A</span>`;
-
-    /* Maintenance badge */
-    let mntBadge;
-    if      (v.maintenance === true)  mntBadge = `<span class="qbadge good">${icoCheckSq} 法定整備付</span>`;
-    else if (v.maintenance === false) mntBadge = `<span class="qbadge bad">${icoXSq} 法定整備無</span>`;
-    else                              mntBadge = `<span class="qbadge neutral">${icoXSq} 整備 N/A</span>`;
-
-    /* OEM Navigation badge */
-    let naviBadge;
-    if      (v.navi === true)  naviBadge = `<span class="qbadge good">${icoMonitorOk} 純正ナビ</span>`;
-    else if (v.navi === false) naviBadge = `<span class="qbadge bad">${icoMonitorX} ナビレス</span>`;
-    else                       naviBadge = `<span class="qbadge neutral">${icoMonitorX} ナビ不明</span>`;
-
-    /* Multi-view camera badge — only shown when detected; absence is silent */
-    const camBadge = v.camera === true
-      ? `<span class="qbadge good"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> マルチビュー</span>`
-      : '';
-
-    /* Score bars — price, mileage, shaken */
-    const barKeys   = ['price', 'mileage', 'shaken'];
-    const barLabels = { price: 'Price', mileage: 'Mileage', shaken: 'Shaken' };
-    const breakdown = barKeys.map(key => {
-      const val = bd[key] ?? 0;
-      return `<div class="deal-bar-row">
-        <span class="deal-bar-label">${barLabels[key]}</span>
-        <div class="deal-bar-track">
-          <div class="deal-bar-fill" style="width:${val * 10}%;background:${barColor(val)}"></div>
-        </div>
-        <span class="deal-bar-val">${val}</span>
-      </div>`;
-    }).join('');
+    const gc     = GRADE_COLORS[v.grade_id] || 'var(--border2)';
 
     const card = document.createElement('div');
     card.className = 'deal-card';
+    card.style.setProperty('--card-grade-color', gc);
     card.innerHTML = `
       <div class="deal-card-header">
         <span class="deal-card-rank">#${i + 1}</span>
         <div style="display:flex;align-items:center;gap:5px">
           ${v.url ? favBtn(v.url) : ''}
-          <span class="deal-card-score" style="color:${color};border-color:${color};background:${color}18">${v.score}</span>
+          <span class="deal-card-score" style="color:${color};border-color:${color}22;background:${color}14">${v.score}</span>
         </div>
       </div>
       <div>
-        <div class="deal-card-grade" style="color:${GRADE_COLORS[v.grade_id] || 'var(--text)'}">${grade.label || v.grade_label}</div>
+        <div class="deal-card-grade" style="color:${gc}">${grade.label || v.grade_label}</div>
         <div class="deal-card-grade-en">${grade.label_en || ''}</div>
       </div>
-      <div class="deal-card-price" style="color:${GRADE_COLORS[v.grade_id] || 'var(--text)'}">¥${v.price_man}万</div>
+      <div class="deal-card-price" style="color:${gc}">¥${v.price_man}万</div>
       <div class="deal-card-divider"></div>
       <div class="deal-card-pills">
         <span class="deal-card-pill">🛣 ${km}</span>
         <span class="deal-card-pill">🔧 ${shaken} shaken</span>
       </div>
-      <div class="quality-badges">
-        ${accBadge}${warBadge}${mntBadge}${naviBadge}${camBadge}
-      </div>
-      <div class="deal-bars">${breakdown}</div>
+      <div class="quality-badges">${buildBadges(v, true)}</div>
+      <div class="deal-bars">${buildBars(bd, null, null)}</div>
       ${v.url ? `<a class="deal-card-link" href="${v.url}" target="_blank" rel="noopener">View on CarSensor ↗</a>` : ''}
     `;
-
     listEl.appendChild(card);
   });
 }
@@ -1162,27 +1210,15 @@ function renderGems(snap, grades) {
   grades.forEach(g => { gradeMap[g.id] = g; });
 
   const CATEGORIES = [
-    {
-      key:   'price',
-      icon:  '💰',
-      title: 'Best Price',
-      desc:  'Cheapest cars on the market — trade-offs may include mileage or shaken',
-      accent: 'var(--green)',
-    },
-    {
-      key:   'mileage',
-      icon:  '📍',
-      title: 'Low Mileage',
-      desc:  'Lowest km listings not in the top-15 — often newer but pricier',
-      accent: 'var(--accent)',
-    },
-    {
-      key:   'accident',
-      icon:  '🔧',
-      title: 'Accident History — Best Otherwise',
-      desc:  'These cars have repair history but score well on everything else',
-      accent: 'var(--amber)',
-    },
+    { key: 'price',    icon: '💰', title: 'Best Price',
+      desc: 'Cheapest cars on the market — trade-offs may include mileage or shaken',
+      accent: 'var(--green)' },
+    { key: 'mileage',  icon: '📍', title: 'Low Mileage',
+      desc: 'Lowest km listings not in the top-15 — often newer but pricier',
+      accent: 'var(--blue)' },
+    { key: 'accident', icon: '🔧', title: 'Accident History — Best Otherwise',
+      desc: 'These cars have repair history but score well on everything else',
+      accent: 'var(--amber)' },
   ];
 
   const section = document.createElement('div');
@@ -1203,72 +1239,52 @@ function renderGems(snap, grades) {
     row.className = 'gems-row';
 
     if (vehicles.length === 0) {
-      row.innerHTML = `<div style="grid-column:1/-1;color:var(--muted);font-size:.78rem">No data yet.</div>`;
+      row.innerHTML = `<div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:12px">No data yet.</div>`;
     } else {
       vehicles.forEach(v => {
-        if (v.url) VMAP[v.url] = v;   // register for watchlist
+        if (v.url) VMAP[v.url] = v;
 
         const grade  = gradeMap[v.grade_id] || {};
         const color  = scoreColor(v.score);
         const bd     = v.score_breakdown || {};
+        const gc     = GRADE_COLORS[v.grade_id] || 'var(--border2)';
         const km     = v.mileage_km != null   ? `${v.mileage_km.toLocaleString()} km` : 'N/A';
         const shaken = v.shaken_months != null ? `${v.shaken_months} mo`               : 'N/A';
 
-        // Highlight the category's own sub-score in amber to call it out
         const highlightKey = { price: 'price', mileage: 'mileage', accident: null }[cat.key];
 
-        const barKeys   = ['price', 'mileage', 'shaken'];
-        const barLabels = { price: 'Price', mileage: 'Mileage', shaken: 'Shaken' };
-        const breakdown = barKeys.map(key => {
-          const val = bd[key] ?? 0;
-          const isHighlight = key === highlightKey;
-          const fill = isHighlight ? cat.accent : barColor(val);
-          return `<div class="deal-bar-row">
-            <span class="deal-bar-label" style="${isHighlight ? `color:${cat.accent};font-weight:700` : ''}">${barLabels[key]}</span>
-            <div class="deal-bar-track">
-              <div class="deal-bar-fill" style="width:${val*10}%;background:${fill}"></div>
-            </div>
-            <span class="deal-bar-val" style="${isHighlight ? `color:${cat.accent};font-weight:700` : ''}">${val}</span>
-          </div>`;
-        }).join('');
-
-        // Accident badge (always show explicitly in gems)
-        const icoCircleCheck = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="7 12 10 15 17 9"/></svg>`;
-        const icoCircleX     = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="8" x2="16" y2="16"/><line x1="16" y1="8" x2="8" y2="16"/></svg>`;
-        let accBadge;
-        if      (v.accident === false) accBadge = `<span class="qbadge good">${icoCircleCheck} Clean</span>`;
-        else if (v.accident === true)  accBadge = `<span class="qbadge bad">${icoCircleX} Accident</span>`;
-        else                           accBadge = `<span class="qbadge neutral">${icoCircleX} Acc N/A</span>`;
+        const accOnly = v.accident === false ? `<span class="qbadge good">${_ico.circleCheck} Clean</span>`
+                      : v.accident === true  ? `<span class="qbadge bad">${_ico.circleX} Accident</span>`
+                      :                        `<span class="qbadge neutral">${_ico.circleX} Acc N/A</span>`;
 
         const card = document.createElement('div');
         card.className = 'deal-card';
-        card.style.borderColor = `color-mix(in srgb, ${cat.accent} 30%, var(--border))`;
+        card.style.setProperty('--card-grade-color', cat.accent);
         card.innerHTML = `
           <div class="deal-card-header">
-            <span class="deal-card-rank" style="color:${cat.accent}">${cat.icon}</span>
+            <span class="deal-card-rank" style="color:${cat.accent};font-family:'DM Sans',sans-serif;font-size:0.85rem">${cat.icon}</span>
             <div style="display:flex;align-items:center;gap:5px">
               ${v.url ? favBtn(v.url) : ''}
-              <span class="deal-card-score" style="color:${color};border-color:${color};background:${color}18">${v.score}</span>
+              <span class="deal-card-score" style="color:${color};border-color:${color}22;background:${color}14">${v.score}</span>
             </div>
           </div>
           <div>
-            <div class="deal-card-grade" style="color:${GRADE_COLORS[v.grade_id] || 'var(--text)'}">${grade.label || v.grade_label}</div>
+            <div class="deal-card-grade" style="color:${gc}">${grade.label || v.grade_label}</div>
             <div class="deal-card-grade-en">${grade.label_en || ''}</div>
           </div>
-          <div class="deal-card-price" style="color:${GRADE_COLORS[v.grade_id] || 'var(--text)'}">¥${v.price_man}万</div>
+          <div class="deal-card-price" style="color:${gc}">¥${v.price_man}万</div>
           <div class="deal-card-divider"></div>
           <div class="deal-card-pills">
             <span class="deal-card-pill">🛣 ${km}</span>
             <span class="deal-card-pill">🔧 ${shaken} shaken</span>
           </div>
-          <div class="quality-badges">${accBadge}</div>
-          <div class="deal-bars">${breakdown}</div>
+          <div class="quality-badges">${accOnly}</div>
+          <div class="deal-bars">${buildBars(bd, highlightKey, cat.accent)}</div>
           ${v.url ? `<a class="deal-card-link" href="${v.url}" target="_blank" rel="noopener">View on CarSensor ↗</a>` : ''}
         `;
         row.appendChild(card);
       });
     }
-
     catEl.appendChild(row);
     section.appendChild(catEl);
   });
@@ -1286,8 +1302,8 @@ function renderWatchlist() {
     panel.innerHTML = `
       <div class="watchlist-empty">
         <div class="watchlist-empty-icon">⭐</div>
-        <div style="font-weight:600;color:var(--text2)">No saved vehicles yet</div>
-        <div style="margin-top:4px;font-size:0.74rem">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:1px;color:var(--text2)">No Saved Vehicles</div>
+        <div style="margin-top:4px;font-size:0.72rem;color:var(--muted)">
           Tap the ★ on any card in Best Overall or Hidden Gems to save it here.
         </div>
       </div>`;
@@ -1298,16 +1314,6 @@ function renderWatchlist() {
   const gradeMap = {};
   grades.forEach(g => { gradeMap[g.id] = g; });
 
-  /* shared inline SVGs */
-  const icoCircleCheck = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="7 12 10 15 17 9"/></svg>`;
-  const icoCircleX     = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="8" x2="16" y2="16"/><line x1="16" y1="8" x2="8" y2="16"/></svg>`;
-  const icoShieldCheck = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="7 12 10 15 17 9"/></svg>`;
-  const icoShieldX     = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`;
-  const icoCheckSq     = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><polyline points="7 12 10 15 17 9"/></svg>`;
-  const icoXSq         = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>`;
-  const icoMonitorOk   = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`;
-  const icoMonitorX    = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="9" y1="8" x2="15" y2="14"/><line x1="15" y1="8" x2="9" y2="14"/></svg>`;
-
   const grid = document.createElement('div');
   grid.className = 'watchlist-grid';
 
@@ -1315,67 +1321,33 @@ function renderWatchlist() {
     const color = scoreColor(v.score);
     const grade = gradeMap[v.grade_id] || {};
     const bd    = v.score_breakdown || {};
+    const gc    = GRADE_COLORS[v.grade_id] || 'var(--border2)';
     const km     = v.mileage_km != null   ? `${v.mileage_km.toLocaleString()} km` : 'N/A';
     const shaken = v.shaken_months != null ? `${v.shaken_months} mo`               : 'N/A';
 
-    let accBadge;
-    if      (v.accident === false) accBadge = `<span class="qbadge good">${icoCircleCheck} No Accident</span>`;
-    else if (v.accident === true)  accBadge = `<span class="qbadge bad">${icoCircleX} Accident</span>`;
-    else                           accBadge = `<span class="qbadge neutral">${icoCircleX} Acc N/A</span>`;
-
-    let warBadge;
-    if      (v.warranty === true)  warBadge = `<span class="qbadge good">${icoShieldCheck} 保証付</span>`;
-    else if (v.warranty === false) warBadge = `<span class="qbadge bad">${icoShieldX} 保証なし</span>`;
-    else                           warBadge = `<span class="qbadge neutral">${icoShieldX} 保証 N/A</span>`;
-
-    let mntBadge;
-    if      (v.maintenance === true)  mntBadge = `<span class="qbadge good">${icoCheckSq} 法定整備付</span>`;
-    else if (v.maintenance === false) mntBadge = `<span class="qbadge bad">${icoXSq} 法定整備無</span>`;
-    else                              mntBadge = `<span class="qbadge neutral">${icoXSq} 整備 N/A</span>`;
-
-    let naviBadge;
-    if      (v.navi === true)  naviBadge = `<span class="qbadge good">${icoMonitorOk} 純正ナビ</span>`;
-    else if (v.navi === false) naviBadge = `<span class="qbadge bad">${icoMonitorX} ナビレス</span>`;
-    else                       naviBadge = `<span class="qbadge neutral">${icoMonitorX} ナビ不明</span>`;
-
-    const camBadge = v.camera === true
-      ? `<span class="qbadge good"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> マルチビュー</span>`
-      : '';
-
-    const barKeys   = ['price', 'mileage', 'shaken'];
-    const barLabels = { price: 'Price', mileage: 'Mileage', shaken: 'Shaken' };
-    const breakdown = barKeys.map(key => {
-      const val = bd[key] ?? 0;
-      return `<div class="deal-bar-row">
-        <span class="deal-bar-label">${barLabels[key]}</span>
-        <div class="deal-bar-track"><div class="deal-bar-fill" style="width:${val*10}%;background:${barColor(val)}"></div></div>
-        <span class="deal-bar-val">${val}</span>
-      </div>`;
-    }).join('');
-
     const card = document.createElement('div');
     card.className = 'deal-card';
-    card.style.borderColor = 'color-mix(in srgb, var(--amber) 25%, var(--border))';
+    card.style.setProperty('--card-grade-color', 'var(--amber)');
     card.innerHTML = `
       <div class="deal-card-header">
-        <span class="deal-card-rank" style="color:var(--amber);font-size:0.68rem">⭐ Saved</span>
+        <span class="deal-card-rank" style="color:var(--amber);font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:1px">⭐ SAVED</span>
         <div style="display:flex;align-items:center;gap:5px">
           <button class="fav-btn active" data-url="${v.url || ''}" title="Remove from watchlist" onclick="toggleFav(this)">${icoStarSVG}</button>
-          <span class="deal-card-score" style="color:${color};border-color:${color};background:${color}18">${v.score}</span>
+          <span class="deal-card-score" style="color:${color};border-color:${color}22;background:${color}14">${v.score}</span>
         </div>
       </div>
       <div>
-        <div class="deal-card-grade" style="color:${GRADE_COLORS[v.grade_id] || 'var(--text)'}">${grade.label || v.grade_label}</div>
+        <div class="deal-card-grade" style="color:${gc}">${grade.label || v.grade_label}</div>
         <div class="deal-card-grade-en">${grade.label_en || ''}</div>
       </div>
-      <div class="deal-card-price" style="color:${GRADE_COLORS[v.grade_id] || 'var(--text)'}">¥${v.price_man}万</div>
+      <div class="deal-card-price" style="color:${gc}">¥${v.price_man}万</div>
       <div class="deal-card-divider"></div>
       <div class="deal-card-pills">
         <span class="deal-card-pill">🛣 ${km}</span>
         <span class="deal-card-pill">🔧 ${shaken} shaken</span>
       </div>
-      <div class="quality-badges">${accBadge}${warBadge}${mntBadge}${naviBadge}${camBadge}</div>
-      <div class="deal-bars">${breakdown}</div>
+      <div class="quality-badges">${buildBadges(v, true)}</div>
+      <div class="deal-bars">${buildBars(bd, null, null)}</div>
       ${v.url ? `<a class="deal-card-link" href="${v.url}" target="_blank" rel="noopener">View on CarSensor ↗</a>` : ''}
     `;
     grid.appendChild(card);
