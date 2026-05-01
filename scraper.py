@@ -146,6 +146,7 @@ def _extract_details(item) -> dict:
         "maintenance":   None,   # True = 法定整備付, False = 法定整備無
         "navi":          None,   # True = メーカー純正ナビ present, False = ナビレス, None = unknown
         "camera":        None,   # True = マルチビューカメラ detected, None = not mentioned
+        "color":         None,   # body color string from listing card
     }
 
     # Detail page URL
@@ -197,6 +198,11 @@ def _extract_details(item) -> dict:
             elif "法定整備無" in text or "法定整備なし" in text:
                 details["maintenance"] = False
 
+        elif "ボディカラー" in text or "カラー" in text:
+            color_val = re.sub(r'^(?:ボディカラー|カラー)\s*[:：\s]*', '', text).strip()
+            if color_val and len(color_val) <= 40:
+                details["color"] = color_val
+
     # Both navi and camera are detected from the free-text headline of the listing card.
     # CarSensor embeds equipment keywords in the title, not in structured spec fields.
     full_text = item.get_text(" ", strip=True)
@@ -212,6 +218,17 @@ def _extract_details(item) -> dict:
     if re.search(r'マルチビューカメラ|マルチビュー|アラウンドビュー|全周囲カメラ|パノラミックビュー', full_text):
         details["camera"] = True
     # else: None → not mentioned (can't reliably detect absence from listing text)
+
+    # Color: regex fallback in case it wasn't in a spec box
+    if not details["color"]:
+        m_color = re.search(
+            r'(?:ボディカラー|カラー)\s*[:：]?\s*([゠-ヿぁ-ゞ一-龥][^\n\r\t]{1,38}?)(?:\s{2,}|\n|　|$)',
+            full_text + '  ',
+        )
+        if m_color:
+            color_val = m_color.group(1).strip()
+            if 2 <= len(color_val) <= 40:
+                details["color"] = color_val
 
     return details
 
@@ -357,6 +374,7 @@ def _clean_vehicle(v: dict) -> dict:
         "maintenance":     v.get("maintenance"),
         "navi":            v.get("navi"),
         "camera":          v.get("camera"),
+        "color":           v.get("color"),
         "url":             v.get("url"),
     }
 
@@ -594,36 +612,49 @@ def run(max_pages: int | None) -> None:
         time.sleep(DELAY_SEC)
 
     # ── Category Gems ─────────────────────────────────────────────────────
-    # Vehicles that excel in ONE specific parameter but aren't in the top-15.
-    # Seat filtering is not applied here — these are supplementary picks.
+    # Vehicles that excel in ONE specific parameter.
+    # Each URL appears in at most ONE category (strict deduplication).
     top_urls = {v.get("url") for v in top_vehicles}
     non_top  = [v for v in scored_sorted if v.get("url") not in top_urls]
 
-    # Price gems: cheapest cars (highest price score) not in top-15.
-    # These likely have trade-offs like higher mileage or shorter shaken.
-    price_gems = sorted(
+    used_gem_urls: set[str] = set()
+
+    def _pick_gems(candidates: list[dict], n: int = 3) -> list[dict]:
+        result: list[dict] = []
+        for v in candidates:
+            url = v.get("url")
+            if url and url in used_gem_urls:
+                continue
+            result.append(v)
+            if url:
+                used_gem_urls.add(url)
+            if len(result) >= n:
+                break
+        return result
+
+    # Price gems: cheapest non-top cars (likely trade-offs on mileage / shaken).
+    price_gems = _pick_gems(sorted(
         non_top,
         key=lambda x: (-x["score_breakdown"]["price"], -x["score"]),
-    )[:3]
+    ))
 
-    # Mileage gems: lowest mileage not in top-15 (may be pricier or lack extras).
-    mileage_gems = sorted(
+    # Mileage gems: lowest km non-top cars (may be pricier or lack extras).
+    mileage_gems = _pick_gems(sorted(
         non_top,
         key=lambda x: (-x["score_breakdown"]["mileage"], -x["score"]),
-    )[:3]
+    ))
 
-    # Accident gems: cars WITH accident history, ranked by overall score.
-    # These are naturally excluded from top-15 by the accident penalty,
-    # but may offer compelling value on price, mileage, and shaken.
-    accident_gems = sorted(
-        [v for v in scored_sorted if v.get("accident") is True],
+    # No-shaken gems: cars with no remaining shaken (shaken_months None or 0),
+    # ranked by overall score. Buyer must arrange JCI — often priced lower.
+    no_shaken_gems = _pick_gems(sorted(
+        [v for v in scored_sorted if not v.get("shaken_months")],
         key=lambda x: -x["score"],
-    )[:3]
+    ))
 
     category_gems = {
-        "price":    price_gems,
-        "mileage":  mileage_gems,
-        "accident": accident_gems,
+        "price":     price_gems,
+        "mileage":   mileage_gems,
+        "no_shaken": no_shaken_gems,
     }
 
     print("\nCategory gems:")
@@ -631,8 +662,8 @@ def run(max_pages: int | None) -> None:
         print(f"  {cat}:")
         for g in gems:
             km  = f"{g['mileage_km']:,} km" if g.get("mileage_km") is not None else "km=?"
-            acc = "accident" if g.get("accident") else "clean"
-            print(f"    [{g['score']}] ¥{g['price_man']}万  {km}  {acc}  {g.get('url','')}")
+            shk = f"{g.get('shaken_months')}mo" if g.get("shaken_months") else "no shaken"
+            print(f"    [{g['score']}] ¥{g['price_man']}万  {km}  {shk}  {g.get('url','')}")
 
     # ── Save ──────────────────────────────────────────────────────────────
     snapshot = build_snapshot(by_grade_prices, limit, top_vehicles, category_gems)
