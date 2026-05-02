@@ -26,8 +26,8 @@
       --purple:   #9F7AEA;
       --blue:     #4492FF;
       --text:     #EEEEF3;
-      --text2:    #888899;
-      --muted:    #3E3E50;
+      --text2:    #AAAABB;
+      --muted:    #5A5A72;
       --radius:   6px;
       --radius-sm:4px;
     }
@@ -459,7 +459,7 @@
     /* ── Deal grid (3×5) ── */
     .deal-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 1px;
       background: var(--border);
     }
@@ -571,46 +571,56 @@
     .gems-category-divider { flex: 1; height: 1px; background: var(--border); }
     .gems-row {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 1px;
       background: var(--border);
     }
 
-    /* ── Color chip ── */
-    .color-chip {
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      cursor: default;
-      padding: 3px 7px 4px;
+    /* ── Color band ── */
+    .color-band {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 8px;
       background: var(--surface3);
       border: 1px solid var(--border);
       border-radius: 3px;
-      vertical-align: top;
     }
-    .color-circle {
-      width: 14px; height: 14px;
-      border-radius: 50%;
-      flex-shrink: 0;
+    .color-band-swatch {
+      width: 16px; height: 16px;
+      border-radius: 3px; flex-shrink: 0;
     }
-    .color-label {
+    .color-band-name {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.52rem; color: var(--text2);
-      text-align: center; letter-spacing: 0.1px;
-      line-height: 1; max-width: 58px;
+      font-size: 0.72rem; font-weight: 500; color: var(--text);
+      letter-spacing: 0.3px; line-height: 1;
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
 
+    /* ── Show more / card detail ── */
+    .show-more-btn {
+      background: none;
+      border: 1px solid var(--border2);
+      cursor: pointer;
+      color: var(--text2);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 5px 0; border-radius: 3px;
+      width: 100%; text-align: center;
+      transition: color .15s, border-color .15s, background .15s;
+    }
+    .show-more-btn:hover { color: var(--text); border-color: var(--border2); background: var(--surface3); }
+    .show-more-btn.open  { color: var(--text2); }
+    .card-detail { display: none; flex-direction: column; gap: 8px; }
+    .card-detail.open { display: flex; }
+
     /* ── Dealer row ── */
     .dealer-row {
-      display: flex; align-items: center; gap: 6px;
-      margin: 6px 0 2px;
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
       padding: 5px 7px;
       background: var(--surface3);
       border: 1px solid var(--border);
       border-radius: 3px;
-      min-width: 0;
+      min-width: 0; overflow: hidden;
     }
     .dealer-name {
       font-family: 'Barlow Condensed', sans-serif;
@@ -622,20 +632,19 @@
     .dealer-stars-wrap {
       display: flex; align-items: center; gap: 4px; flex-shrink: 0;
     }
-    .star-track {
-      position: relative; display: inline-block;
-      color: var(--muted); font-size: 0.68rem; letter-spacing: 0.5px;
-      line-height: 1; user-select: none;
-    }
-    .star-fill {
-      position: absolute; left: 0; top: 0;
-      overflow: hidden; white-space: nowrap;
-      color: var(--amber);
-    }
+    .stars { font-size: 0.68rem; letter-spacing: 0.3px; line-height: 1; user-select: none; }
+    .stars-filled { color: var(--amber); }
+    .stars-half   { color: var(--amber); opacity: 0.5; }
+    .stars-empty  { color: var(--muted); }
     .dealer-score-val {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 0.72rem; color: var(--amber);
       letter-spacing: 0.5px; line-height: 1;
+    }
+    .dealer-reviews {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.62rem; color: var(--text2);
+      letter-spacing: 0.1px; line-height: 1;
     }
 
     /* ── Favourite / Watchlist ── */
@@ -652,7 +661,7 @@
 
     .watchlist-panel { padding: 22px 26px; }
     .watchlist-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr);
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 1px; background: var(--border);
     }
     .watchlist-empty {
@@ -664,7 +673,7 @@
     /* ── Responsive ── */
     @media (max-width: 860px) {
       .avg-value { font-size: 2.1rem; }
-      .deal-grid, .gems-row, .watchlist-grid { grid-template-columns: repeat(2, 1fr); }
+      .deal-grid, .gems-row, .watchlist-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 600px) {
       header { padding: 0 18px; }
@@ -1196,35 +1205,34 @@ const COLOR_HEX = {
   'パープル':                    '#7C3AED',
 };
 
-function colorChip(name) {
-  if (!name) return '';
-  // Longest-key-first match so substrings don't fire early
+function _resolveColorHex(name) {
+  if (!name) return null;
   const keys = Object.keys(COLOR_HEX).sort((a, b) => b.length - a.length);
-  let hex = null;
-  for (const k of keys) {
-    if (name.includes(k)) { hex = COLOR_HEX[k]; break; }
-  }
-  if (!hex) {
-    if (/ホワイト|白|パール/.test(name))        hex = '#F2EFE8';
-    else if (/ブラック|黒/.test(name))           hex = '#1C1B20';
-    else if (/シルバー/.test(name))              hex = '#AEADB8';
-    else if (/グレー|グレイ|ルーセ/.test(name))  hex = '#787882';
-    else if (/ブルー|青|コスモス/.test(name))    hex = '#2B4D8F';
-    else if (/グリーン|緑|フォレスト/.test(name))hex = '#2D5A30';
-    else if (/レッド|赤/.test(name))             hex = '#DC2626';
-    else if (/ブラウン|茶|ブロンズ/.test(name))  hex = '#7C4A1E';
-    else if (/ゴールド|金/.test(name))           hex = '#C9A028';
-    else                                         hex = '#4A4A58';
-  }
-  // Shorten display name: strip verbose Japanese prefixes/suffixes
-  const short = name
-    .replace(/プレミアム|クリスタル|スパークリング|メタリック|パール|・/g, '')
-    .trim().slice(0, 9) || name.slice(0, 9);
+  for (const k of keys) { if (name.includes(k)) return COLOR_HEX[k]; }
+  if (/ホワイト|白|パール/.test(name))         return '#F2EFE8';
+  if (/ブラック|黒/.test(name))                return '#1C1B20';
+  if (/シルバー/.test(name))                   return '#AEADB8';
+  if (/グレー|グレイ|ルーセ/.test(name))       return '#787882';
+  if (/ブルー|青|コスモス/.test(name))         return '#2B4D8F';
+  if (/グリーン|緑|フォレスト/.test(name))     return '#2D5A30';
+  if (/レッド|赤/.test(name))                  return '#DC2626';
+  if (/ブラウン|茶|ブロンズ/.test(name))       return '#7C4A1E';
+  if (/ゴールド|金/.test(name))               return '#C9A028';
+  return '#4A4A58';
+}
+
+function colorBand(name) {
+  if (!name) return '';
+  const hex = _resolveColorHex(name);
   const isLight = /ホワイト|白|シルバー|アイボリー|ベージュ|プラチナ/.test(name);
   const ring = isLight
-    ? '0 0 0 1.5px rgba(255,255,255,0.3) inset, 0 1px 4px rgba(0,0,0,0.5)'
-    : '0 0 0 1px rgba(0,0,0,0.4) inset, 0 1px 4px rgba(0,0,0,0.5)';
-  return `<span class="color-chip" title="${name}"><span class="color-circle" style="background:${hex};box-shadow:${ring}"></span><span class="color-label">${short}</span></span>`;
+    ? '0 0 0 1.5px rgba(255,255,255,0.3) inset, 0 1px 3px rgba(0,0,0,0.5)'
+    : '0 0 0 1px rgba(0,0,0,0.5) inset, 0 1px 3px rgba(0,0,0,0.5)';
+  const short = name.replace(/プレミアム|クリスタル|スパークリング|メタリック|パール|・/g, '').trim().slice(0, 16) || name.slice(0, 16);
+  return `<div class="color-band" title="${name}">
+    <span class="color-band-swatch" style="background:${hex};box-shadow:${ring}"></span>
+    <span class="color-band-name">${short}</span>
+  </div>`;
 }
 
 /* ── Shared SVG icons ── */
@@ -1262,8 +1270,14 @@ function starRating(score) {
   if (score == null) return '';
   const s = parseFloat(score);
   if (isNaN(s) || s < 0.5 || s > 5) return '';
-  const pct = Math.round((s / 5) * 100);
-  return `<span class="star-track"><span class="star-fill" style="width:${pct}%">★★★★★</span>★★★★★</span>`;
+  const full  = Math.floor(s);
+  const half  = (s - full) >= 0.5 ? 1 : 0;
+  const empty = 5 - full - half;
+  return `<span class="stars">`
+    + (full  ? `<span class="stars-filled">${'★'.repeat(full)}</span>` : '')
+    + (half  ? `<span class="stars-half">★</span>` : '')
+    + (empty ? `<span class="stars-empty">${'★'.repeat(empty)}</span>` : '')
+    + `</span>`;
 }
 
 function dealerRow(v) {
@@ -1271,10 +1285,57 @@ function dealerRow(v) {
   const nameHtml = v.dealer_name
     ? `<span class="dealer-name" title="${v.dealer_name}">🏪 ${v.dealer_name}</span>`
     : `<span class="dealer-name" style="color:var(--muted)">🏪 —</span>`;
-  const starsHtml = v.dealer_rating != null
-    ? `<span class="dealer-stars-wrap">${starRating(v.dealer_rating)}<span class="dealer-score-val">${parseFloat(v.dealer_rating).toFixed(1)}</span></span>`
-    : '';
+  let starsHtml = '';
+  if (v.dealer_rating != null) {
+    const reviewsHtml = v.dealer_reviews != null
+      ? `<span class="dealer-reviews">(${v.dealer_reviews.toLocaleString()})</span>` : '';
+    starsHtml = `<span class="dealer-stars-wrap">${starRating(v.dealer_rating)}<span class="dealer-score-val">${parseFloat(v.dealer_rating).toFixed(1)}</span>${reviewsHtml}</span>`;
+  }
   return `<div class="dealer-row">${nameHtml}${starsHtml}</div>`;
+}
+
+function toggleCardDetail(btn) {
+  const detail = btn.nextElementSibling;
+  const isOpen = detail.classList.contains('open');
+  detail.classList.toggle('open', !isOpen);
+  btn.classList.toggle('open', !isOpen);
+  btn.textContent = isOpen ? 'Details ▾' : 'Hide ▴';
+}
+
+function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
+                         highlightKey = null, highlightAccent = null, watchlist = false }) {
+  const color  = scoreColor(v.score);
+  const km     = v.mileage_km != null   ? `${v.mileage_km.toLocaleString()} km` : 'N/A';
+  const shaken = v.shaken_months != null ? `${v.shaken_months} mo` : 'N/A';
+  const favHtml = watchlist
+    ? `<button class="fav-btn active" data-url="${v.url || ''}" title="Remove from watchlist" onclick="toggleFav(this)">${icoStarSVG}</button>`
+    : (v.url ? favBtn(v.url) : '');
+  return `
+    <div class="deal-card-header">
+      <span class="deal-card-rank">${rankHtml}</span>
+      <div style="display:flex;align-items:center;gap:5px">
+        ${favHtml}
+        <span class="deal-card-score" style="color:${color};border-color:${color}22;background:${color}14">${v.score}</span>
+      </div>
+    </div>
+    <div>
+      <div class="deal-card-grade" style="color:${gc}">${grade.label || v.grade_label}</div>
+      <div class="deal-card-grade-en">${grade.label_en || ''}</div>
+    </div>
+    <div class="deal-card-price" style="color:${gc}">¥${v.price_man}万</div>
+    <div class="deal-card-divider"></div>
+    <div class="deal-card-pills">
+      <span class="deal-card-pill">🛣 ${km}</span>
+      <span class="deal-card-pill">🔧 ${shaken}</span>
+    </div>
+    ${colorBand(v.color)}
+    <button class="show-more-btn" onclick="toggleCardDetail(this)">Details ▾</button>
+    <div class="card-detail">
+      <div class="quality-badges">${badges}</div>
+      <div class="deal-bars">${buildBars(bd, highlightKey, highlightAccent)}</div>
+      ${dealerRow(v)}
+    </div>
+    ${v.url ? `<a class="deal-card-link" href="${v.url}" target="_blank" rel="noopener">View on CarSensor ↗</a>` : ''}`;
 }
 
 function buildBars(bd, highlightKey, highlightColor) {
@@ -1310,41 +1371,13 @@ function renderTopDeals(snap, grades) {
 
   vehicles.forEach((v, i) => {
     if (v.url) VMAP[v.url] = v;
-
-    const color = scoreColor(v.score);
     const grade = gradeMap[v.grade_id] || {};
     const bd    = v.score_breakdown || {};
-    const km     = v.mileage_km != null   ? `${v.mileage_km.toLocaleString()} km` : 'N/A';
-    const shaken = v.shaken_months != null ? `${v.shaken_months} mo`               : 'N/A';
-    const gc     = GRADE_COLORS[v.grade_id] || 'var(--border2)';
-
-    const card = document.createElement('div');
+    const gc    = GRADE_COLORS[v.grade_id] || 'var(--border2)';
+    const card  = document.createElement('div');
     card.className = 'deal-card';
     card.style.setProperty('--card-grade-color', gc);
-    card.innerHTML = `
-      <div class="deal-card-header">
-        <span class="deal-card-rank">#${i + 1}</span>
-        <div style="display:flex;align-items:center;gap:5px">
-          ${v.url ? favBtn(v.url) : ''}
-          <span class="deal-card-score" style="color:${color};border-color:${color}22;background:${color}14">${v.score}</span>
-        </div>
-      </div>
-      <div>
-        <div class="deal-card-grade" style="color:${gc}">${grade.label || v.grade_label}</div>
-        <div class="deal-card-grade-en">${grade.label_en || ''}</div>
-      </div>
-      <div class="deal-card-price" style="color:${gc}">¥${v.price_man}万</div>
-      <div class="deal-card-divider"></div>
-      <div class="deal-card-pills">
-        <span class="deal-card-pill">🛣 ${km}</span>
-        <span class="deal-card-pill">🔧 ${shaken} shaken</span>
-        ${colorChip(v.color)}
-      </div>
-      <div class="quality-badges">${buildBadges(v, true)}</div>
-      <div class="deal-bars">${buildBars(bd, null, null)}</div>
-      ${dealerRow(v)}
-      ${v.url ? `<a class="deal-card-link" href="${v.url}" target="_blank" rel="noopener">View on CarSensor ↗</a>` : ''}
-    `;
+    card.innerHTML = buildCardHTML({ v, grade, gc, rankHtml: `#${i + 1}`, badges: buildBadges(v, true), bd });
     listEl.appendChild(card);
   });
 }
@@ -1398,47 +1431,19 @@ function renderGems(snap, grades) {
     } else {
       vehicles.forEach(v => {
         if (v.url) VMAP[v.url] = v;
-
-        const grade  = gradeMap[v.grade_id] || {};
-        const color  = scoreColor(v.score);
-        const bd     = v.score_breakdown || {};
-        const gc     = GRADE_COLORS[v.grade_id] || 'var(--border2)';
-        const km     = v.mileage_km != null   ? `${v.mileage_km.toLocaleString()} km` : 'N/A';
-        const shaken = v.shaken_months != null ? `${v.shaken_months} mo`               : 'N/A';
-
-        const highlightKey = { price: 'price', mileage: 'mileage', accident: null }[cat.key];
-
-        const accOnly = v.accident === false ? `<span class="qbadge good">${_ico.circleCheck} Clean</span>`
-                      : v.accident === true  ? `<span class="qbadge bad">${_ico.circleX} Accident</span>`
-                      :                        `<span class="qbadge neutral">${_ico.circleX} Acc N/A</span>`;
-
+        const grade        = gradeMap[v.grade_id] || {};
+        const bd           = v.score_breakdown || {};
+        const gc           = GRADE_COLORS[v.grade_id] || 'var(--border2)';
+        const highlightKey = { price: 'price', mileage: 'mileage', no_shaken: 'shaken' }[cat.key] || null;
+        const accOnly      = v.accident === false ? `<span class="qbadge good">${_ico.circleCheck} Clean</span>`
+                           : v.accident === true  ? `<span class="qbadge bad">${_ico.circleX} Accident</span>`
+                           :                        `<span class="qbadge neutral">${_ico.circleX} Acc N/A</span>`;
+        const rankHtml     = `<span style="color:${cat.accent};font-size:0.9rem">${cat.icon}</span>`;
         const card = document.createElement('div');
         card.className = 'deal-card';
         card.style.setProperty('--card-grade-color', cat.accent);
-        card.innerHTML = `
-          <div class="deal-card-header">
-            <span class="deal-card-rank" style="color:${cat.accent};font-family:'DM Sans',sans-serif;font-size:0.85rem">${cat.icon}</span>
-            <div style="display:flex;align-items:center;gap:5px">
-              ${v.url ? favBtn(v.url) : ''}
-              <span class="deal-card-score" style="color:${color};border-color:${color}22;background:${color}14">${v.score}</span>
-            </div>
-          </div>
-          <div>
-            <div class="deal-card-grade" style="color:${gc}">${grade.label || v.grade_label}</div>
-            <div class="deal-card-grade-en">${grade.label_en || ''}</div>
-          </div>
-          <div class="deal-card-price" style="color:${gc}">¥${v.price_man}万</div>
-          <div class="deal-card-divider"></div>
-          <div class="deal-card-pills">
-            <span class="deal-card-pill">🛣 ${km}</span>
-            <span class="deal-card-pill">🔧 ${shaken} shaken</span>
-            ${colorChip(v.color)}
-          </div>
-          <div class="quality-badges">${accOnly}</div>
-          <div class="deal-bars">${buildBars(bd, highlightKey, cat.accent)}</div>
-          ${dealerRow(v)}
-          ${v.url ? `<a class="deal-card-link" href="${v.url}" target="_blank" rel="noopener">View on CarSensor ↗</a>` : ''}
-        `;
+        card.innerHTML = buildCardHTML({ v, grade, gc, rankHtml, badges: accOnly, bd,
+                                         highlightKey, highlightAccent: cat.accent });
         row.appendChild(card);
       });
     }
@@ -1475,40 +1480,14 @@ function renderWatchlist() {
   grid.className = 'watchlist-grid';
 
   list.forEach(v => {
-    const color = scoreColor(v.score);
-    const grade = gradeMap[v.grade_id] || {};
-    const bd    = v.score_breakdown || {};
-    const gc    = GRADE_COLORS[v.grade_id] || 'var(--border2)';
-    const km     = v.mileage_km != null   ? `${v.mileage_km.toLocaleString()} km` : 'N/A';
-    const shaken = v.shaken_months != null ? `${v.shaken_months} mo`               : 'N/A';
-
+    const grade   = gradeMap[v.grade_id] || {};
+    const bd      = v.score_breakdown || {};
+    const gc      = GRADE_COLORS[v.grade_id] || 'var(--border2)';
+    const rankHtml = `<span style="color:var(--amber);font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:1px">⭐ SAVED</span>`;
     const card = document.createElement('div');
     card.className = 'deal-card';
     card.style.setProperty('--card-grade-color', 'var(--amber)');
-    card.innerHTML = `
-      <div class="deal-card-header">
-        <span class="deal-card-rank" style="color:var(--amber);font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:1px">⭐ SAVED</span>
-        <div style="display:flex;align-items:center;gap:5px">
-          <button class="fav-btn active" data-url="${v.url || ''}" title="Remove from watchlist" onclick="toggleFav(this)">${icoStarSVG}</button>
-          <span class="deal-card-score" style="color:${color};border-color:${color}22;background:${color}14">${v.score}</span>
-        </div>
-      </div>
-      <div>
-        <div class="deal-card-grade" style="color:${gc}">${grade.label || v.grade_label}</div>
-        <div class="deal-card-grade-en">${grade.label_en || ''}</div>
-      </div>
-      <div class="deal-card-price" style="color:${gc}">¥${v.price_man}万</div>
-      <div class="deal-card-divider"></div>
-      <div class="deal-card-pills">
-        <span class="deal-card-pill">🛣 ${km}</span>
-        <span class="deal-card-pill">🔧 ${shaken} shaken</span>
-        ${colorChip(v.color)}
-      </div>
-      <div class="quality-badges">${buildBadges(v, true)}</div>
-      <div class="deal-bars">${buildBars(bd, null, null)}</div>
-      ${dealerRow(v)}
-      ${v.url ? `<a class="deal-card-link" href="${v.url}" target="_blank" rel="noopener">View on CarSensor ↗</a>` : ''}
-    `;
+    card.innerHTML = buildCardHTML({ v, grade, gc, rankHtml, badges: buildBadges(v, true), bd, watchlist: true });
     grid.appendChild(card);
   });
 

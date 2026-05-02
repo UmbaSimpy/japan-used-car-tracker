@@ -147,8 +147,9 @@ def _extract_details(item) -> dict:
         "navi":          None,   # True = メーカー純正ナビ present, False = ナビレス, None = unknown
         "camera":        None,   # True = マルチビューカメラ detected, None = not mentioned
         "color":         None,   # body color string from listing card
-        "dealer_name":   None,   # dealer / shop display name
-        "dealer_rating": None,   # float 0.0–5.0 from CarSensor evaluation score
+        "dealer_name":    None,   # dealer / shop display name
+        "dealer_rating":  None,   # float 0.0–5.0 from CarSensor evaluation score
+        "dealer_reviews": None,   # integer review count shown next to the score
     }
 
     # Detail page URL
@@ -269,6 +270,24 @@ def _extract_details(item) -> dict:
             val = float(m_rate.group(1))
             if 0.5 <= val <= 5.0:
                 details["dealer_rating"] = val
+
+    # Dealer review count — typically shown as "(NNN件)" near the rating
+    for sel in (
+        '.reviewCount', '.ratingCount', '.scoreCount', '.evaluationCount',
+        '[class*="review"]', '[class*="count"]',
+    ):
+        el = item.select_one(sel)
+        if el:
+            m_cnt = re.search(r'(\d+)', el.get_text())
+            if m_cnt:
+                details["dealer_reviews"] = int(m_cnt.group(1))
+                break
+
+    if not details["dealer_reviews"]:
+        # Fallback: "（123件）" or "(123件)" somewhere near the score in full_text
+        m_rev = re.search(r'[(\（](\d+)件[)\）]', full_text)
+        if m_rev:
+            details["dealer_reviews"] = int(m_rev.group(1))
 
     return details
 
@@ -417,6 +436,7 @@ def _clean_vehicle(v: dict) -> dict:
         "color":           v.get("color"),
         "dealer_name":     v.get("dealer_name"),
         "dealer_rating":   v.get("dealer_rating"),
+        "dealer_reviews":  v.get("dealer_reviews"),
         "url":             v.get("url"),
     }
 
