@@ -541,6 +541,26 @@
       letter-spacing: 0.5px;
     }
 
+    .price-per-km-row {
+      display: flex; align-items: baseline; justify-content: space-between;
+      padding: 5px 0 2px;
+      border-top: 1px solid var(--border);
+      margin-top: 2px;
+    }
+    .price-per-km-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.58rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.7px;
+    }
+    .price-per-km-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1rem; letter-spacing: 0.5px; line-height: 1;
+    }
+    .price-per-km-sub {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.56rem; color: var(--muted); margin-left: 3px;
+    }
+
     .deal-card-link {
       display: block; text-align: center;
       font-family: 'Barlow Condensed', sans-serif;
@@ -1302,6 +1322,24 @@ function toggleCardDetail(btn) {
   btn.textContent = isOpen ? 'Details ▾' : 'Hide ▴';
 }
 
+function pricePerKm(v) {
+  if (v.mileage_km == null || v.mileage_km < 2000) return '';
+  const yen = Math.round((v.price_man * 10000) / v.mileage_km);
+  // Format: use k-suffix above 1000 to keep it compact
+  const fmt = yen >= 10000 ? `¥${(yen / 1000).toFixed(0)}k`
+            : yen >= 1000  ? `¥${(yen / 1000).toFixed(1)}k`
+            :                `¥${yen}`;
+  // Color guide: low ¥/km = good value (green), high = nearly new premium (muted)
+  const c = yen < 300  ? 'var(--green)'
+          : yen < 700  ? 'var(--text)'
+          : yen < 1500 ? 'var(--text2)'
+          :              'var(--muted)';
+  return `<div class="price-per-km-row">
+    <span class="price-per-km-label">Cost per km</span>
+    <span><span class="price-per-km-val" style="color:${c}">${fmt}</span><span class="price-per-km-sub">/km</span></span>
+  </div>`;
+}
+
 function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
                          highlightKey = null, highlightAccent = null, watchlist = false }) {
   const color  = scoreColor(v.score);
@@ -1333,6 +1371,7 @@ function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
     <div class="card-detail">
       <div class="quality-badges">${badges}</div>
       <div class="deal-bars">${buildBars(bd, highlightKey, highlightAccent)}</div>
+      ${pricePerKm(v)}
       ${dealerRow(v)}
     </div>
     ${v.url ? `<a class="deal-card-link" href="${v.url}" target="_blank" rel="noopener">View on CarSensor ↗</a>` : ''}`;
