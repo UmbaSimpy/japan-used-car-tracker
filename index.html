@@ -632,23 +632,6 @@
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
 
-    /* ── Show more / card detail ── */
-    .show-more-btn {
-      background: none;
-      border: 1px solid var(--border2);
-      cursor: pointer;
-      color: var(--text2);
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.6rem; font-weight: 700; letter-spacing: 1px;
-      text-transform: uppercase;
-      padding: 5px 0; border-radius: 3px;
-      width: 100%; text-align: center;
-      transition: color .15s, border-color .15s, background .15s;
-    }
-    .show-more-btn:hover { color: var(--text); border-color: var(--border2); background: var(--surface3); }
-    .show-more-btn.open  { color: var(--text2); }
-    .card-detail { display: none; flex-direction: column; gap: 8px; }
-    .card-detail.open { display: flex; }
 
     /* ── Dealer row ── */
     .dealer-row {
@@ -1331,13 +1314,6 @@ function dealerRow(v) {
   return `<div class="dealer-row">${nameHtml}${starsHtml}</div>`;
 }
 
-function toggleCardDetail(btn) {
-  const detail = btn.nextElementSibling;
-  const isOpen = detail.classList.contains('open');
-  detail.classList.toggle('open', !isOpen);
-  btn.classList.toggle('open', !isOpen);
-  btn.textContent = isOpen ? 'Details ▾' : 'Hide ▴';
-}
 
 function pricePerKm(v) {
   if (v.mileage_km == null || v.mileage_km < 2000) return '';
@@ -1379,7 +1355,7 @@ function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
     </div>
     <div class="deal-card-price" style="color:${gc}">¥${v.price_man}万</div>
     ${v.photo_url
-      ? `<img class="deal-card-photo" src="${v.photo_url}" alt="Vehicle photo" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'deal-card-photo-placeholder',textContent:'🚗'}))">`
+      ? `<a href="${v.url || '#'}" target="_blank" rel="noopener" style="display:block;line-height:0"><img class="deal-card-photo" src="${v.photo_url}" alt="Vehicle photo" loading="lazy" onerror="this.closest('a').replaceWith(Object.assign(document.createElement('div'),{className:'deal-card-photo-placeholder',textContent:'🚗'}))"></a>`
       : `<div class="deal-card-photo-placeholder">🚗</div>`}
     <div class="deal-card-divider"></div>
     <div class="deal-card-pills">
@@ -1387,13 +1363,10 @@ function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
       <span class="deal-card-pill">🔧 ${shaken}</span>
     </div>
     ${colorBand(v.color)}
-    <button class="show-more-btn" onclick="toggleCardDetail(this)">Details ▾</button>
-    <div class="card-detail">
-      <div class="quality-badges">${badges}</div>
-      <div class="deal-bars">${buildBars(bd, highlightKey, highlightAccent)}</div>
-      ${pricePerKm(v)}
-      ${dealerRow(v)}
-    </div>
+    <div class="quality-badges">${badges}</div>
+    <div class="deal-bars">${buildBars(bd, highlightKey, highlightAccent)}</div>
+    ${pricePerKm(v)}
+    ${dealerRow(v)}
     ${v.url ? `<a class="deal-card-link" href="${v.url}" target="_blank" rel="noopener">View on CarSensor ↗</a>` : ''}`;
 }
 
