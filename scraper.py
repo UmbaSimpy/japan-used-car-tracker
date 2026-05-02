@@ -147,6 +147,8 @@ def _extract_details(item) -> dict:
         "navi":          None,   # True = メーカー純正ナビ present, False = ナビレス, None = unknown
         "camera":        None,   # True = マルチビューカメラ detected, None = not mentioned
         "color":         None,   # body color string from listing card
+        "dealer_name":   None,   # dealer / shop display name
+        "dealer_rating": None,   # float 0.0–5.0 from CarSensor evaluation score
     }
 
     # Detail page URL
@@ -229,6 +231,44 @@ def _extract_details(item) -> dict:
             color_val = m_color.group(1).strip()
             if 2 <= len(color_val) <= 40:
                 details["color"] = color_val
+
+    # Dealer name — try multiple selector patterns CarSensor uses
+    for sel in (
+        'p.shopName a', 'p.shopName', 'div.shopName a', 'div.shopName',
+        '.shopNameLink', '.dealerName a', '.dealerName',
+        'p[class*="shop"] a', 'p[class*="shop"]', 'div[class*="shop"] a',
+    ):
+        el = item.select_one(sel)
+        if el:
+            name = el.get_text(strip=True)
+            if name and 2 <= len(name) <= 60:
+                details["dealer_name"] = name
+                break
+
+    # Dealer rating — numeric score (0.0–5.0) from evaluation / star elements
+    for sel in (
+        '.scoreNum', '.starScore', '.dealerScore', '.evaluationScore',
+        '.ratingNum', '[class*="score"]', '[class*="rating"]',
+    ):
+        el = item.select_one(sel)
+        if el:
+            m_r = re.search(r'(\d+\.\d+|\d+)', el.get_text())
+            if m_r:
+                val = float(m_r.group(1))
+                if 0.5 <= val <= 5.0:
+                    details["dealer_rating"] = val
+                    break
+
+    # Fallback: scan full_text for a pattern like "評価 4.2" or "★ 4.1"
+    if not details["dealer_rating"]:
+        m_rate = re.search(
+            r'(?:評価|評点|スコア|★|☆)\s*[:：]?\s*([0-4]\.\d|5\.0|[1-5])\b',
+            full_text,
+        )
+        if m_rate:
+            val = float(m_rate.group(1))
+            if 0.5 <= val <= 5.0:
+                details["dealer_rating"] = val
 
     return details
 
@@ -375,6 +415,8 @@ def _clean_vehicle(v: dict) -> dict:
         "navi":            v.get("navi"),
         "camera":          v.get("camera"),
         "color":           v.get("color"),
+        "dealer_name":     v.get("dealer_name"),
+        "dealer_rating":   v.get("dealer_rating"),
         "url":             v.get("url"),
     }
 
