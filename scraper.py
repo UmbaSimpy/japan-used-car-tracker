@@ -201,11 +201,6 @@ def _extract_details(item) -> dict:
             elif "法定整備無" in text or "法定整備なし" in text:
                 details["maintenance"] = False
 
-        elif "ボディカラー" in text or "カラー" in text:
-            color_val = re.sub(r'^(?:ボディカラー|カラー)\s*[:：\s]*', '', text).strip()
-            if color_val and len(color_val) <= 40:
-                details["color"] = color_val
-
     # Both navi and camera are detected from the free-text headline of the listing card.
     # CarSensor embeds equipment keywords in the title, not in structured spec fields.
     full_text = item.get_text(" ", strip=True)
@@ -222,70 +217,63 @@ def _extract_details(item) -> dict:
         details["camera"] = True
     # else: None → not mentioned (can't reliably detect absence from listing text)
 
-    # Color: regex fallback in case it wasn't in a spec box
-    if not details["color"]:
-        m_color = re.search(
-            r'(?:ボディカラー|カラー)\s*[:：]?\s*([゠-ヿぁ-ゞ一-龥][^\n\r\t]{1,38}?)(?:\s{2,}|\n|　|$)',
-            full_text + '  ',
-        )
-        if m_color:
-            color_val = m_color.group(1).strip()
-            if 2 <= len(color_val) <= 40:
-                details["color"] = color_val
+    # Body color — CarSensor puts it as the 2nd <li> in carBodyInfoList
+    # (1st item is body type e.g. ミニバン, 2nd is the color name)
+    body_items = item.select('li.carBodyInfoList__item')
+    if len(body_items) >= 2:
+        color_val = body_items[1].get_text(strip=True)
+        if color_val and 1 <= len(color_val) <= 30:
+            details["color"] = color_val
+    elif len(body_items) == 1:
+        # Only one item — could be just the color (no body-type listed)
+        val = body_items[0].get_text(strip=True)
+        BODY_TYPES = {'ミニバン','SUV','セダン','ハッチバック','ワゴン','クーペ','軽','コンパクト'}
+        if val not in BODY_TYPES and 1 <= len(val) <= 30:
+            details["color"] = val
 
-    # Dealer name — try multiple selector patterns CarSensor uses
+    # Dealer name — CarSensor shows it in a <p class="js_shop"> element
     for sel in (
-        'p.shopName a', 'p.shopName', 'div.shopName a', 'div.shopName',
+        'p.js_shop', 'p.shopName a', 'p.shopName',
+        'div.shopName a', 'div.shopName',
         '.shopNameLink', '.dealerName a', '.dealerName',
-        'p[class*="shop"] a', 'p[class*="shop"]', 'div[class*="shop"] a',
     ):
         el = item.select_one(sel)
         if el:
-            name = el.get_text(strip=True)
+            # js_shop may include rating text — extract only the name portion
+            txt = el.get_text(strip=True)
+            # Strip trailing review/rating boilerplate
+            name = re.sub(r'\s*クチコミ評価.*$', '', txt).strip()
             if name and 2 <= len(name) <= 60:
                 details["dealer_name"] = name
                 break
 
-    # Dealer rating — numeric score (0.0–5.0) from evaluation / star elements
-    for sel in (
-        '.scoreNum', '.starScore', '.dealerScore', '.evaluationScore',
-        '.ratingNum', '[class*="score"]', '[class*="rating"]',
-    ):
+    # Dealer rating + review count — CarSensor uses:
+    #   <p class="js_shop">クチコミ評価： 4.6 点（ 55 件）</p>
+    #   or <div class="cassetteSub__review">クチコミ評価： 4.6 点（ 55 件）</div>
+    for sel in ('p.js_shop', 'div.cassetteSub__review', '.cassetteSub__review'):
         el = item.select_one(sel)
         if el:
-            m_r = re.search(r'(\d+\.\d+|\d+)', el.get_text())
+            txt = el.get_text(' ', strip=True)
+            m_r = re.search(r'(\d+\.\d+|\d)\s*点', txt)
             if m_r:
                 val = float(m_r.group(1))
                 if 0.5 <= val <= 5.0:
                     details["dealer_rating"] = val
-                    break
+            m_cnt = re.search(r'[（(]\s*(\d+)\s*件\s*[）)]', txt)
+            if m_cnt:
+                details["dealer_reviews"] = int(m_cnt.group(1))
+            if details["dealer_rating"]:
+                break
 
-    # Fallback: scan full_text for a pattern like "評価 4.2" or "★ 4.1"
+    # Fallback rating from full_text
     if not details["dealer_rating"]:
-        m_rate = re.search(
-            r'(?:評価|評点|スコア|★|☆)\s*[:：]?\s*([0-4]\.\d|5\.0|[1-5])\b',
-            full_text,
-        )
+        m_rate = re.search(r'クチコミ評価\s*[:：]?\s*(\d+\.\d+|\d)\s*点', full_text)
         if m_rate:
             val = float(m_rate.group(1))
             if 0.5 <= val <= 5.0:
                 details["dealer_rating"] = val
-
-    # Dealer review count — typically shown as "(NNN件)" near the rating
-    for sel in (
-        '.reviewCount', '.ratingCount', '.scoreCount', '.evaluationCount',
-        '[class*="review"]', '[class*="count"]',
-    ):
-        el = item.select_one(sel)
-        if el:
-            m_cnt = re.search(r'(\d+)', el.get_text())
-            if m_cnt:
-                details["dealer_reviews"] = int(m_cnt.group(1))
-                break
-
     if not details["dealer_reviews"]:
-        # Fallback: "（123件）" or "(123件)" somewhere near the score in full_text
-        m_rev = re.search(r'[(\（](\d+)件[)\）]', full_text)
+        m_rev = re.search(r'[（(]\s*(\d+)\s*件\s*[）)]', full_text)
         if m_rev:
             details["dealer_reviews"] = int(m_rev.group(1))
 

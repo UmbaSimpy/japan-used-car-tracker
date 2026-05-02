@@ -1669,10 +1669,10 @@ window.FREED_DATA = {
           "count": 48
         },
         "ehev_air_ex": {
-          "avg": 3199048,
+          "avg": 3198297,
           "min": 2280000,
           "max": 3770000,
-          "count": 711
+          "count": 713
         },
         "ehev_crosstar_4wd": {
           "avg": 3615294,
@@ -1681,7 +1681,7 @@ window.FREED_DATA = {
           "count": 34
         },
         "ehev_crosstar": {
-          "avg": 3321245,
+          "avg": 3319884,
           "min": 2250000,
           "max": 5355000,
           "count": 387
@@ -1710,9 +1710,10 @@ window.FREED_DATA = {
           "maintenance": true,
           "navi": true,
           "camera": null,
-          "color": null,
+          "color": "茶真珠",
           "dealer_name": "栃木ホンダ販売株式会社 Ｕ－Ｓｅｌｅｃｔ　さくら",
           "dealer_rating": 5.0,
+          "dealer_reviews": 3,
           "url": "https://www.carsensor.net/usedcar/detail/AU6982104839/index.html"
         },
         {
@@ -1737,9 +1738,10 @@ window.FREED_DATA = {
           "maintenance": true,
           "navi": true,
           "camera": null,
-          "color": null,
+          "color": "深灰Ｍ",
           "dealer_name": "ガリバー 朝日店",
           "dealer_rating": 4.7,
+          "dealer_reviews": 128,
           "url": "https://www.carsensor.net/usedcar/detail/AU6911824286/index.html"
         },
         {
@@ -1764,9 +1766,10 @@ window.FREED_DATA = {
           "maintenance": true,
           "navi": null,
           "camera": true,
-          "color": null,
+          "color": "灰真珠",
           "dealer_name": "オートファルコン 相模原支店",
           "dealer_rating": 4.9,
+          "dealer_reviews": 36,
           "url": "https://www.carsensor.net/usedcar/detail/AU6942468518/index.html"
         },
         {
@@ -1791,9 +1794,10 @@ window.FREED_DATA = {
           "maintenance": true,
           "navi": true,
           "camera": null,
-          "color": null,
+          "color": "黒真珠",
           "dealer_name": "ＶＥＲＮＯ　ＣＡＲＬＡ越谷レイクタウン店 （ベルノカーラ越谷レイクタウン店）",
           "dealer_rating": 4.8,
+          "dealer_reviews": 358,
           "url": "https://www.carsensor.net/usedcar/detail/AU6971688091/index.html"
         },
         {
@@ -1818,9 +1822,10 @@ window.FREED_DATA = {
           "maintenance": true,
           "navi": null,
           "camera": null,
-          "color": null,
+          "color": "白真珠",
           "dealer_name": "新車王国　ミニバン・ＳＵＶ・アルファード・ヴェルファイア・シビック・ハイエース 専門店",
           "dealer_rating": 5.0,
+          "dealer_reviews": 417,
           "url": "https://www.carsensor.net/usedcar/detail/AU6942785513/index.html"
         },
         {
@@ -1845,9 +1850,10 @@ window.FREED_DATA = {
           "maintenance": true,
           "navi": null,
           "camera": true,
-          "color": null,
+          "color": "灰",
           "dealer_name": "ネクステージ 富里インター店",
           "dealer_rating": null,
+          "dealer_reviews": null,
           "url": "https://www.carsensor.net/usedcar/detail/AU6976440593/index.html"
         },
         {
@@ -1872,9 +1878,10 @@ window.FREED_DATA = {
           "maintenance": true,
           "navi": true,
           "camera": null,
-          "color": null,
+          "color": "黒真珠",
           "dealer_name": "ＶＥＲＮＯ　ＣＡＲＬＡ越谷レイクタウン店 （ベルノカーラ越谷レイクタウン店）",
           "dealer_rating": 4.8,
+          "dealer_reviews": 358,
           "url": "https://www.carsensor.net/usedcar/detail/AU6971904530/index.html"
         },
         {
@@ -1899,9 +1906,10 @@ window.FREED_DATA = {
           "maintenance": true,
           "navi": true,
           "camera": null,
-          "color": null,
+          "color": "白真珠",
           "dealer_name": "ガリバー 枚方店",
           "dealer_rating": 4.6,
+          "dealer_reviews": 27,
           "url": "https://www.carsensor.net/usedcar/detail/AU6649013760/index.html"
         },
         {
@@ -1926,9 +1934,10 @@ window.FREED_DATA = {
           "maintenance": true,
           "navi": true,
           "camera": null,
-          "color": null,
+          "color": "青",
           "dealer_name": "ネクステージ 岡崎美合店",
           "dealer_rating": 4.7,
+          "dealer_reviews": 56,
           "url": "https://www.carsensor.net/usedcar/detail/AU6969903074/index.html"
         },
         {
@@ -1953,10 +1962,39 @@ window.FREED_DATA = {
           "maintenance": true,
           "navi": true,
           "camera": null,
-          "color": null,
+          "color": "白真珠",
           "dealer_name": "ガリバー 香椎浜店",
           "dealer_rating": 4.8,
+          "dealer_reviews": 14,
           "url": "https://www.carsensor.net/usedcar/detail/AU6679363278/index.html"
+        },
+        {
+          "score": 8.7,
+          "score_breakdown": {
+            "price": 7.1,
+            "mileage": 10.0,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "camera": 5.0
+          },
+          "grade_id": "ehev_air_ex",
+          "grade_label": "1.5 e:HEV エアー EX",
+          "price_man": 316.1,
+          "mileage_km": 10,
+          "shaken_months": 31,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "camera": null,
+          "color": "灰Ｍ",
+          "dealer_name": "ガリバー 新狭山店",
+          "dealer_rating": 4.5,
+          "dealer_reviews": 24,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6895393650/index.html"
         },
         {
           "score": 8.7,
@@ -1980,9 +2018,10 @@ window.FREED_DATA = {
           "maintenance": true,
           "navi": true,
           "camera": null,
-          "color": null,
+          "color": "黒真珠",
           "dealer_name": "ガリバー 前橋南インター店",
           "dealer_rating": 4.7,
+          "dealer_reviews": 84,
           "url": "https://www.carsensor.net/usedcar/detail/AU6694255368/index.html"
         },
         {
@@ -2007,9 +2046,10 @@ window.FREED_DATA = {
           "maintenance": true,
           "navi": true,
           "camera": null,
-          "color": null,
+          "color": "灰Ｍ",
           "dealer_name": "ガリバー 山口店",
           "dealer_rating": 5.0,
+          "dealer_reviews": 7,
           "url": "https://www.carsensor.net/usedcar/detail/AU6943713230/index.html"
         },
         {
@@ -2034,37 +2074,11 @@ window.FREED_DATA = {
           "maintenance": true,
           "navi": true,
           "camera": null,
-          "color": null,
+          "color": "黒",
           "dealer_name": "ガリバー 高前バイパス店",
           "dealer_rating": 4.7,
+          "dealer_reviews": 47,
           "url": "https://www.carsensor.net/usedcar/detail/AU6760658403/index.html"
-        },
-        {
-          "score": 8.7,
-          "score_breakdown": {
-            "price": 7.1,
-            "mileage": 10.0,
-            "shaken": 10.0,
-            "accident": 10.0,
-            "warranty": 8.0,
-            "maintenance": 10.0,
-            "navi": 10.0,
-            "camera": 5.0
-          },
-          "grade_id": "ehev_air_ex",
-          "grade_label": "1.5 e:HEV エアー EX",
-          "price_man": 316.1,
-          "mileage_km": 10,
-          "shaken_months": 31,
-          "accident": false,
-          "warranty": true,
-          "maintenance": true,
-          "navi": true,
-          "camera": null,
-          "color": null,
-          "dealer_name": "ガリバー 新狭山店",
-          "dealer_rating": 4.5,
-          "url": "https://www.carsensor.net/usedcar/detail/AU6895393650/index.html"
         },
         {
           "score": 8.7,
@@ -2078,20 +2092,21 @@ window.FREED_DATA = {
             "navi": 10.0,
             "camera": 5.0
           },
-          "grade_id": "ehev_air_ex",
-          "grade_label": "1.5 e:HEV エアー EX",
-          "price_man": 318.0,
-          "mileage_km": 4,
-          "shaken_months": 31,
+          "grade_id": "ehev_crosstar",
+          "grade_label": "1.5 e:HEV クロスター",
+          "price_man": 317.1,
+          "mileage_km": 10,
+          "shaken_months": 29,
           "accident": false,
           "warranty": true,
           "maintenance": true,
           "navi": true,
           "camera": null,
-          "color": null,
-          "dealer_name": "ガリバー 豊橋店",
-          "dealer_rating": 4.7,
-          "url": "https://www.carsensor.net/usedcar/detail/AU6780846849/index.html"
+          "color": "深灰Ｍ",
+          "dealer_name": "ガリバー 伊勢店",
+          "dealer_rating": 4.6,
+          "dealer_reviews": 92,
+          "url": "https://www.carsensor.net/usedcar/detail/AU6647699222/index.html"
         }
       ],
       "category_gems": {
@@ -2118,9 +2133,10 @@ window.FREED_DATA = {
             "maintenance": true,
             "navi": true,
             "camera": null,
-            "color": null,
+            "color": "灰真珠",
             "dealer_name": "ＡＵＴＯ　ＳＥＬＥＣＴＩＯＮ １６号本店",
             "dealer_rating": 4.8,
+            "dealer_reviews": 1073,
             "url": "https://www.carsensor.net/usedcar/detail/AU6865940059/index.html"
           },
           {
@@ -2145,9 +2161,10 @@ window.FREED_DATA = {
             "maintenance": false,
             "navi": true,
             "camera": null,
-            "color": null,
+            "color": "白真珠",
             "dealer_name": "ジャンプ三郷センター",
             "dealer_rating": 4.3,
+            "dealer_reviews": 198,
             "url": "https://www.carsensor.net/usedcar/detail/AU6975810805/index.html"
           },
           {
@@ -2172,9 +2189,10 @@ window.FREED_DATA = {
             "maintenance": false,
             "navi": null,
             "camera": null,
-            "color": null,
+            "color": "真珠白",
             "dealer_name": "ジャンプ三郷センター",
             "dealer_rating": 4.3,
+            "dealer_reviews": 198,
             "url": "https://www.carsensor.net/usedcar/detail/AU6927613479/index.html"
           }
         ],
@@ -2201,15 +2219,16 @@ window.FREED_DATA = {
             "maintenance": true,
             "navi": true,
             "camera": null,
-            "color": null,
+            "color": "深灰Ｍ",
             "dealer_name": "（有）エクセレント",
             "dealer_rating": 4.6,
+            "dealer_reviews": 17,
             "url": "https://www.carsensor.net/usedcar/detail/AU6966696695/index.html"
           },
           {
             "score": 8.7,
             "score_breakdown": {
-              "price": 6.9,
+              "price": 7.0,
               "mileage": 10.0,
               "shaken": 10.0,
               "accident": 10.0,
@@ -2220,23 +2239,24 @@ window.FREED_DATA = {
             },
             "grade_id": "ehev_air_ex",
             "grade_label": "1.5 e:HEV エアー EX",
-            "price_man": 319.8,
-            "mileage_km": 17,
-            "shaken_months": 28,
+            "price_man": 318.0,
+            "mileage_km": 4,
+            "shaken_months": 31,
             "accident": false,
             "warranty": true,
             "maintenance": true,
             "navi": true,
             "camera": null,
-            "color": null,
-            "dealer_name": "インディオ富山",
-            "dealer_rating": 4.5,
-            "url": "https://www.carsensor.net/usedcar/detail/AU6943448077/index.html"
+            "color": "白",
+            "dealer_name": "ガリバー 豊橋店",
+            "dealer_rating": 4.7,
+            "dealer_reviews": 78,
+            "url": "https://www.carsensor.net/usedcar/detail/AU6780846849/index.html"
           },
           {
             "score": 8.7,
             "score_breakdown": {
-              "price": 7.9,
+              "price": 7.7,
               "mileage": 10.0,
               "shaken": 10.0,
               "accident": 10.0,
@@ -2247,18 +2267,19 @@ window.FREED_DATA = {
             },
             "grade_id": "ehev_air_ex",
             "grade_label": "1.5 e:HEV エアー EX",
-            "price_man": 289.8,
-            "mileage_km": 5,
+            "price_man": 295.3,
+            "mileage_km": 25,
             "shaken_months": 33,
             "accident": false,
             "warranty": true,
             "maintenance": true,
             "navi": null,
             "camera": null,
-            "color": null,
-            "dealer_name": "オートバックスカーズ 塩屋北店",
-            "dealer_rating": 4.8,
-            "url": "https://www.carsensor.net/usedcar/detail/AU6935737391/index.html"
+            "color": "真珠白",
+            "dealer_name": "ＳＵＶ　ＬＡＮＤ 豊橋",
+            "dealer_rating": 4.7,
+            "dealer_reviews": 11,
+            "url": "https://www.carsensor.net/usedcar/detail/AU6985422195/index.html"
           }
         ],
         "no_shaken": [
@@ -2284,9 +2305,10 @@ window.FREED_DATA = {
             "maintenance": true,
             "navi": null,
             "camera": null,
-            "color": null,
+            "color": "白",
             "dealer_name": "ホンダカーズ吉田　吉田店",
             "dealer_rating": null,
+            "dealer_reviews": null,
             "url": "https://www.carsensor.net/usedcar/detail/AU6977380788/index.html"
           },
           {
@@ -2311,9 +2333,10 @@ window.FREED_DATA = {
             "maintenance": true,
             "navi": null,
             "camera": null,
-            "color": null,
+            "color": "茶",
             "dealer_name": "ホンダカーズ吉田　吉田店",
             "dealer_rating": null,
+            "dealer_reviews": null,
             "url": "https://www.carsensor.net/usedcar/detail/AU6974303834/index.html"
           },
           {
@@ -2338,9 +2361,10 @@ window.FREED_DATA = {
             "maintenance": true,
             "navi": null,
             "camera": null,
-            "color": null,
+            "color": "白真珠",
             "dealer_name": "ホンダカーズ乙訓 向日店",
             "dealer_rating": 5.0,
+            "dealer_reviews": 1,
             "url": "https://www.carsensor.net/usedcar/detail/AU6963089170/index.html"
           }
         ]
