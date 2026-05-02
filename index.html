@@ -504,6 +504,23 @@
       font-size: 1.65rem; letter-spacing: 0.5px; line-height: 1;
     }
 
+    .deal-card-photo {
+      width: 100%; aspect-ratio: 4/3;
+      object-fit: cover;
+      border-radius: 3px;
+      background: var(--surface3);
+      display: block;
+      margin: 2px 0;
+    }
+    .deal-card-photo-placeholder {
+      width: 100%; aspect-ratio: 4/3;
+      background: var(--surface3);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 1.4rem;
+      margin: 2px 0;
+    }
+
     .deal-card-divider { height: 1px; background: var(--border); margin: 1px 0; }
 
     .deal-card-pills { display: flex; gap: 5px; flex-wrap: wrap; }
@@ -1361,6 +1378,9 @@ function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
       <div class="deal-card-grade-en">${grade.label_en || ''}</div>
     </div>
     <div class="deal-card-price" style="color:${gc}">¥${v.price_man}万</div>
+    ${v.photo_url
+      ? `<img class="deal-card-photo" src="${v.photo_url}" alt="Vehicle photo" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'deal-card-photo-placeholder',textContent:'🚗'}))">`
+      : `<div class="deal-card-photo-placeholder">🚗</div>`}
     <div class="deal-card-divider"></div>
     <div class="deal-card-pills">
       <span class="deal-card-pill">🛣 ${km}</span>

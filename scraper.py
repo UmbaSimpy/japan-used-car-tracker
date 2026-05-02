@@ -147,6 +147,7 @@ def _extract_details(item) -> dict:
         "navi":          None,   # True = メーカー純正ナビ present, False = ナビレス, None = unknown
         "camera":        None,   # True = マルチビューカメラ detected, None = not mentioned
         "color":         None,   # body color string from listing card
+        "photo_url":     None,   # main listing photo (CDN URL)
         "dealer_name":    None,   # dealer / shop display name
         "dealer_rating":  None,   # float 0.0–5.0 from CarSensor evaluation score
         "dealer_reviews": None,   # integer review count shown next to the score
@@ -230,6 +231,16 @@ def _extract_details(item) -> dict:
         BODY_TYPES = {'ミニバン','SUV','セダン','ハッチバック','ワゴン','クーペ','軽','コンパクト'}
         if val not in BODY_TYPES and 1 <= len(val) <= 30:
             details["color"] = val
+
+    # Main listing photo — first <img> whose src is on the ccsrpcma CDN (large photo)
+    for img in item.select('img'):
+        src = img.get('src') or img.get('data-src') or ''
+        if 'ccsrpcma' in src:
+            # Normalise protocol-relative URL  (//ccsrpcma... → https://ccsrpcma...)
+            if src.startswith('//'):
+                src = 'https:' + src
+            details["photo_url"] = src
+            break
 
     # Dealer name — CarSensor shows it in a <p class="js_shop"> element
     for sel in (
@@ -422,6 +433,7 @@ def _clean_vehicle(v: dict) -> dict:
         "navi":            v.get("navi"),
         "camera":          v.get("camera"),
         "color":           v.get("color"),
+        "photo_url":       v.get("photo_url"),
         "dealer_name":     v.get("dealer_name"),
         "dealer_rating":   v.get("dealer_rating"),
         "dealer_reviews":  v.get("dealer_reviews"),
