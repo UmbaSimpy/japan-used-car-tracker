@@ -700,10 +700,14 @@ def run(max_pages: int | None) -> None:
         key=lambda x: (-x["score_breakdown"]["price"], -x["score"]),
     ))
 
-    # Mileage gems: lowest km non-top cars (may be pricier or lack extras).
-    mileage_gems = _pick_gems(sorted(
-        non_top,
-        key=lambda x: (-x["score_breakdown"]["mileage"], -x["score"]),
+    # High-mileage gems: ≥30,000 km but strong on every other parameter.
+    # Ranked by score-excluding-mileage so mileage penalty doesn't drown good deals.
+    W_ML = WEIGHTS["mileage"]
+    high_mileage_gems = _pick_gems(sorted(
+        [v for v in non_top if (v.get("mileage_km") or 0) >= 30_000],
+        key=lambda x: -(
+            (x["score"] - x["score_breakdown"]["mileage"] * W_ML) / (1 - W_ML)
+        ),
     ))
 
     # No-shaken gems: cars with no remaining shaken (shaken_months None or 0),
@@ -714,9 +718,9 @@ def run(max_pages: int | None) -> None:
     ))
 
     category_gems = {
-        "price":     price_gems,
-        "mileage":   mileage_gems,
-        "no_shaken": no_shaken_gems,
+        "price":        price_gems,
+        "high_mileage": high_mileage_gems,
+        "no_shaken":    no_shaken_gems,
     }
 
     print("\nCategory gems:")

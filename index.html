@@ -1460,8 +1460,8 @@ function renderGems(snap, grades) {
     { key: 'price',    icon: '💰', title: 'Best Price',
       desc: 'Cheapest cars on the market — trade-offs may include mileage or shaken',
       accent: 'var(--green)' },
-    { key: 'mileage',  icon: '📍', title: 'Low Mileage',
-      desc: 'Lowest km listings not in the top-15 — often newer but pricier',
+    { key: 'high_mileage', icon: '📏', title: 'High Mileage, Strong Value',
+      desc: '30,000+ km but clean record, solid warranty & fair price — best deal despite wear',
       accent: 'var(--blue)' },
     { key: 'no_shaken', icon: '⚡', title: '車検なし — No Shaken',
       desc: 'No remaining JCI validity — often priced lower; buyer arranges inspection',
@@ -1493,7 +1493,7 @@ function renderGems(snap, grades) {
         const grade        = gradeMap[v.grade_id] || {};
         const bd           = v.score_breakdown || {};
         const gc           = GRADE_COLORS[v.grade_id] || 'var(--border2)';
-        const highlightKey = { price: 'price', mileage: 'mileage', no_shaken: 'shaken' }[cat.key] || null;
+        const highlightKey = { price: 'price', high_mileage: 'mileage', no_shaken: 'shaken' }[cat.key] || null;
         const accOnly      = v.accident === false ? `<span class="qbadge good">${_ico.circleCheck} Clean</span>`
                            : v.accident === true  ? `<span class="qbadge bad">${_ico.circleX} Accident</span>`
                            :                        `<span class="qbadge neutral">${_ico.circleX} Acc N/A</span>`;
