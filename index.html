@@ -725,30 +725,52 @@
       to   { opacity: 1; transform: scale(1) translateY(0); }
     }
 
-    /* ── NEW listing badge ── */
-    .new-badge {
-      position: absolute;
-      top: 7px;
-      left: 7px;
-      z-index: 2;
+    /* ── Photo overlay badges (shared base) ── */
+    /* Multi-layer shadow guarantees legibility on any car photo background */
+    .new-badge,
+    .stat-badge {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 0.68rem;
       letter-spacing: 2px;
       line-height: 1;
       color: #fff;
-      background: var(--red);
       padding: 3px 7px 2px;
       border-radius: 3px;
       border: 1px solid rgba(255,255,255,0.22);
-      /* Multi-layer shadow: dark halo + spread — readable on any photo background */
       box-shadow:
         0 0 0 1.5px rgba(0,0,0,0.45),
         0 3px 10px rgba(0,0,0,0.65),
         0 1px 3px  rgba(0,0,0,0.5);
       pointer-events: none;
       animation: new-badge-in 0.45s cubic-bezier(.34,1.56,.64,1) both;
+    }
+
+    /* ── NEW listing badge (top-left) ── */
+    .new-badge {
+      position: absolute;
+      top: 7px;
+      left: 7px;
+      z-index: 2;
+      background: var(--red);
       animation-delay: calc(var(--card-delay, 0s) + 0.15s);
     }
+
+    /* ── Stat badges container (bottom-right) ── */
+    .photo-badges-br {
+      position: absolute;
+      bottom: 7px;
+      right: 7px;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+    .stat-badge {
+      animation-delay: calc(var(--card-delay, 0s) + 0.2s);
+    }
+    .stat-badge.price-badge { background: #0f8f55; }   /* deeper green — readable on light photos */
+    .stat-badge.km-badge    { background: #1a66cc; }   /* deep blue */
 
     .grade-card {
       animation: grade-in 0.38s ease both;
@@ -1251,9 +1273,19 @@ function render() {
     });
   }
 
+  // Compute global minimums across all displayed vehicles (top + all gem categories)
+  const allDisplayed = [
+    ...(snap.top_vehicles || []),
+    ...Object.values(snap.category_gems || {}).flat(),
+  ];
+  const prices  = allDisplayed.map(v => v.price_man).filter(p => p != null);
+  const kms     = allDisplayed.map(v => v.mileage_km).filter(k => k != null);
+  const minPrice = prices.length ? Math.min(...prices) : null;
+  const minKm    = kms.length   ? Math.min(...kms)   : null;
+
   renderChart(grades, snaps);
-  renderTopDeals(snap, grades, prevDayUrls);
-  renderGems(snap, grades, prevDayUrls);
+  renderTopDeals(snap, grades, prevDayUrls, minPrice, minKm);
+  renderGems(snap, grades, prevDayUrls, minPrice, minKm);
 }
 
 function renderChart(grades, snaps) {
@@ -1510,7 +1542,8 @@ function pricePerKm(v) {
 }
 
 function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
-                         highlightKey = null, highlightAccent = null, watchlist = false, isNew = false }) {
+                         highlightKey = null, highlightAccent = null, watchlist = false, isNew = false,
+                         minPrice = null, minKm = null }) {
   const color  = scoreColor(v.score);
   const score  = typeof v.score === 'number' ? v.score.toFixed(1) : v.score;
   const km     = v.mileage_km != null   ? `${v.mileage_km.toLocaleString()} km` : 'N/A';
@@ -1518,10 +1551,22 @@ function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
   const favHtml = watchlist
     ? `<button class="fav-btn active" data-url="${v.url || ''}" title="Remove from watchlist" onclick="toggleFav(this)">${icoStarSVG}</button>`
     : (v.url ? favBtn(v.url) : '');
+
+  // Top-left: NEW badge
   const newBadge = isNew ? `<span class="new-badge">NEW</span>` : '';
+
+  // Bottom-right: stat badges
+  const brBadges = [];
+  if (minPrice != null && v.price_man != null && v.price_man === minPrice)
+    brBadges.push(`<span class="stat-badge price-badge">¥ BEST</span>`);
+  if (minKm != null && v.mileage_km != null && v.mileage_km === minKm)
+    brBadges.push(`<span class="stat-badge km-badge">LOW KM</span>`);
+  const brBadgeBlock = brBadges.length
+    ? `<div class="photo-badges-br">${brBadges.join('')}</div>` : '';
+
   const photoBlock = v.photo_url
-    ? `<a href="${v.url || '#'}" target="_blank" rel="noopener" class="deal-card-photo-wrap">${newBadge}<img class="deal-card-photo" src="${v.photo_url}" alt="Vehicle photo" loading="lazy" onerror="this.closest('a').replaceWith(Object.assign(document.createElement('div'),{className:'deal-card-photo-placeholder',textContent:'🚗'}))"></a>`
-    : `<div class="deal-card-photo-placeholder" style="position:relative">${newBadge}🚗</div>`;
+    ? `<a href="${v.url || '#'}" target="_blank" rel="noopener" class="deal-card-photo-wrap">${newBadge}${brBadgeBlock}<img class="deal-card-photo" src="${v.photo_url}" alt="Vehicle photo" loading="lazy" onerror="this.closest('a').replaceWith(Object.assign(document.createElement('div'),{className:'deal-card-photo-placeholder',textContent:'🚗'}))"></a>`
+    : `<div class="deal-card-photo-placeholder" style="position:relative">${newBadge}${brBadgeBlock}🚗</div>`;
   return `
     <div class="deal-card-header">
       <span class="deal-card-rank">${rankHtml}</span>
@@ -1567,7 +1612,7 @@ function buildBars(bd, highlightKey, highlightColor) {
 }
 
 /* ── Top Deals renderer ── */
-function renderTopDeals(snap, grades, prevDayUrls = new Set()) {
+function renderTopDeals(snap, grades, prevDayUrls = new Set(), minPrice = null, minKm = null) {
   const listEl = document.getElementById('deal-list');
   listEl.innerHTML = '';
   listEl.className = 'deal-grid';
@@ -1594,13 +1639,13 @@ function renderTopDeals(snap, grades, prevDayUrls = new Set()) {
     card.style.setProperty('--card-grade-color', gc);
     card.style.setProperty('--card-delay', `${i * 0.05}s`);
     const isNew = v.url ? !prevDayUrls.has(v.url) : false;
-    card.innerHTML = buildCardHTML({ v, grade, gc, rankHtml: `#${i + 1}`, badges: buildBadges(v, true), bd, isNew });
+    card.innerHTML = buildCardHTML({ v, grade, gc, rankHtml: `#${i + 1}`, badges: buildBadges(v, true), bd, isNew, minPrice, minKm });
     listEl.appendChild(card);
   });
 }
 
 /* ── Gems renderer ── */
-function renderGems(snap, grades, prevDayUrls = new Set()) {
+function renderGems(snap, grades, prevDayUrls = new Set(), minPrice = null, minKm = null) {
   const el = document.getElementById('gems-list');
   el.innerHTML = '';
 
@@ -1662,7 +1707,7 @@ function renderGems(snap, grades, prevDayUrls = new Set()) {
         card.style.setProperty('--card-delay', `${gemIdx * 0.05}s`);
         const isNew = v.url ? !prevDayUrls.has(v.url) : false;
         card.innerHTML = buildCardHTML({ v, grade, gc, rankHtml, badges: accOnly, bd,
-                                         highlightKey, highlightAccent: cat.accent, isNew });
+                                         highlightKey, highlightAccent: cat.accent, isNew, minPrice, minKm });
         row.appendChild(card);
       });
     }
