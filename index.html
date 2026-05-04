@@ -720,6 +720,35 @@
       from { opacity: 0; transform: translateY(7px); }
       to   { opacity: 1; transform: none; }
     }
+    @keyframes new-badge-in {
+      from { opacity: 0; transform: scale(0.55) translateY(-4px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* ── NEW listing badge ── */
+    .new-badge {
+      position: absolute;
+      top: 7px;
+      left: 7px;
+      z-index: 2;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 2px;
+      line-height: 1;
+      color: #fff;
+      background: var(--red);
+      padding: 3px 7px 2px;
+      border-radius: 3px;
+      border: 1px solid rgba(255,255,255,0.22);
+      /* Multi-layer shadow: dark halo + spread — readable on any photo background */
+      box-shadow:
+        0 0 0 1.5px rgba(0,0,0,0.45),
+        0 3px 10px rgba(0,0,0,0.65),
+        0 1px 3px  rgba(0,0,0,0.5);
+      pointer-events: none;
+      animation: new-badge-in 0.45s cubic-bezier(.34,1.56,.64,1) both;
+      animation-delay: calc(var(--card-delay, 0s) + 0.15s);
+    }
 
     .grade-card {
       animation: grade-in 0.38s ease both;
@@ -738,7 +767,7 @@
     }
 
     /* Photo wrap — subtle zoom on hover */
-    .deal-card-photo-wrap { display: block; line-height: 0; overflow: hidden; border-radius: 3px; }
+    .deal-card-photo-wrap { display: block; line-height: 0; overflow: hidden; border-radius: 3px; position: relative; }
     .deal-card-photo { transition: transform .38s ease; margin: 0; }
     .deal-card-photo-wrap:hover .deal-card-photo { transform: scale(1.04); }
 
@@ -1212,9 +1241,19 @@ function render() {
     cardsEl.appendChild(card);
   });
 
+  // Build set of all vehicle URLs seen in the previous snapshot
+  const prevDayUrls = new Set();
+  if (prevSnap) {
+    (prevSnap.top_vehicles || []).forEach(v => { if (v.url) prevDayUrls.add(v.url); });
+    const prevGems = prevSnap.category_gems || {};
+    Object.values(prevGems).forEach(list => {
+      list.forEach(v => { if (v.url) prevDayUrls.add(v.url); });
+    });
+  }
+
   renderChart(grades, snaps);
-  renderTopDeals(snap, grades);
-  renderGems(snap, grades);
+  renderTopDeals(snap, grades, prevDayUrls);
+  renderGems(snap, grades, prevDayUrls);
 }
 
 function renderChart(grades, snaps) {
@@ -1471,7 +1510,7 @@ function pricePerKm(v) {
 }
 
 function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
-                         highlightKey = null, highlightAccent = null, watchlist = false }) {
+                         highlightKey = null, highlightAccent = null, watchlist = false, isNew = false }) {
   const color  = scoreColor(v.score);
   const score  = typeof v.score === 'number' ? v.score.toFixed(1) : v.score;
   const km     = v.mileage_km != null   ? `${v.mileage_km.toLocaleString()} km` : 'N/A';
@@ -1479,9 +1518,10 @@ function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
   const favHtml = watchlist
     ? `<button class="fav-btn active" data-url="${v.url || ''}" title="Remove from watchlist" onclick="toggleFav(this)">${icoStarSVG}</button>`
     : (v.url ? favBtn(v.url) : '');
+  const newBadge = isNew ? `<span class="new-badge">NEW</span>` : '';
   const photoBlock = v.photo_url
-    ? `<a href="${v.url || '#'}" target="_blank" rel="noopener" class="deal-card-photo-wrap"><img class="deal-card-photo" src="${v.photo_url}" alt="Vehicle photo" loading="lazy" onerror="this.closest('a').replaceWith(Object.assign(document.createElement('div'),{className:'deal-card-photo-placeholder',textContent:'🚗'}))"></a>`
-    : `<div class="deal-card-photo-placeholder">🚗</div>`;
+    ? `<a href="${v.url || '#'}" target="_blank" rel="noopener" class="deal-card-photo-wrap">${newBadge}<img class="deal-card-photo" src="${v.photo_url}" alt="Vehicle photo" loading="lazy" onerror="this.closest('a').replaceWith(Object.assign(document.createElement('div'),{className:'deal-card-photo-placeholder',textContent:'🚗'}))"></a>`
+    : `<div class="deal-card-photo-placeholder" style="position:relative">${newBadge}🚗</div>`;
   return `
     <div class="deal-card-header">
       <span class="deal-card-rank">${rankHtml}</span>
@@ -1527,7 +1567,7 @@ function buildBars(bd, highlightKey, highlightColor) {
 }
 
 /* ── Top Deals renderer ── */
-function renderTopDeals(snap, grades) {
+function renderTopDeals(snap, grades, prevDayUrls = new Set()) {
   const listEl = document.getElementById('deal-list');
   listEl.innerHTML = '';
   listEl.className = 'deal-grid';
@@ -1553,13 +1593,14 @@ function renderTopDeals(snap, grades) {
     card.className = 'deal-card';
     card.style.setProperty('--card-grade-color', gc);
     card.style.setProperty('--card-delay', `${i * 0.05}s`);
-    card.innerHTML = buildCardHTML({ v, grade, gc, rankHtml: `#${i + 1}`, badges: buildBadges(v, true), bd });
+    const isNew = v.url ? !prevDayUrls.has(v.url) : false;
+    card.innerHTML = buildCardHTML({ v, grade, gc, rankHtml: `#${i + 1}`, badges: buildBadges(v, true), bd, isNew });
     listEl.appendChild(card);
   });
 }
 
 /* ── Gems renderer ── */
-function renderGems(snap, grades) {
+function renderGems(snap, grades, prevDayUrls = new Set()) {
   const el = document.getElementById('gems-list');
   el.innerHTML = '';
 
@@ -1619,8 +1660,9 @@ function renderGems(snap, grades) {
         card.className = 'deal-card';
         card.style.setProperty('--card-grade-color', cat.accent);
         card.style.setProperty('--card-delay', `${gemIdx * 0.05}s`);
+        const isNew = v.url ? !prevDayUrls.has(v.url) : false;
         card.innerHTML = buildCardHTML({ v, grade, gc, rankHtml, badges: accOnly, bd,
-                                         highlightKey, highlightAccent: cat.accent });
+                                         highlightKey, highlightAccent: cat.accent, isNew });
         row.appendChild(card);
       });
     }
