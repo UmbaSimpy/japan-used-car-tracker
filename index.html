@@ -451,10 +451,11 @@
       text-transform: uppercase;
       color: var(--muted); padding: 12px 22px;
       border-bottom: 2px solid transparent; margin-bottom: -1px;
-      transition: color .15s, border-color .15s;
+      transition: color .18s, background .18s;
+      position: relative;
     }
-    .deal-tab:hover { color: var(--text2); }
-    .deal-tab.active { color: var(--text); border-bottom-color: var(--red); }
+    .deal-tab:hover { color: var(--text); background: rgba(255,255,255,.025); }
+    .deal-tab.active { color: var(--text); border-bottom-color: transparent; }
 
     /* ── Deal grid (3×5) ── */
     .deal-grid {
@@ -470,11 +471,17 @@
       display: flex;
       flex-direction: column;
       gap: 9px;
-      transition: background .15s;
+      transition: background .18s, transform .22s cubic-bezier(.4,0,.2,1), box-shadow .22s;
       position: relative;
       border-left: 2px solid var(--card-grade-color, var(--border2));
+      animation: card-in 0.35s ease both;
+      animation-delay: var(--card-delay, 0s);
     }
-    .deal-card:hover { background: var(--surface3); }
+    .deal-card:hover {
+      background: var(--surface3);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.5), 0 0 0 1px var(--border2);
+    }
 
     .deal-card-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -550,8 +557,8 @@
       font-size: 0.56rem; color: var(--muted); width: 38px; flex-shrink: 0;
       text-transform: uppercase; letter-spacing: 0.6px;
     }
-    .deal-bar-track { flex: 1; height: 2px; background: var(--surface3); border-radius: 1px; overflow: hidden; }
-    .deal-bar-fill { height: 100%; border-radius: 1px; }
+    .deal-bar-track { flex: 1; height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+    .deal-bar-fill { height: 100%; border-radius: 2px; animation: bar-grow 0.6s cubic-bezier(.4,0,.2,1) both; animation-delay: var(--bar-delay, 0.1s); }
     .deal-bar-val {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 0.7rem; color: var(--text2); width: 22px; text-align: right; flex-shrink: 0;
@@ -690,6 +697,62 @@
     }
     .watchlist-empty-icon { font-size: 2rem; margin-bottom: 6px; }
 
+    /* ── Animations & Motion ── */
+    @keyframes card-in {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes grade-in {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes bar-grow {
+      from { width: 0; }
+      to   { width: var(--bar-w, 0%); }
+    }
+    @keyframes fav-pop {
+      0%   { transform: scale(1); }
+      30%  { transform: scale(1.75) rotate(-15deg); }
+      60%  { transform: scale(0.85); }
+      100% { transform: scale(1); }
+    }
+    @keyframes tab-fade {
+      from { opacity: 0; transform: translateY(7px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .grade-card {
+      animation: grade-in 0.38s ease both;
+      animation-delay: var(--grade-delay, 0s);
+    }
+    .fav-btn.popping { animation: fav-pop 0.42s cubic-bezier(.4,0,.2,1) both; }
+    .tab-fade { animation: tab-fade 0.22s ease both; }
+
+    /* Sliding tab indicator */
+    .deal-tab-bar { position: relative; overflow: visible; }
+    .tab-indicator {
+      position: absolute; bottom: 0; height: 2px;
+      background: var(--red); pointer-events: none;
+      border-radius: 1px 1px 0 0;
+      transition: left .24s cubic-bezier(.4,0,.2,1), width .24s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* Photo wrap — subtle zoom on hover */
+    .deal-card-photo-wrap { display: block; line-height: 0; overflow: hidden; border-radius: 3px; }
+    .deal-card-photo { transition: transform .38s ease; margin: 0; }
+    .deal-card-photo-wrap:hover .deal-card-photo { transform: scale(1.04); }
+
+    /* Price + grade hero cluster */
+    .deal-card-hero {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 6px; margin-top: 1px;
+    }
+    .deal-card-hero-right { text-align: right; min-width: 0; flex-shrink: 0; }
+
+    /* Dealer row hover */
+    .dealer-row { transition: background .15s; cursor: default; }
+    .dealer-row:hover { background: var(--surface2); }
+
     /* ── Responsive ── */
     @media (max-width: 860px) {
       .avg-value { font-size: 2.1rem; }
@@ -816,6 +879,7 @@
       <button class="deal-tab active" data-tab="top">🏆 Best Overall</button>
       <button class="deal-tab" data-tab="gems">💎 Hidden Gems</button>
       <button class="deal-tab" data-tab="watchlist">⭐ Watchlist</button>
+      <div class="tab-indicator" id="tab-indicator"></div>
     </div>
     <div id="deal-list"></div>
     <div id="gems-list" style="display:none"></div>
@@ -945,7 +1009,12 @@ function toggleFav(btn) {
   else        { list.splice(idx, 1); }
   saveWatchlist(list);
   document.querySelectorAll('.fav-btn').forEach(b => {
-    if (b.dataset.url === url) b.classList.toggle('active', adding);
+    if (b.dataset.url !== url) return;
+    b.classList.toggle('active', adding);
+    b.classList.remove('popping');
+    void b.offsetWidth;                  // force reflow to restart animation
+    b.classList.add('popping');
+    b.addEventListener('animationend', () => b.classList.remove('popping'), { once: true });
   });
   const wlPanel = document.getElementById('watchlist-panel');
   if (wlPanel && wlPanel.style.display !== 'none') renderWatchlist();
@@ -1090,6 +1159,7 @@ function render() {
     const card = document.createElement('div');
     card.className = 'grade-card';
     card.style.setProperty('--card-color', color);
+    card.style.setProperty('--grade-delay', `${grades.indexOf(grade) * 0.08}s`);
     card.innerHTML = `
       <div class="card-accent-bar"></div>
       <div class="card-body">
@@ -1403,35 +1473,39 @@ function pricePerKm(v) {
 function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
                          highlightKey = null, highlightAccent = null, watchlist = false }) {
   const color  = scoreColor(v.score);
+  const score  = typeof v.score === 'number' ? v.score.toFixed(1) : v.score;
   const km     = v.mileage_km != null   ? `${v.mileage_km.toLocaleString()} km` : 'N/A';
   const shaken = v.shaken_months != null ? `${v.shaken_months} mo` : 'N/A';
   const favHtml = watchlist
     ? `<button class="fav-btn active" data-url="${v.url || ''}" title="Remove from watchlist" onclick="toggleFav(this)">${icoStarSVG}</button>`
     : (v.url ? favBtn(v.url) : '');
+  const photoBlock = v.photo_url
+    ? `<a href="${v.url || '#'}" target="_blank" rel="noopener" class="deal-card-photo-wrap"><img class="deal-card-photo" src="${v.photo_url}" alt="Vehicle photo" loading="lazy" onerror="this.closest('a').replaceWith(Object.assign(document.createElement('div'),{className:'deal-card-photo-placeholder',textContent:'🚗'}))"></a>`
+    : `<div class="deal-card-photo-placeholder">🚗</div>`;
   return `
     <div class="deal-card-header">
       <span class="deal-card-rank">${rankHtml}</span>
       <div style="display:flex;align-items:center;gap:5px">
         ${favHtml}
-        <span class="deal-card-score" style="color:${color};border-color:${color}22;background:${color}14">${v.score}</span>
+        <span class="deal-card-score" style="color:${color};border-color:${color}22;background:${color}14">${score}</span>
       </div>
     </div>
-    <div>
-      <div class="deal-card-grade" style="color:${gc}">${grade.label || v.grade_label}</div>
-      <div class="deal-card-grade-en">${grade.label_en || ''}</div>
+    ${photoBlock}
+    <div class="deal-card-hero">
+      <div class="deal-card-price" style="color:${gc}">¥${v.price_man}万</div>
+      <div class="deal-card-hero-right">
+        <div class="deal-card-grade" style="color:${gc}">${grade.label || v.grade_label}</div>
+        <div class="deal-card-grade-en">${grade.label_en || ''}</div>
+      </div>
     </div>
-    <div class="deal-card-price" style="color:${gc}">¥${v.price_man}万</div>
-    ${v.photo_url
-      ? `<a href="${v.url || '#'}" target="_blank" rel="noopener" style="display:block;line-height:0"><img class="deal-card-photo" src="${v.photo_url}" alt="Vehicle photo" loading="lazy" onerror="this.closest('a').replaceWith(Object.assign(document.createElement('div'),{className:'deal-card-photo-placeholder',textContent:'🚗'}))"></a>`
-      : `<div class="deal-card-photo-placeholder">🚗</div>`}
     <div class="deal-card-divider"></div>
     <div class="deal-card-pills">
       <span class="deal-card-pill">🛣 ${km}</span>
       <span class="deal-card-pill">🔧 ${shaken}</span>
       ${seatPill(v)}
     </div>
-    ${colorBand(v.color)}
     <div class="quality-badges">${badges}</div>
+    ${colorBand(v.color)}
     <div class="deal-bars">${buildBars(bd, highlightKey, highlightAccent)}</div>
     ${pricePerKm(v)}
     ${dealerRow(v)}
@@ -1439,13 +1513,14 @@ function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
 }
 
 function buildBars(bd, highlightKey, highlightColor) {
-  return ['price', 'mileage', 'shaken'].map(key => {
-    const val  = bd[key] ?? 0;
-    const hi   = key === highlightKey;
-    const fill = hi ? highlightColor : barColor(val);
+  return ['price', 'mileage', 'shaken'].map((key, idx) => {
+    const val   = bd[key] ?? 0;
+    const hi    = key === highlightKey;
+    const fill  = hi ? highlightColor : barColor(val);
+    const delay = (0.12 + idx * 0.09).toFixed(2);
     return `<div class="deal-bar-row">
       <span class="deal-bar-label" style="${hi ? `color:${highlightColor}` : ''}">${key}</span>
-      <div class="deal-bar-track"><div class="deal-bar-fill" style="width:${val*10}%;background:${fill}"></div></div>
+      <div class="deal-bar-track"><div class="deal-bar-fill" style="--bar-w:${val*10}%;--bar-delay:${delay}s;background:${fill}"></div></div>
       <span class="deal-bar-val" style="${hi ? `color:${highlightColor}` : ''}">${val}</span>
     </div>`;
   }).join('');
@@ -1477,6 +1552,7 @@ function renderTopDeals(snap, grades) {
     const card  = document.createElement('div');
     card.className = 'deal-card';
     card.style.setProperty('--card-grade-color', gc);
+    card.style.setProperty('--card-delay', `${i * 0.05}s`);
     card.innerHTML = buildCardHTML({ v, grade, gc, rankHtml: `#${i + 1}`, badges: buildBadges(v, true), bd });
     listEl.appendChild(card);
   });
@@ -1529,7 +1605,7 @@ function renderGems(snap, grades) {
     if (vehicles.length === 0) {
       row.innerHTML = `<div style="grid-column:1/-1;color:var(--muted);font-size:.78rem;padding:12px">No data yet.</div>`;
     } else {
-      vehicles.forEach(v => {
+      vehicles.forEach((v, gemIdx) => {
         if (v.url) VMAP[v.url] = v;
         const grade        = gradeMap[v.grade_id] || {};
         const bd           = v.score_breakdown || {};
@@ -1542,6 +1618,7 @@ function renderGems(snap, grades) {
         const card = document.createElement('div');
         card.className = 'deal-card';
         card.style.setProperty('--card-grade-color', cat.accent);
+        card.style.setProperty('--card-delay', `${gemIdx * 0.05}s`);
         card.innerHTML = buildCardHTML({ v, grade, gc, rankHtml, badges: accOnly, bd,
                                          highlightKey, highlightAccent: cat.accent });
         row.appendChild(card);
@@ -1598,16 +1675,39 @@ function renderWatchlist() {
   panel.appendChild(grid);
 }
 
+/* ── Tab indicator ── */
+function updateTabIndicator(activeTab) {
+  const ind = document.getElementById('tab-indicator');
+  if (!ind || !activeTab) return;
+  ind.style.left  = activeTab.offsetLeft + 'px';
+  ind.style.width = activeTab.offsetWidth + 'px';
+}
+
 /* ── Tab switching ── */
 document.getElementById('top-deals').addEventListener('click', e => {
   const tab = e.target.closest('.deal-tab');
   if (!tab) return;
   document.querySelectorAll('.deal-tab').forEach(t => t.classList.remove('active'));
   tab.classList.add('active');
+  updateTabIndicator(tab);
   const which = tab.dataset.tab;
-  document.getElementById('deal-list').style.display       = which === 'top'       ? '' : 'none';
-  document.getElementById('gems-list').style.display       = which === 'gems'      ? '' : 'none';
-  document.getElementById('watchlist-panel').style.display = which === 'watchlist' ? '' : 'none';
+  const panels = {
+    top:       document.getElementById('deal-list'),
+    gems:      document.getElementById('gems-list'),
+    watchlist: document.getElementById('watchlist-panel'),
+  };
+  Object.entries(panels).forEach(([key, el]) => {
+    if (!el) return;
+    if (key === which) {
+      el.style.display = '';
+      el.classList.remove('tab-fade');
+      void el.offsetWidth;             // reflow to restart animation
+      el.classList.add('tab-fade');
+    } else {
+      el.style.display = 'none';
+      el.classList.remove('tab-fade');
+    }
+  });
   if (which === 'watchlist') renderWatchlist();
 });
 
@@ -1623,6 +1723,12 @@ document.getElementById('period-sel').addEventListener('click', e => {
 });
 
 render();
+
+// Initialize tab indicator position after render
+setTimeout(() => {
+  const activeTab = document.querySelector('.deal-tab.active');
+  updateTabIndicator(activeTab);
+}, 0);
 </script>
 </body>
 </html>
