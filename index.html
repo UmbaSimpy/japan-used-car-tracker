@@ -1273,19 +1273,23 @@ function render() {
     });
   }
 
-  // Compute global minimums across all displayed vehicles (top + all gem categories)
-  const allDisplayed = [
-    ...(snap.top_vehicles || []),
-    ...Object.values(snap.category_gems || {}).flat(),
-  ];
-  const prices  = allDisplayed.map(v => v.price_man).filter(p => p != null);
-  const kms     = allDisplayed.map(v => v.mileage_km).filter(k => k != null);
-  const minPrice = prices.length ? Math.min(...prices) : null;
-  const minKm    = kms.length   ? Math.min(...kms)   : null;
+  // Compute minimums separately per section so badges are relative to what's visible
+  const topVehicles = snap.top_vehicles || [];
+  const gemVehicles = Object.values(snap.category_gems || {}).flat();
+
+  const minOf = (arr, key) => {
+    const vals = arr.map(v => v[key]).filter(x => x != null);
+    return vals.length ? Math.min(...vals) : null;
+  };
+
+  const minPriceTop  = minOf(topVehicles, 'price_man');
+  const minKmTop     = minOf(topVehicles, 'mileage_km');
+  const minPriceGems = minOf(gemVehicles, 'price_man');
+  const minKmGems    = minOf(gemVehicles, 'mileage_km');
 
   renderChart(grades, snaps);
-  renderTopDeals(snap, grades, prevDayUrls, minPrice, minKm);
-  renderGems(snap, grades, prevDayUrls, minPrice, minKm);
+  renderTopDeals(snap, grades, prevDayUrls, minPriceTop, minKmTop);
+  renderGems(snap, grades, prevDayUrls, minPriceGems, minKmGems);
 }
 
 function renderChart(grades, snaps) {
