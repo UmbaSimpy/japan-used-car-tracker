@@ -2805,16 +2805,16 @@ window.FREED_DATA = {
       "pages_scraped": 107,
       "by_grade": {
         "ehev_air_ex_4wd": {
-          "avg": 3556837,
+          "avg": 3553646,
           "min": 3161000,
           "max": 3709000,
-          "count": 49
+          "count": 48
         },
         "ehev_air_ex": {
-          "avg": 3199812,
-          "min": 2280000,
+          "avg": 3198818,
+          "min": 2442000,
           "max": 3770000,
-          "count": 717
+          "count": 714
         },
         "ehev_crosstar_4wd": {
           "avg": 3605000,
@@ -2823,10 +2823,10 @@ window.FREED_DATA = {
           "count": 34
         },
         "ehev_crosstar": {
-          "avg": 3319579,
+          "avg": 3318189,
           "min": 2250000,
           "max": 5355000,
-          "count": 382
+          "count": 380
         }
       },
       "top_vehicles": [
@@ -3134,36 +3134,6 @@ window.FREED_DATA = {
             "url": "https://www.carsensor.net/usedcar/detail/AU6865940059/index.html"
           },
           {
-            "score": 7.6,
-            "score_breakdown": {
-              "price": 9.9,
-              "mileage": 9.3,
-              "shaken": 10.0,
-              "accident": 1.0,
-              "warranty": 4.0,
-              "maintenance": 3.0,
-              "navi": 10.0,
-              "camera": 5.0
-            },
-            "grade_id": "ehev_air_ex",
-            "grade_label": "1.5 e:HEV エアー EX",
-            "price_man": 228.0,
-            "mileage_km": 10000,
-            "shaken_months": 24,
-            "accident": true,
-            "warranty": null,
-            "maintenance": false,
-            "navi": true,
-            "camera": null,
-            "color": "白真珠",
-            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/566/687/U00052566687/U00052566687_002L.JPG",
-            "dealer_name": "ジャンプ三郷センター",
-            "dealer_rating": 4.3,
-            "dealer_reviews": 198,
-            "seats": 6,
-            "url": "https://www.carsensor.net/usedcar/detail/AU6975810805/index.html"
-          },
-          {
             "score": 6.5,
             "score_breakdown": {
               "price": 9.7,
@@ -3192,9 +3162,7 @@ window.FREED_DATA = {
             "dealer_reviews": 198,
             "seats": 5,
             "url": "https://www.carsensor.net/usedcar/detail/AU6927613479/index.html"
-          }
-        ],
-        "high_mileage": [
+          },
           {
             "score": 8.0,
             "score_breakdown": {
@@ -3224,7 +3192,9 @@ window.FREED_DATA = {
             "dealer_reviews": 2,
             "seats": 6,
             "url": "https://www.carsensor.net/usedcar/detail/AU6975456168/index.html"
-          },
+          }
+        ],
+        "high_mileage": [
           {
             "score": 8.2,
             "score_breakdown": {
@@ -3284,6 +3254,36 @@ window.FREED_DATA = {
             "dealer_reviews": null,
             "seats": 6,
             "url": "https://www.carsensor.net/usedcar/detail/AU6950504309/index.html"
+          },
+          {
+            "score": 7.8,
+            "score_breakdown": {
+              "price": 7.6,
+              "mileage": 7.0,
+              "shaken": 6.3,
+              "accident": 10.0,
+              "warranty": 8.0,
+              "maintenance": 10.0,
+              "navi": 10.0,
+              "camera": 5.0
+            },
+            "grade_id": "ehev_crosstar",
+            "grade_label": "1.5 e:HEV クロスター",
+            "price_man": 299.8,
+            "mileage_km": 33000,
+            "shaken_months": 13,
+            "accident": false,
+            "warranty": true,
+            "maintenance": true,
+            "navi": true,
+            "camera": null,
+            "color": "白真珠",
+            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/164/263/UZ0052164263/UZ0052164263_001L.JPG",
+            "dealer_name": "ホンダカーズ南近畿奈良 橿原曲川店（Ｈｏｎｄａ認定中古車取扱店）",
+            "dealer_rating": 4.5,
+            "dealer_reviews": 25,
+            "seats": 5,
+            "url": "https://www.carsensor.net/usedcar/detail/AU6899582555/index.html"
           }
         ],
         "no_shaken": [
