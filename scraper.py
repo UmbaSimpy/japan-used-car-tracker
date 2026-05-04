@@ -16,7 +16,7 @@ import json
 import re
 import sys
 import time
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 # Force UTF-8 output so Japanese characters print correctly on Windows
@@ -437,6 +437,7 @@ def _clean_vehicle(v: dict) -> dict:
         "dealer_name":     v.get("dealer_name"),
         "dealer_rating":   v.get("dealer_rating"),
         "dealer_reviews":  v.get("dealer_reviews"),
+        "seats":           v.get("seats"),
         "url":             v.get("url"),
     }
 
@@ -464,6 +465,49 @@ def build_snapshot(
 
 
 # ── Telegram ─────────────────────────────────────────────────────────────────
+
+def _recent_top_n_urls(
+    snapshots: list[dict],
+    today: str,
+    n: int | None = None,
+    days: int = 7,
+) -> set[str]:
+    """Return the set of vehicle URLs that appeared in the top-N list of any
+    snapshot within the last *days* days (exclusive of today)."""
+    cutoff = str(date.today() - timedelta(days=days))
+    urls: set[str] = set()
+    for s in snapshots:
+        if cutoff <= s["date"] < today:
+            vehicles = s.get("top_vehicles", [])
+            if n is not None:
+                vehicles = vehicles[:n]
+            for v in vehicles:
+                if v.get("url"):
+                    urls.add(v["url"])
+    return urls
+
+
+def build_telegram_alert(v: dict) -> str:
+    """Single-vehicle 🚨 alert for an exceptional deal (score ≥ 9.1)."""
+    km   = f"{v['mileage_km']:,} km"     if v.get("mileage_km")    is not None else "?"
+    shk  = f"{v['shaken_months']}mo車検" if v.get("shaken_months") is not None else "車検?"
+    acc  = "✅ 修復歴なし"   if v.get("accident")    is False else ("⚠️ 修復歴あり" if v.get("accident") else "")
+    war  = "保証付"          if v.get("warranty")    is True  else ""
+    navi = "純正ナビ"        if v.get("navi")        is True  else ""
+    cam  = "マルチビュー"    if v.get("camera")      is True  else ""
+    extras = "  ·  ".join(x for x in [acc, war, navi, cam] if x)
+
+    lines = [
+        f"🚨 <b>EXCEPTIONAL DEAL — {v['score']}/10</b>",
+        "",
+        f"Honda Freed  {v['grade_label']}",
+        f"<b>¥{v['price_man']}万</b>  ·  {km}  ·  {shk}",
+    ]
+    if extras:
+        lines.append(extras)
+    lines += ["", f"👉 {v.get('url', '')}"]
+    return "\n".join(lines)
+
 
 def load_telegram_config() -> dict | None:
     import os
@@ -500,60 +544,67 @@ def send_telegram(message: str) -> None:
         print(f"  [!] Telegram request failed: {e}")
 
 
-def build_telegram_message(snapshot: dict, prev_snapshot: dict | None) -> str:
+def build_telegram_message(
+    snapshot: dict,
+    prev_snapshot: dict | None,
+    known_top3_urls: set[str] | None = None,
+) -> str:
+    """Compact daily summary. known_top3_urls: URLs seen in top-3 in the last
+    7 days — vehicles NOT in that set get a 🆕 NEW marker."""
+    if known_top3_urls is None:
+        known_top3_urls = set()
+
     today = snapshot["date"]
-    lines = [f"<b>🚗 Honda Freed Scan — {today}</b>"]
+    lines = [f"<b>🚗 Honda Freed — {today}</b>"]
 
-    grade_labels = {
-        "ehev_air_ex":       "e:HEV エアー EX (2WD)",
-        "ehev_air_ex_4wd":   "e:HEV エアー EX 4WD",
-        "ehev_crosstar":     "e:HEV クロスター (2WD)",
-        "ehev_crosstar_4wd": "e:HEV クロスター 4WD",
+    # ── Grade stats: one compact line per grade ───────────────────────────
+    SHORT = {
+        "ehev_air_ex":       "エアーEX 2WD",
+        "ehev_air_ex_4wd":   "エアーEX 4WD",
+        "ehev_crosstar":     "クロスター 2WD",
+        "ehev_crosstar_4wd": "クロスター 4WD",
     }
-
-    for gid, label in grade_labels.items():
+    grade_lines = []
+    for gid, label in SHORT.items():
         cur = snapshot["by_grade"].get(gid)
         if not cur:
             continue
         pre = prev_snapshot["by_grade"].get(gid) if prev_snapshot else None
-
-        lines.append("")
-        lines.append(f"<b>{label}</b>")
-
         count = cur["count"]
+        avg   = cur["avg"]
         if pre:
-            d_count = count - pre["count"]
-            arrow = "▲" if d_count > 0 else ("▼" if d_count < 0 else "→")
-            sign  = "+" if d_count > 0 else ""
-            lines.append(f"  台数: {count:,} 台  ({arrow} {sign}{d_count:,} from last scan)")
+            dc = count - pre["count"]
+            da = avg   - pre["avg"]
+            c_str = f"{count:,}台 ({'+' if dc>0 else ''}{dc:,})"
+            a_str = f"¥{avg:,} ({'+' if da>0 else ''}¥{da:,})"
         else:
-            lines.append(f"  台数: {count:,} 台  (first snapshot)")
+            c_str = f"{count:,}台"
+            a_str = f"¥{avg:,}"
+        grade_lines.append(f"  {label}: {c_str}  avg {a_str}")
 
-        avg = cur["avg"]
-        if pre:
-            d_avg = avg - pre["avg"]
-            arrow = "▲" if d_avg > 0 else ("▼" if d_avg < 0 else "→")
-            sign  = "+" if d_avg > 0 else ""
-            lines.append(f"  Avg:  ¥{avg:,}  ({arrow} {sign}¥{d_avg:,})")
-        else:
-            lines.append(f"  Avg:  ¥{avg:,}")
+    if grade_lines:
+        lines.append("")
+        lines.extend(grade_lines)
 
-    # Top 3 deals
+    # ── Top 3 deals ───────────────────────────────────────────────────────
     top = snapshot.get("top_vehicles", [])[:3]
     if top:
         lines.append("")
-        lines.append("<b>🏆 Top 3 Deals Today</b>")
+        lines.append("<b>🏆 Top 3</b>")
         for i, v in enumerate(top, 1):
-            km    = f"{v['mileage_km']:,} km" if v.get("mileage_km") is not None else "km ?"
-            shk   = f"{v['shaken_months']}mo shaken" if v.get("shaken_months") is not None else "shaken ?"
-            acc   = "No accident" if v.get("accident") is False else ("Accident" if v.get("accident") else "acc ?")
-            war   = "保証付" if v.get("warranty") is True else ("保証なし" if v.get("warranty") is False else "保証 ?")
-            mnt   = "整備付" if v.get("maintenance") is True else ("整備無" if v.get("maintenance") is False else "整備 ?")
-            navi   = "純正ナビ" if v.get("navi") is True else ("ナビレス" if v.get("navi") is False else "ナビ ?")
-            cam    = "マルチビュー" if v.get("camera") is True else ""
-            extras = " · ".join(x for x in [navi, cam] if x)
-            lines.append(f"  #{i} [{v['score']}/10] {v['grade_label']} — ¥{v['price_man']}万")
-            lines.append(f"      {km} · {shk} · {acc} · {war} · {mnt} · {extras}")
+            new_tag = "" if v.get("url") in known_top3_urls else "  🆕 NEW"
+            km  = f"{v['mileage_km']:,}km"     if v.get("mileage_km")    is not None else "?km"
+            shk = f"{v['shaken_months']}mo車検" if v.get("shaken_months") is not None else "車検?"
+            acc = "✅"  if v.get("accident")  is False else ("⚠️" if v.get("accident") else "")
+            war = "保証" if v.get("warranty")  is True  else ""
+            navi = "ナビ" if v.get("navi")     is True  else ""
+            tags = " ".join(x for x in [acc, war, navi] if x)
+            lines.append(
+                f"  #{i} <b>[{v['score']}]</b> ¥{v['price_man']}万"
+                f"  {km} · {shk}{new_tag}"
+            )
+            if tags:
+                lines.append(f"      {tags}")
             if v.get("url"):
                 lines.append(f"      {v['url']}")
 
@@ -664,6 +715,7 @@ def run(max_pages: int | None) -> None:
             top_vehicles.append(v)   # no URL → can't check, include anyway
             continue
         seats = _fetch_seat_count(url)
+        v["seats"] = seats           # store for display (no scoring impact)
         if seats == 5:
             print(f"  ✗ skipped  5-seat  ¥{v['price_man']}万  {v['grade_id']}  {url}")
         else:
@@ -723,13 +775,32 @@ def run(max_pages: int | None) -> None:
         "no_shaken":    no_shaken_gems,
     }
 
+    # ── Seat counts for gem vehicles (display only, no score impact) ─────────
+    # Collect unique gem URLs that haven't already been seat-checked
+    # (top_vehicles already have v["seats"] set from the earlier loop)
+    gem_by_url: dict[str, dict] = {}
+    for gem_list in category_gems.values():
+        for v in gem_list:
+            u = v.get("url")
+            if u and u not in gem_by_url and v.get("seats") is None:
+                gem_by_url[u] = v
+
+    if gem_by_url:
+        print(f"\nFetching seat counts for {len(gem_by_url)} gem vehicle(s) …")
+        for u, v in gem_by_url.items():
+            seats = _fetch_seat_count(u)
+            v["seats"] = seats
+            print(f"  {u}  → {seats}名" if seats else f"  {u}  → ?")
+            time.sleep(DELAY_SEC)
+
     print("\nCategory gems:")
     for cat, gems in category_gems.items():
         print(f"  {cat}:")
         for g in gems:
             km  = f"{g['mileage_km']:,} km" if g.get("mileage_km") is not None else "km=?"
             shk = f"{g.get('shaken_months')}mo" if g.get("shaken_months") else "no shaken"
-            print(f"    [{g['score']}] ¥{g['price_man']}万  {km}  {shk}  {g.get('url','')}")
+            seat_label = f"  {g['seats']}名" if g.get("seats") is not None else ""
+            print(f"    [{g['score']}] ¥{g['price_man']}万  {km}  {shk}{seat_label}  {g.get('url','')}")
 
     # ── Save ──────────────────────────────────────────────────────────────
     snapshot = build_snapshot(by_grade_prices, limit, top_vehicles, category_gems)
@@ -753,7 +824,18 @@ def run(max_pages: int | None) -> None:
     save(data)
 
     # ── Telegram ──────────────────────────────────────────────────────────
-    msg = build_telegram_message(snapshot, prev_snapshot)
+    # URLs that appeared anywhere in top_vehicles in the last 7 days
+    known_all    = _recent_top_n_urls(data["snapshots"], today, n=None, days=7)
+    # URLs that appeared in the top-3 specifically in the last 7 days
+    known_top3   = _recent_top_n_urls(data["snapshots"], today, n=3,    days=7)
+
+    # 🚨 Alert for any exceptional vehicle (score ≥ 9.1) not seen recently
+    for v in snapshot.get("top_vehicles", []):
+        if v.get("score", 0) >= 9.1 and v.get("url") and v["url"] not in known_all:
+            send_telegram(build_telegram_alert(v))
+
+    # Regular compact daily summary
+    msg = build_telegram_message(snapshot, prev_snapshot, known_top3)
     send_telegram(msg)
 
     # ── Console summary ───────────────────────────────────────────────────

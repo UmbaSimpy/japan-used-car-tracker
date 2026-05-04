@@ -1669,10 +1669,10 @@ window.FREED_DATA = {
           "count": 49
         },
         "ehev_air_ex": {
-          "avg": 3198626,
+          "avg": 3198698,
           "min": 2280000,
           "max": 3770000,
-          "count": 712
+          "count": 713
         },
         "ehev_crosstar_4wd": {
           "avg": 3613543,
@@ -1681,10 +1681,10 @@ window.FREED_DATA = {
           "count": 35
         },
         "ehev_crosstar": {
-          "avg": 3320545,
+          "avg": 3321827,
           "min": 2250000,
           "max": 5355000,
-          "count": 385
+          "count": 387
         }
       },
       "top_vehicles": [
@@ -1715,6 +1715,7 @@ window.FREED_DATA = {
           "dealer_name": "栃木ホンダ販売株式会社 Ｕ－Ｓｅｌｅｃｔ　さくら",
           "dealer_rating": 5.0,
           "dealer_reviews": 3,
+          "seats": 6,
           "url": "https://www.carsensor.net/usedcar/detail/AU6982104839/index.html"
         },
         {
@@ -1744,6 +1745,7 @@ window.FREED_DATA = {
           "dealer_name": "ガリバー 朝日店",
           "dealer_rating": 4.7,
           "dealer_reviews": 128,
+          "seats": 6,
           "url": "https://www.carsensor.net/usedcar/detail/AU6911824286/index.html"
         },
         {
@@ -1773,6 +1775,7 @@ window.FREED_DATA = {
           "dealer_name": "オートファルコン 相模原支店",
           "dealer_rating": 4.9,
           "dealer_reviews": 36,
+          "seats": 6,
           "url": "https://www.carsensor.net/usedcar/detail/AU6942468518/index.html"
         },
         {
@@ -1802,6 +1805,7 @@ window.FREED_DATA = {
           "dealer_name": "ＶＥＲＮＯ　ＣＡＲＬＡ越谷レイクタウン店 （ベルノカーラ越谷レイクタウン店）",
           "dealer_rating": 4.8,
           "dealer_reviews": 358,
+          "seats": 6,
           "url": "https://www.carsensor.net/usedcar/detail/AU6971688091/index.html"
         },
         {
@@ -1831,6 +1835,7 @@ window.FREED_DATA = {
           "dealer_name": "新車王国　ミニバン・ＳＵＶ・アルファード・ヴェルファイア・シビック・ハイエース 専門店",
           "dealer_rating": 5.0,
           "dealer_reviews": 417,
+          "seats": 6,
           "url": "https://www.carsensor.net/usedcar/detail/AU6942785513/index.html"
         },
         {
@@ -1860,6 +1865,7 @@ window.FREED_DATA = {
           "dealer_name": "ネクステージ 富里インター店",
           "dealer_rating": null,
           "dealer_reviews": null,
+          "seats": 6,
           "url": "https://www.carsensor.net/usedcar/detail/AU6976440593/index.html"
         },
         {
@@ -1889,6 +1895,7 @@ window.FREED_DATA = {
           "dealer_name": "ＶＥＲＮＯ　ＣＡＲＬＡ越谷レイクタウン店 （ベルノカーラ越谷レイクタウン店）",
           "dealer_rating": 4.8,
           "dealer_reviews": 358,
+          "seats": 6,
           "url": "https://www.carsensor.net/usedcar/detail/AU6971904530/index.html"
         },
         {
@@ -1918,6 +1925,7 @@ window.FREED_DATA = {
           "dealer_name": "ガリバー 枚方店",
           "dealer_rating": 4.6,
           "dealer_reviews": 27,
+          "seats": 6,
           "url": "https://www.carsensor.net/usedcar/detail/AU6649013760/index.html"
         },
         {
@@ -1947,6 +1955,7 @@ window.FREED_DATA = {
           "dealer_name": "ネクステージ 岡崎美合店",
           "dealer_rating": 4.7,
           "dealer_reviews": 56,
+          "seats": 6,
           "url": "https://www.carsensor.net/usedcar/detail/AU6969903074/index.html"
         }
       ],
@@ -1979,6 +1988,7 @@ window.FREED_DATA = {
             "dealer_name": "ＡＵＴＯ　ＳＥＬＥＣＴＩＯＮ １６号本店",
             "dealer_rating": 4.8,
             "dealer_reviews": 1073,
+            "seats": 5,
             "url": "https://www.carsensor.net/usedcar/detail/AU6865940059/index.html"
           },
           {
@@ -2008,6 +2018,7 @@ window.FREED_DATA = {
             "dealer_name": "ジャンプ三郷センター",
             "dealer_rating": 4.3,
             "dealer_reviews": 198,
+            "seats": 6,
             "url": "https://www.carsensor.net/usedcar/detail/AU6975810805/index.html"
           },
           {
@@ -2037,6 +2048,7 @@ window.FREED_DATA = {
             "dealer_name": "ジャンプ三郷センター",
             "dealer_rating": 4.3,
             "dealer_reviews": 198,
+            "seats": 5,
             "url": "https://www.carsensor.net/usedcar/detail/AU6927613479/index.html"
           }
         ],
@@ -2068,6 +2080,7 @@ window.FREED_DATA = {
             "dealer_name": "株式会社ホンダカーズ兵庫中央 Ｕ－Ｓｅｌｅｃｔ加古川",
             "dealer_rating": 5.0,
             "dealer_reviews": 2,
+            "seats": 6,
             "url": "https://www.carsensor.net/usedcar/detail/AU6975456168/index.html"
           },
           {
@@ -2097,6 +2110,7 @@ window.FREED_DATA = {
             "dealer_name": "（株）ホンダカーズ市川 東金東店Ｕ－Ｓｅｌｅｃｔコーナー",
             "dealer_rating": 4.7,
             "dealer_reviews": 42,
+            "seats": 5,
             "url": "https://www.carsensor.net/usedcar/detail/AU6944524163/index.html"
           },
           {
@@ -2126,6 +2140,7 @@ window.FREED_DATA = {
             "dealer_name": "ガリバー 太田３５４バイパス店",
             "dealer_rating": null,
             "dealer_reviews": null,
+            "seats": 6,
             "url": "https://www.carsensor.net/usedcar/detail/AU6950504309/index.html"
           }
         ],
@@ -2157,6 +2172,7 @@ window.FREED_DATA = {
             "dealer_name": "ホンダカーズ吉田　吉田店",
             "dealer_rating": null,
             "dealer_reviews": null,
+            "seats": 6,
             "url": "https://www.carsensor.net/usedcar/detail/AU6977380788/index.html"
           },
           {
@@ -2186,6 +2202,7 @@ window.FREED_DATA = {
             "dealer_name": "ホンダカーズ吉田　吉田店",
             "dealer_rating": null,
             "dealer_reviews": null,
+            "seats": 5,
             "url": "https://www.carsensor.net/usedcar/detail/AU6974303834/index.html"
           },
           {
@@ -2215,6 +2232,7 @@ window.FREED_DATA = {
             "dealer_name": "ホンダカーズ乙訓 向日店",
             "dealer_rating": 5.0,
             "dealer_reviews": 1,
+            "seats": 6,
             "url": "https://www.carsensor.net/usedcar/detail/AU6963089170/index.html"
           }
         ]

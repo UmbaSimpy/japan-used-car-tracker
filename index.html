@@ -695,12 +695,68 @@
       .avg-value { font-size: 2.1rem; }
       .deal-grid, .gems-row, .watchlist-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
+
     @media (max-width: 600px) {
-      header { padding: 0 18px; }
-      main { padding: 28px 18px; gap: 36px; }
+      /* Header: stack period controls below logo */
+      header {
+        padding: 0 16px;
+        height: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        padding-top: 10px;
+        padding-bottom: 10px;
+      }
+      .logo-meta { display: none; }          /* hide subtitle on small screens */
+      .logo-rule { display: none; }
+      .logo-freed, .logo-market { font-size: 1.35rem; }
+      .header-right {
+        width: 100%;
+        justify-content: space-between;
+        padding-top: 8px;
+        border-top: 1px solid var(--border);
+        margin-top: 8px;
+      }
+
+      main { padding: 22px 14px; gap: 30px; }
+
+      /* Grade cards: single column */
       .cards-row { grid-template-columns: 1fr; }
-      .deal-grid, .gems-row, .watchlist-grid { grid-template-columns: 1fr; }
-      .gems-section, .watchlist-panel { padding: 18px; }
+
+      /* Deal / gem / watchlist grids: single column, properly constrained */
+      .deal-grid, .gems-row, .watchlist-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      /* Cards: prevent any content from blowing out the column */
+      .deal-card { overflow: hidden; padding: 13px 14px; }
+
+      /* Score bars: reduce label width so bars have more room */
+      .deal-bar-label { width: 32px; font-size: 0.52rem; }
+      .deal-bar-val   { width: 20px; font-size: 0.65rem; }
+
+      /* Tab bar: shrink text so all three tabs fit */
+      .deal-tab { padding: 10px 14px; font-size: 0.68rem; letter-spacing: 0.8px; }
+
+      /* Top-deals header: tighter */
+      .top-deals-header { padding: 14px 16px; }
+      .top-deals-title  { font-size: 1.2rem; }
+      .top-deals-subtitle { display: none; }
+      .score-legend { gap: 8px; }
+      .score-legend-item { font-size: 0.6rem; }
+
+      /* Gems section */
+      .gems-section { padding: 16px 14px; gap: 18px; }
+      .gems-category-header { flex-wrap: wrap; gap: 6px; }
+      .gems-category-desc { display: none; }     /* desc verbose on mobile */
+
+      /* Watchlist */
+      .watchlist-panel { padding: 16px 14px; }
+
+      /* Chart */
+      .chart-header { padding: 14px 16px; }
+      .chart-body   { padding: 16px 16px 20px; }
+      .chart-wrap   { height: 200px; }
     }
   </style>
 </head>
@@ -1315,6 +1371,17 @@ function dealerRow(v) {
 }
 
 
+function seatPill(v) {
+  const s = v.seats;
+  if (s == null) return '';
+  const isIdeal = s === 6;
+  const isBad   = s === 5 || s === 7;
+  const color   = isIdeal ? 'var(--green)' : isBad ? 'var(--red)' : 'var(--text2)';
+  const border  = isIdeal ? 'rgba(25,195,125,.35)' : isBad ? 'rgba(232,39,42,.35)' : 'var(--border)';
+  const bg      = isIdeal ? 'rgba(25,195,125,.07)'  : isBad ? 'rgba(232,39,42,.07)'  : 'transparent';
+  return `<span class="deal-card-pill" style="color:${color};border-color:${border};background:${bg}">🪑 ${s}名</span>`;
+}
+
 function pricePerKm(v) {
   if (v.mileage_km == null || v.mileage_km < 2000) return '';
   const yen = Math.round((v.price_man * 10000) / v.mileage_km);
@@ -1361,6 +1428,7 @@ function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
     <div class="deal-card-pills">
       <span class="deal-card-pill">🛣 ${km}</span>
       <span class="deal-card-pill">🔧 ${shaken}</span>
+      ${seatPill(v)}
     </div>
     ${colorBand(v.color)}
     <div class="quality-badges">${badges}</div>
@@ -1511,7 +1579,11 @@ function renderWatchlist() {
   const grid = document.createElement('div');
   grid.className = 'watchlist-grid';
 
-  list.forEach(v => {
+  list.forEach(saved => {
+    // Prefer the live VMAP entry (fresh from today's snapshot) so fields added
+    // after the vehicle was first saved (photo_url, seats, etc.) are always current.
+    // Fall back to the stored copy if the car is no longer in the current snapshot.
+    const v = (saved.url && VMAP[saved.url]) ? VMAP[saved.url] : saved;
     const grade   = gradeMap[v.grade_id] || {};
     const bd      = v.score_breakdown || {};
     const gc      = GRADE_COLORS[v.grade_id] || 'var(--border2)';
