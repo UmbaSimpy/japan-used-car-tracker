@@ -608,6 +608,9 @@ def build_telegram_message(
             if v.get("url"):
                 lines.append(f"      {v['url']}")
 
+    lines.append("")
+    lines.append("📊 <a href=\"https://umbasimpy.github.io/japan-used-car-tracker/\">View dashboard</a>")
+
     return "\n".join(lines)
 
 
