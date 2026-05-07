@@ -55,13 +55,13 @@ GRADE_ID_TO_LABEL = {v: k for k, v in TARGET_GRADES.items()}
 
 # Scoring weights (must sum to 1.0)
 WEIGHTS = {
-    "price":       0.33,   # up from 0.28 — price spread matters more
-    "mileage":     0.19,   # down from 0.24 — 0–3k km flat zone reduces its impact
-    "shaken":      0.05,   # swapped with navi — short shaken still viable, navi costs ~¥30万
+    "price":       0.35,   # increased — price spread is the strongest signal
+    "mileage":     0.20,   # increased — low km is a core value driver
+    "shaken":      0.04,   # reduced — short shaken still viable, buyer can renew
     "accident":    0.13,
     "warranty":    0.09,
     "maintenance": 0.05,
-    "navi":        0.13,   # swapped with shaken — OEM nav absence = ~¥30万 extra cost
+    "navi":        0.11,   # OEM nav absence = ~¥30万 extra cost, but not dominant
     "camera":      0.03,   # slight bonus for マルチビューカメラ
 }
 
