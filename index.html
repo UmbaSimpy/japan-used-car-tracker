@@ -1375,13 +1375,13 @@ function renderChart(grades, snaps) {
 
 /* ── Score helpers ── */
 function scoreColor(s) {
-  if (s >= 8) return '#19C37D';
-  if (s >= 5) return '#F5A623';
+  if (s >= 7.5) return '#19C37D';
+  if (s >= 5.5) return '#F5A623';
   return '#E8272A';
 }
 function barColor(s) {
-  if (s >= 8) return '#19C37D';
-  if (s >= 5) return '#F5A623';
+  if (s >= 7.5) return '#19C37D';
+  if (s >= 5.5) return '#F5A623';
   return '#E8272A';
 }
 
@@ -1549,7 +1549,7 @@ function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
                          highlightKey = null, highlightAccent = null, watchlist = false, isNew = false,
                          minPrice = null, minKm = null }) {
   const color  = scoreColor(v.score);
-  const score  = typeof v.score === 'number' ? v.score.toFixed(1) : v.score;
+  const score  = typeof v.score === 'number' ? v.score.toFixed(2) : v.score;
   const km     = v.mileage_km != null   ? `${v.mileage_km.toLocaleString()} km` : 'N/A';
   const shaken = v.shaken_months != null ? `${v.shaken_months} mo` : 'N/A';
   const favHtml = watchlist

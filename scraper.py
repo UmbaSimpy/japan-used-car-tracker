@@ -55,15 +55,29 @@ GRADE_ID_TO_LABEL = {v: k for k, v in TARGET_GRADES.items()}
 
 # Scoring weights (must sum to 1.0)
 WEIGHTS = {
-    "price":       0.35,   # increased — price spread is the strongest signal
-    "mileage":     0.20,   # increased — low km is a core value driver
+    "price":       0.35,   # per-grade fixed-anchor value score (range + discount bonus)
+    "mileage":     0.20,   # linear decay from 0 km — no flat zone
     "shaken":      0.04,   # reduced — short shaken still viable, buyer can renew
     "accident":    0.13,
     "warranty":    0.09,
     "maintenance": 0.05,
-    "navi":        0.11,   # OEM nav absence = ~¥30万 extra cost, but not dominant
-    "camera":      0.03,   # slight bonus for マルチビューカメラ
+    "navi":        0.11,   # OEM nav absence ≈ ¥30万 extra cost for buyer
+    "camera":      0.03,
 }
+
+# ── Fixed price anchors (per-grade, stable over time) ─────────────────────────
+# Scores are consistent across days — they don't shift with the daily pool.
+#   floor   = realistic floor for a clean used deal (→ scores close to 10)
+#   ceiling = near-new retail territory             (→ scores 0)
+#   typical = stable market median                  (→ baseline for discount bonus)
+# Update these manually only when the market structurally shifts.
+GRADE_PRICE_ANCHORS: dict[str, tuple[float, float, float]] = {
+    "ehev_air_ex":       (220.0, 385.0, 315.0),
+    "ehev_air_ex_4wd":   (295.0, 395.0, 355.0),
+    "ehev_crosstar":     (220.0, 430.0, 330.0),
+    "ehev_crosstar_4wd": (260.0, 445.0, 360.0),
+}
+_DEFAULT_ANCHORS: tuple[float, float, float] = (220.0, 430.0, 330.0)
 
 
 # ── Scraping ─────────────────────────────────────────────────────────────────
@@ -313,27 +327,35 @@ def _fetch_seat_count(url: str) -> int | None:
 
 # ── Scoring ──────────────────────────────────────────────────────────────────
 
-def score_vehicle(vehicle: dict, global_stats: dict) -> tuple[float, dict]:
+def score_vehicle(vehicle: dict) -> tuple[float, dict]:
     """
-    Score a vehicle 0–10 using price (35%), mileage (30%),
-    shaken remaining (20%), accident history (15%).
-    All criteria use the same scale regardless of grade.
-    Price is normalized against the global min/max across ALL grades.
-    """
-    # Price: normalized globally so every vehicle is judged on the same scale
-    g_min = global_stats["min"]
-    g_max = global_stats["max"]
-    price_range = max(g_max - g_min, 1.0)
-    price_score = max(0.0, min(10.0, 10.0 * (g_max - vehicle["price_man"]) / price_range))
+    Score a vehicle 0–10 using fixed, per-grade price anchors.
 
-    # Mileage: 0–3,000 km all score 10 (flat max zone — brand-new vs demo-car irrelevant).
-    # Above 3,000 km the score decays linearly: 10 at 3,000 km → 0 at 103,000 km.
+    Scores are stable across time — they don't shift with the daily pool.
+    Returns (score_rounded_to_2dp, breakdown_dict).
+
+    Price (35%): two components averaged (70/30):
+      - Range score:    where in [floor, ceiling] does this price sit?
+      - Discount score: how much below the grade's typical market price?
+    Mileage (20%): linear decay from 0 km — 0 km→10, 100k km→0. No flat zone.
+    """
+    # ── Price: per-grade fixed anchors ────────────────────────────────────────
+    anchors    = GRADE_PRICE_ANCHORS.get(vehicle.get("grade_id", ""), _DEFAULT_ANCHORS)
+    floor, ceiling, typical = anchors
+    price_man  = vehicle["price_man"]
+    price_span = max(ceiling - floor, 1.0)
+
+    range_score    = max(0.0, min(10.0, 10.0 * (ceiling - price_man) / price_span))
+    discount_pct   = (typical - price_man) / max(typical, 1.0)   # >0 = below typical
+    discount_score = max(0.0, min(10.0, 5.0 + discount_pct * 25.0))
+    price_score    = 0.70 * range_score + 0.30 * discount_score
+
+    # ── Mileage: linear from 0, no flat zone ──────────────────────────────────
     km = vehicle.get("mileage_km")
     if km is None:
         mileage_score = 5.0
     else:
-        effective_km = max(0, km - 3_000)
-        mileage_score = max(0.0, min(10.0, 10.0 - (effective_km / 10_000.0)))
+        mileage_score = max(0.0, min(10.0, 10.0 - km / 10_000.0))
 
     # Shaken: 0 months → 2,  ≥ 24 months → 10
     months = vehicle.get("shaken_months")
@@ -400,7 +422,7 @@ def score_vehicle(vehicle: dict, global_stats: dict) -> tuple[float, dict]:
         "navi":        round(navi_score,        1),
         "camera":      round(camera_score,      1),
     }
-    return round(total, 1), breakdown
+    return round(total, 2), breakdown
 
 
 # ── Statistics ───────────────────────────────────────────────────────────────
@@ -687,16 +709,9 @@ def run(max_pages: int | None) -> None:
     for v in all_vehicles:
         by_grade_prices[v["grade_id"]].append(v["price_man"])
 
-    # ── Global price range (shared across ALL grades for fair scoring) ────
-    all_prices = [v["price_man"] for v in all_vehicles]
-    global_stats = {
-        "min": min(all_prices),
-        "max": max(all_prices),
-    } if all_prices else {"min": 0, "max": 1}
-
-    # ── Score every vehicle using the same global scale ───────────────────
+    # ── Score every vehicle (fixed per-grade anchors — no global stats needed) ──
     for v in all_vehicles:
-        v["score"], v["score_breakdown"] = score_vehicle(v, global_stats)
+        v["score"], v["score_breakdown"] = score_vehicle(v)
 
     # ── Top N across all grades (excluding 5-seat configurations) ────────
     # Seating capacity is only on the detail page, so we fetch detail pages
@@ -834,7 +849,7 @@ def run(max_pages: int | None) -> None:
 
     # 🚨 Alert for any exceptional vehicle (score ≥ 9.1) not seen recently
     for v in snapshot.get("top_vehicles", []):
-        if v.get("score", 0) >= 9.1 and v.get("url") and v["url"] not in known_all:
+        if v.get("score", 0) >= 8.8 and v.get("url") and v["url"] not in known_all:
             send_telegram(build_telegram_alert(v))
 
     # Regular compact daily summary
