@@ -72,12 +72,17 @@ WEIGHTS = {
 #   typical = stable market median                  (→ baseline for discount bonus)
 # Update these manually only when the market structurally shifts.
 GRADE_PRICE_ANCHORS: dict[str, tuple[float, float, float]] = {
-    "ehev_air_ex":       (220.0, 385.0, 315.0),
-    "ehev_air_ex_4wd":   (295.0, 395.0, 355.0),
-    "ehev_crosstar":     (220.0, 430.0, 330.0),
-    "ehev_crosstar_4wd": (260.0, 445.0, 360.0),
+    # (floor_man, ceiling_man, typical_man)
+    # ceiling = Honda official MSRP (新車価格) — at/above this price scores 0
+    # typical = fair used price (~10% below MSRP) — the discount bonus baseline
+    # floor   = realistic floor for a genuine deal
+    # To revert: git revert HEAD  (commit b5bd7db is the previous baseline)
+    "ehev_air_ex":       (220.0, 323.0, 291.0),
+    "ehev_air_ex_4wd":   (290.0, 345.0, 311.0),
+    "ehev_crosstar":     (220.0, 332.0, 299.0),
+    "ehev_crosstar_4wd": (260.0, 354.0, 319.0),
 }
-_DEFAULT_ANCHORS: tuple[float, float, float] = (220.0, 430.0, 330.0)
+_DEFAULT_ANCHORS: tuple[float, float, float] = (220.0, 332.0, 299.0)
 
 
 # ── Scraping ─────────────────────────────────────────────────────────────────
