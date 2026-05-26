@@ -751,58 +751,55 @@ def run(max_pages: int | None) -> None:
     # ── Category Gems ─────────────────────────────────────────────────────
     # Vehicles that excel in ONE specific parameter.
     # Each URL appears in at most ONE category (strict deduplication).
+    # We over-pick candidates (GEM_BUFFER), fetch all seat counts up-front,
+    # then filter 5-seat vehicles before trimming to GEM_TARGET.
+    GEM_TARGET = 3
+    GEM_BUFFER = 25  # large buffer — 5-seat Crosstars dominate cheap/high-km pool
+
     top_urls = {v.get("url") for v in top_vehicles}
     non_top  = [v for v in scored_sorted if v.get("url") not in top_urls]
 
-    used_gem_urls: set[str] = set()
-
-    def _pick_gems(candidates: list[dict], n: int = 3) -> list[dict]:
+    def _pick_candidates(candidates: list[dict], n: int = GEM_BUFFER) -> list[dict]:
+        """Pick up to n candidates without cross-category URL tracking.
+        Deduplication across categories is handled at finalisation stage."""
         result: list[dict] = []
+        seen: set[str] = set()
         for v in candidates:
             url = v.get("url")
-            if url and url in used_gem_urls:
+            if url and url in seen:
                 continue
             result.append(v)
             if url:
-                used_gem_urls.add(url)
+                seen.add(url)
             if len(result) >= n:
                 break
         return result
 
-    # Price gems: cheapest non-top cars (likely trade-offs on mileage / shaken).
-    price_gems = _pick_gems(sorted(
-        non_top,
-        key=lambda x: (-x["score_breakdown"]["price"], -x["score"]),
-    ))
-
-    # High-mileage gems: ≥30,000 km but strong on every other parameter.
-    # Ranked by score-excluding-mileage so mileage penalty doesn't drown good deals.
     W_ML = WEIGHTS["mileage"]
-    high_mileage_gems = _pick_gems(sorted(
-        [v for v in non_top if (v.get("mileage_km") or 0) >= 30_000],
-        key=lambda x: -(
-            (x["score"] - x["score_breakdown"]["mileage"] * W_ML) / (1 - W_ML)
-        ),
-    ))
-
-    # No-shaken gems: cars with no remaining shaken (shaken_months None or 0),
-    # ranked by overall score. Buyer must arrange JCI — often priced lower.
-    no_shaken_gems = _pick_gems(sorted(
-        [v for v in scored_sorted if not v.get("shaken_months")],
-        key=lambda x: -x["score"],
-    ))
-
-    category_gems = {
-        "price":        price_gems,
-        "high_mileage": high_mileage_gems,
-        "no_shaken":    no_shaken_gems,
+    raw_candidates: dict[str, list[dict]] = {
+        # Price gems: cheapest non-top cars (likely trade-offs on mileage / shaken)
+        "price": _pick_candidates(sorted(
+            non_top,
+            key=lambda x: (-x["score_breakdown"]["price"], -x["score"]),
+        )),
+        # High-mileage gems: ≥15k km, ranked excluding mileage penalty
+        # (threshold kept low — Freed e:HEV is a new model, 30k+ is rare)
+        "high_mileage": _pick_candidates(sorted(
+            [v for v in non_top if (v.get("mileage_km") or 0) >= 15_000],
+            key=lambda x: -(
+                (x["score"] - x["score_breakdown"]["mileage"] * W_ML) / (1 - W_ML)
+            ),
+        )),
+        # No-shaken gems: no JCI remaining, buyer arranges inspection
+        "no_shaken": _pick_candidates(sorted(
+            [v for v in scored_sorted if not v.get("shaken_months")],
+            key=lambda x: -x["score"],
+        )),
     }
 
-    # ── Seat counts for gem vehicles (display only, no score impact) ─────────
-    # Collect unique gem URLs that haven't already been seat-checked
-    # (top_vehicles already have v["seats"] set from the earlier loop)
+    # ── Seat counts for ALL gem candidates ────────────────────────────────────
     gem_by_url: dict[str, dict] = {}
-    for gem_list in category_gems.values():
+    for gem_list in raw_candidates.values():
         for v in gem_list:
             u = v.get("url")
             if u and u not in gem_by_url and v.get("seats") is None:
@@ -815,6 +812,30 @@ def run(max_pages: int | None) -> None:
             v["seats"] = seats
             print(f"  {u}  → {seats}名" if seats else f"  {u}  → ?")
             time.sleep(DELAY_SEC)
+
+    # ── Finalise: skip 5-seat, deduplicate across categories, trim to target ──
+    used_gem_urls: set[str] = set()
+
+    def _finalize_gems(candidates: list[dict]) -> list[dict]:
+        result: list[dict] = []
+        for v in candidates:
+            url = v.get("url")
+            if url and url in used_gem_urls:
+                continue      # already claimed by a higher-priority category
+            if v.get("seats") == 5:
+                continue      # 5-seat vehicles excluded from all gem categories
+            result.append(v)
+            if url:
+                used_gem_urls.add(url)
+            if len(result) >= GEM_TARGET:
+                break
+        return result
+
+    category_gems = {
+        "price":        _finalize_gems(raw_candidates["price"]),
+        "high_mileage": _finalize_gems(raw_candidates["high_mileage"]),
+        "no_shaken":    _finalize_gems(raw_candidates["no_shaken"]),
+    }
 
     print("\nCategory gems:")
     for cat, gems in category_gems.items():
