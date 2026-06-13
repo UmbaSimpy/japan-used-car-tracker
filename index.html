@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Freed.Market — Honda Freed Used Car Intelligence</title>
+  <title>Freed.Market — Japan Used Car Intelligence</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
   <script src="data/freed_data.js"></script>
+  <script src="data/noah_data.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -150,6 +151,30 @@
     }
     .source-link:hover { border-color: var(--red); color: var(--red); background: rgba(232,39,42,.04); }
 
+    /* ── Vehicle switcher ── */
+    .vehicle-switcher {
+      display: flex;
+      gap: 8px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 40px 0;
+      width: 100%;
+    }
+    .vehicle-tab {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text2);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 10px 22px;
+      cursor: pointer;
+      transition: all .18s;
+    }
+    .vehicle-tab:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
+    .vehicle-tab.active { color: #fff; background: var(--red); border-color: var(--red); }
+
     /* ── Main ── */
     main {
       max-width: 1200px;
@@ -195,6 +220,9 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       overflow: hidden;
+    }
+    .cards-row.single-grade {
+      grid-template-columns: 1fr;
     }
 
     .grade-card {
@@ -832,6 +860,9 @@
         margin-top: 8px;
       }
 
+      .vehicle-switcher { padding: 12px 14px 0; }
+      .vehicle-tab { padding: 9px 16px; font-size: 0.7rem; flex: 1; text-align: center; }
+
       main { padding: 22px 14px; gap: 30px; }
 
       /* Grade cards: single column */
@@ -879,11 +910,11 @@
 <header>
   <div class="logo">
     <div class="logo-nameplate">
-      <span class="logo-freed">FREED</span><span class="logo-dot">.</span><span class="logo-market">MARKET</span>
+      <span class="logo-freed" id="logo-name-left">FREED</span><span class="logo-dot">.</span><span class="logo-market" id="logo-name-right">MARKET</span>
     </div>
     <div class="logo-rule"></div>
     <div class="logo-meta">
-      <div class="logo-model">Honda Freed 3rd Gen · e:HEV</div>
+      <div class="logo-model" id="logo-model">Honda Freed 3rd Gen · e:HEV</div>
       <div class="logo-source">Used Car Intelligence · CarSensor.net · Japan</div>
     </div>
   </div>
@@ -893,11 +924,16 @@
       <button class="period-btn active" data-p="6">6M</button>
       <button class="period-btn" data-p="12">1Y</button>
     </div>
-    <a class="source-link" href="https://www.carsensor.net/usedcar/bHO/s083/spH/" target="_blank" rel="noopener">
+    <a class="source-link" id="source-link" href="https://www.carsensor.net/usedcar/bHO/s083/spH/" target="_blank" rel="noopener">
       CarSensor ↗
     </a>
   </div>
 </header>
+
+<div class="vehicle-switcher" id="vehicle-switcher">
+  <button class="vehicle-tab active" data-vehicle="freed">🚗 Honda Freed</button>
+  <button class="vehicle-tab" data-vehicle="noah">🚐 Toyota Noah</button>
+</div>
 
 <main>
   <div id="notice-area"></div>
@@ -946,7 +982,7 @@
     <div class="chart-header">
       <div class="chart-title-wrap">
         <div class="chart-title">Average Listed Price</div>
-        <div class="chart-subtitle">All grades · Prices in JPY (¥) · CarSensor.net</div>
+        <div class="chart-subtitle" id="chart-subtitle">All grades · Prices in JPY (¥) · CarSensor.net</div>
       </div>
       <div class="chart-legend" id="chart-legend"></div>
     </div>
@@ -959,7 +995,7 @@
 </main>
 
 <footer>
-  <span>Data from <a href="https://www.carsensor.net/usedcar/bHO/s083/spH/" target="_blank" rel="noopener">CarSensor.net</a></span>
+  <span>Data from <a id="footer-source-link" href="https://www.carsensor.net/usedcar/bHO/s083/spH/" target="_blank" rel="noopener">CarSensor.net</a></span>
   <span class="footer-sep">·</span>
   <span>Updated daily · Research purposes only</span>
   <span class="footer-sep">·</span>
@@ -967,13 +1003,47 @@
 </footer>
 
 <script>
-/* ── Grade palette ── */
-const GRADE_COLORS = {
-  ehev_air_ex:       '#4492FF',
-  ehev_air_ex_4wd:   '#F5A623',
-  ehev_crosstar:     '#19C37D',
-  ehev_crosstar_4wd: '#9F7AEA',
+/* ── Vehicle configs ── */
+const VEHICLE_CONFIGS = {
+  freed: {
+    getData:    () => window.FREED_DATA,
+    gradeColors: {
+      ehev_air_ex:       '#4492FF',
+      ehev_air_ex_4wd:   '#F5A623',
+      ehev_crosstar:     '#19C37D',
+      ehev_crosstar_4wd: '#9F7AEA',
+    },
+    watchlistKey: 'freed_watchlist',
+    sourceUrl:    'https://www.carsensor.net/usedcar/bHO/s083/spH/',
+    seatIdeal:    6,
+    seatBad:      [5, 7],
+    nameLeft:     'FREED',
+    nameRight:    'MARKET',
+    logoModel:    'Honda Freed 3rd Gen · e:HEV',
+    chartSubtitle: 'All grades · Prices in JPY (¥) · CarSensor.net',
+    missingMsg:   'Could not load freed_data.js',
+    highMileageDesc: '15,000+ km but clean record, solid warranty & fair price — best deal despite wear',
+  },
+  noah: {
+    getData:    () => window.NOAH_DATA,
+    gradeColors: {
+      hybrid_sz: '#4492FF',
+    },
+    watchlistKey: 'noah_watchlist',
+    sourceUrl:    'https://www.carsensor.net/usedcar/bTO/s108/spH/',
+    seatIdeal:    7,
+    seatBad:      [8],
+    nameLeft:     'NOAH',
+    nameRight:    'MARKET',
+    logoModel:    'Toyota Noah · 1.8 Hybrid S-Z 2WD',
+    chartSubtitle: 'Hybrid S-Z 2WD · Prices in JPY (¥) · CarSensor.net',
+    missingMsg:   'Could not load noah_data.js',
+    highMileageDesc: '50,000+ km but clean record, solid warranty & fair price — best deal despite wear',
+  },
 };
+let activeVehicle = 'freed';
+function VC() { return VEHICLE_CONFIGS[activeVehicle]; }
+function GRADE_COLORS_OF(gid) { return VC().gradeColors[gid]; }
 
 /* ── Formatting helpers ── */
 const fmt  = n => '¥' + Math.round(n).toLocaleString('en-US');
@@ -1044,10 +1114,9 @@ let currentGrades = null;
 
 /* ── Watchlist (localStorage) ── */
 const VMAP   = {};
-const WL_KEY = 'freed_watchlist';
 
-function getWatchlist()      { try { return JSON.parse(localStorage.getItem(WL_KEY) || '[]'); } catch { return []; } }
-function saveWatchlist(list) { localStorage.setItem(WL_KEY, JSON.stringify(list)); }
+function getWatchlist()      { try { return JSON.parse(localStorage.getItem(VC().watchlistKey) || '[]'); } catch { return []; } }
+function saveWatchlist(list) { localStorage.setItem(VC().watchlistKey, JSON.stringify(list)); }
 function isInWatchlist(url)  { return !!url && getWatchlist().some(e => e.url === url); }
 
 function toggleFav(btn) {
@@ -1153,13 +1222,22 @@ function buildTrendComment(grade_id, allSnapshots) {
 
 /* ── Render ── */
 function render() {
-  if (!window.FREED_DATA) {
+  // Apply per-vehicle header/footer/chart labels
+  document.getElementById('logo-name-left').textContent  = VC().nameLeft;
+  document.getElementById('logo-name-right').textContent = VC().nameRight;
+  document.getElementById('logo-model').textContent      = VC().logoModel;
+  document.getElementById('chart-subtitle').textContent  = VC().chartSubtitle;
+  document.getElementById('source-link').href            = VC().sourceUrl;
+  document.getElementById('footer-source-link').href     = VC().sourceUrl;
+
+  const vehicleData = VC().getData();
+  if (!vehicleData) {
     document.getElementById('cards-row').innerHTML =
-      '<p style="color:var(--muted);font-size:.85rem;padding:20px">Could not load freed_data.js</p>';
+      `<p style="color:var(--muted);font-size:.85rem;padding:20px">${VC().missingMsg}</p>`;
     return;
   }
 
-  const { grades, snapshots } = window.FREED_DATA;
+  const { grades, snapshots } = vehicleData;
   currentGrades = grades;
   const snap     = snapshots[snapshots.length - 1];
   const prevSnap = snapshots.length >= 2 ? snapshots[snapshots.length - 2] : null;
@@ -1180,9 +1258,10 @@ function render() {
 
   const cardsEl = document.getElementById('cards-row');
   cardsEl.innerHTML = '';
+  cardsEl.classList.toggle('single-grade', grades.length === 1);
 
   grades.forEach(grade => {
-    const color = GRADE_COLORS[grade.id];
+    const color = VC().gradeColors[grade.id];
     const gSnap = snap.by_grade[grade.id];
     const gPrev = prevSnap?.by_grade[grade.id] ?? null;
     if (!gSnap) return;
@@ -1306,9 +1385,9 @@ function renderChart(grades, snaps) {
   const datasets = grades.map(grade => ({
     label: grade.label,
     data:  snaps.map(s => s.by_grade[grade.id]?.avg ?? null),
-    borderColor: GRADE_COLORS[grade.id],
-    backgroundColor: GRADE_COLORS[grade.id] + '14',
-    pointBackgroundColor: GRADE_COLORS[grade.id],
+    borderColor: VC().gradeColors[grade.id],
+    backgroundColor: VC().gradeColors[grade.id] + '14',
+    pointBackgroundColor: VC().gradeColors[grade.id],
     pointBorderColor: '#0F0F13',
     pointBorderWidth: 2,
     pointRadius: snaps.length < 5 ? 5 : 3,
@@ -1368,7 +1447,7 @@ function renderChart(grades, snaps) {
   grades.forEach(g => {
     const el = document.createElement('div');
     el.className = 'legend-item';
-    el.innerHTML = `<div class="legend-line" style="background:${GRADE_COLORS[g.id]}"></div>${g.label}`;
+    el.innerHTML = `<div class="legend-line" style="background:${VC().gradeColors[g.id]}"></div>${g.label}`;
     legendEl.appendChild(el);
   });
 }
@@ -1519,8 +1598,8 @@ function dealerRow(v) {
 function seatPill(v) {
   const s = v.seats;
   if (s == null) return '';
-  const isIdeal = s === 6;
-  const isBad   = s === 5 || s === 7;
+  const isIdeal = s === VC().seatIdeal;
+  const isBad   = VC().seatBad.includes(s);
   const color   = isIdeal ? 'var(--green)' : isBad ? 'var(--red)' : 'var(--text2)';
   const border  = isIdeal ? 'rgba(25,195,125,.35)' : isBad ? 'rgba(232,39,42,.35)' : 'var(--border)';
   const bg      = isIdeal ? 'rgba(25,195,125,.07)'  : isBad ? 'rgba(232,39,42,.07)'  : 'transparent';
@@ -1637,7 +1716,7 @@ function renderTopDeals(snap, grades, prevDayUrls = new Set(), minPrice = null, 
     if (v.url) VMAP[v.url] = v;
     const grade = gradeMap[v.grade_id] || {};
     const bd    = v.score_breakdown || {};
-    const gc    = GRADE_COLORS[v.grade_id] || 'var(--border2)';
+    const gc    = VC().gradeColors[v.grade_id] || 'var(--border2)';
     const card  = document.createElement('div');
     card.className = 'deal-card';
     card.style.setProperty('--card-grade-color', gc);
@@ -1668,7 +1747,7 @@ function renderGems(snap, grades, prevDayUrls = new Set(), minPrice = null, minK
       desc: 'Cheapest cars on the market — trade-offs may include mileage or shaken',
       accent: 'var(--green)' },
     { key: 'high_mileage', icon: '📏', title: 'High Mileage, Strong Value',
-      desc: '30,000+ km but clean record, solid warranty & fair price — best deal despite wear',
+      desc: VC().highMileageDesc,
       accent: 'var(--blue)' },
     { key: 'no_shaken', icon: '⚡', title: '車検なし — No Shaken',
       desc: 'No remaining JCI validity — often priced lower; buyer arranges inspection',
@@ -1699,7 +1778,7 @@ function renderGems(snap, grades, prevDayUrls = new Set(), minPrice = null, minK
         if (v.url) VMAP[v.url] = v;
         const grade        = gradeMap[v.grade_id] || {};
         const bd           = v.score_breakdown || {};
-        const gc           = GRADE_COLORS[v.grade_id] || 'var(--border2)';
+        const gc           = VC().gradeColors[v.grade_id] || 'var(--border2)';
         const highlightKey = { price: 'price', high_mileage: 'mileage', no_shaken: 'shaken' }[cat.key] || null;
         const accOnly      = v.accident === false ? `<span class="qbadge good">${_ico.circleCheck} Clean</span>`
                            : v.accident === true  ? `<span class="qbadge bad">${_ico.circleX} Accident</span>`
@@ -1754,7 +1833,7 @@ function renderWatchlist() {
     const v = (saved.url && VMAP[saved.url]) ? VMAP[saved.url] : saved;
     const grade   = gradeMap[v.grade_id] || {};
     const bd      = v.score_breakdown || {};
-    const gc      = GRADE_COLORS[v.grade_id] || 'var(--border2)';
+    const gc      = VC().gradeColors[v.grade_id] || 'var(--border2)';
     const rankHtml = `<span style="color:var(--amber);font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:1px">⭐ SAVED</span>`;
     const card = document.createElement('div');
     card.className = 'deal-card';
@@ -1811,6 +1890,21 @@ document.getElementById('period-sel').addEventListener('click', e => {
   period = parseInt(btn.dataset.p);
   if (mainChart) { mainChart.destroy(); mainChart = null; }
   render();
+});
+
+/* ── Vehicle switcher ── */
+document.getElementById('vehicle-switcher').addEventListener('click', e => {
+  const tab = e.target.closest('.vehicle-tab');
+  if (!tab) return;
+  const vehicle = tab.dataset.vehicle;
+  if (vehicle === activeVehicle) return;
+  activeVehicle = vehicle;
+  document.querySelectorAll('.vehicle-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  if (mainChart) { mainChart.destroy(); mainChart = null; }
+  render();
+  const wlPanel = document.getElementById('watchlist-panel');
+  if (wlPanel && wlPanel.style.display !== 'none') renderWatchlist();
 });
 
 render();
