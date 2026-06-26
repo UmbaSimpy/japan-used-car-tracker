@@ -53,16 +53,20 @@ TARGET_GRADES = {
 
 GRADE_ID_TO_LABEL = {v: k for k, v in TARGET_GRADES.items()}
 
-# Scoring weights (must sum to 1.0)
+# Scoring weights (must sum to 1.0).
+# navi/camera up-weighted and mileage eased: near-new "登録済未使用車" with ~0 km
+# otherwise score very high on mileage despite being priced like new (no real
+# bargain), and those stripped units typically lack nav/camera. Rewarding
+# equipment and easing the near-zero-km bonus surfaces genuinely good value.
 WEIGHTS = {
-    "price":       0.35,   # per-grade fixed-anchor value score (range + discount bonus)
-    "mileage":     0.20,   # linear decay from 0 km — no flat zone
-    "shaken":      0.04,   # reduced — short shaken still viable, buyer can renew
+    "price":       0.34,   # per-grade fixed-anchor value score (range + discount bonus)
+    "mileage":     0.14,   # ↓ from 0.20 — ease the near-0 km over-reward
+    "shaken":      0.04,   # short shaken still viable, buyer can renew
     "accident":    0.13,
-    "warranty":    0.09,
-    "maintenance": 0.05,
-    "navi":        0.11,   # OEM nav absence ≈ ¥30万 extra cost for buyer
-    "camera":      0.03,
+    "warranty":    0.08,
+    "maintenance": 0.04,
+    "navi":        0.15,   # ↑ from 0.11 — OEM nav absence ≈ ¥30万; strong real-car signal
+    "camera":      0.08,   # ↑ from 0.03 — multi-view camera is a key option
 }
 
 # ── Fixed price anchors (per-grade, stable over time) ─────────────────────────
@@ -416,9 +420,11 @@ def score_vehicle(vehicle: dict) -> tuple[float, dict]:
     else:
         navi_score = 5.0  # not mentioned → neutral
 
-    # Multi-view camera: detected = 8, not mentioned = 5 (neutral — can't detect absence)
+    # Multi-view camera: detected = 10 (a genuinely valuable option), not
+    # mentioned = 4 (mild below-neutral — well-equipped cars advertise it,
+    # so silence usually means it's absent).
     camera = vehicle.get("camera")
-    camera_score = 8.0 if camera is True else 5.0
+    camera_score = 10.0 if camera is True else 4.0
 
     total = (
         price_score       * WEIGHTS["price"]       +
