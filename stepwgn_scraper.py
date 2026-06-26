@@ -68,17 +68,21 @@ GRADE_ID_TO_LABEL = {
     "anniversary_30th": "e:HEV 30周年特別仕様車",
 }
 
-# Scoring weights (must sum to 1.0) — independent per scraper; same shape
-# as Freed/Noah ("the logic should be the same").
+# Scoring weights (must sum to 1.0) — independent per scraper.
+# Tuned for StepWGN: navi and the multi-view camera are weighted UP, and mileage
+# DOWN. Rationale — near-new "登録済未使用車" with ~0 km otherwise score very high on
+# mileage despite being priced like new (no real bargain), and these stripped
+# units typically lack nav/camera. Rewarding equipment and easing the near-zero-km
+# mileage bonus pushes those cars down and surfaces genuinely well-equipped value.
 WEIGHTS = {
-    "price":       0.35,
-    "mileage":     0.20,
+    "price":       0.34,
+    "mileage":     0.14,   # ↓ from 0.20 — ease the near-0 km over-reward
     "shaken":      0.04,
     "accident":    0.13,
-    "warranty":    0.09,
-    "maintenance": 0.05,
-    "navi":        0.11,
-    "camera":      0.03,
+    "warranty":    0.08,
+    "maintenance": 0.04,
+    "navi":        0.15,   # ↑ from 0.11 — strong signal of a real (vs stripped) car
+    "camera":      0.08,   # ↑ from 0.03 — multi-view camera is a key option
 }
 
 # ── Fixed price anchors (per-grade, stable over time) ─────────────────────────
@@ -298,15 +302,30 @@ def _extract_details(item) -> dict:
     # CarSensor embeds equipment keywords in the title, not in structured spec fields.
     full_text = item.get_text(" ", strip=True)
 
-    # OEM Navigation
-    if re.search(r'純正.{0,6}ナビ|ナビ.{0,6}純正|Gathers.{0,4}ナビ|メーカー.{0,4}ナビ', full_text):
+    # OEM Navigation.
+    # CAUTION: "ナビ装着用スペシャルパッケージ" means the car is only WIRED/MOUNTED
+    # for a nav (nav-READY) — it has NO actual nav unit. Many registered-unused
+    # near-new cars carry just this package. So we look for an actually-installed
+    # nav first; if only the nav-ready package (or ナビレス/オーディオレス) is
+    # present, navi = False. (The old loose "Gathers.{0,4}ナビ" pattern matched
+    # "HondaCONNECTforGathers+ナビ装着用…" and wrongly flagged these as having nav.)
+    INSTALLED_NAVI = (
+        r'純正[^\s　]{0,6}ナビ|'                      # 純正ナビ / 純正9型ナビ / 純正コネクトナビ
+        r'\d+\.?\d*\s*(?:インチ|型)[^\s　]{0,6}ナビ|'  # 9インチナビ / 11.4型コネクトナビ
+        r'メモリーナビ|HDDナビ|SDナビ|DAナビ|インターナビ|コネクトナビ|メーカーナビ|'
+        r'ナビTV|フルセグ[^\s　]{0,4}ナビ|ナビ[^\s　]{0,4}フルセグ'
+    )
+    if "ナビ装着用" in full_text and not re.search(INSTALLED_NAVI, full_text):
+        details["navi"] = False        # nav-ready package only → no actual nav
+    elif re.search(INSTALLED_NAVI, full_text):
         details["navi"] = True
     elif re.search(r'ナビレス|オーディオレス', full_text):
         details["navi"] = False
     # else: None → not mentioned / unknown
 
-    # Multi-view camera (マルチビューカメラ / 全周囲カメラ / アラウンドビューモニター)
-    if re.search(r'マルチビューカメラ|マルチビュー|アラウンドビュー|全周囲カメラ|パノラミックビュー', full_text):
+    # Multi-view / surround camera — a real value option (NOT a plain バックカメラ).
+    # Honda calls it マルチビューカメラシステム; also accept 全周囲/アラウンドビュー/360°.
+    if re.search(r'マルチビューカメラ|マルチビュー|アラウンドビュー|全周囲カメラ|全方位カメラ|パノラミックビュー|360°|３６０°', full_text):
         details["camera"] = True
     # else: None → not mentioned (can't reliably detect absence from listing text)
 
@@ -475,9 +494,11 @@ def score_vehicle(vehicle: dict) -> tuple[float, dict]:
     else:
         navi_score = 5.0  # not mentioned → neutral
 
-    # Multi-view camera: detected = 8, not mentioned = 5 (neutral — can't detect absence)
+    # Multi-view camera: detected = 10 (a genuinely valuable option), not
+    # mentioned = 4 (mild below-neutral — most well-equipped cars advertise it,
+    # so silence usually means it's absent on this model).
     camera = vehicle.get("camera")
-    camera_score = 8.0 if camera is True else 5.0
+    camera_score = 10.0 if camera is True else 4.0
 
     total = (
         price_score       * WEIGHTS["price"]       +

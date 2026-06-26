@@ -225,8 +225,22 @@ def _extract_details(item) -> dict:
     # CarSensor embeds equipment keywords in the title, not in structured spec fields.
     full_text = item.get_text(" ", strip=True)
 
-    # OEM Navigation
-    if re.search(r'純正.{0,6}ナビ|ナビ.{0,6}純正|Gathers.{0,4}ナビ|メーカー.{0,4}ナビ', full_text):
+    # OEM Navigation.
+    # CAUTION: "ナビ装着用スペシャルパッケージ" means the car is only WIRED/MOUNTED
+    # for a nav (nav-READY) — it has NO actual nav unit (common on registered-unused
+    # near-new cars). Detect an actually-installed nav first; if only the nav-ready
+    # package (or ナビレス/オーディオレス) is present, navi = False. (The old loose
+    # "Gathers.{0,4}ナビ" pattern matched "…Gathers+ナビ装着用…" and wrongly flagged
+    # these as having nav.)
+    INSTALLED_NAVI = (
+        r'純正[^\s　]{0,6}ナビ|'                      # 純正ナビ / 純正9型ナビ
+        r'\d+\.?\d*\s*(?:インチ|型)[^\s　]{0,6}ナビ|'  # 9インチナビ / 11.4型コネクトナビ
+        r'メモリーナビ|HDDナビ|SDナビ|DAナビ|インターナビ|コネクトナビ|メーカーナビ|'
+        r'ナビTV|フルセグ[^\s　]{0,4}ナビ|ナビ[^\s　]{0,4}フルセグ'
+    )
+    if "ナビ装着用" in full_text and not re.search(INSTALLED_NAVI, full_text):
+        details["navi"] = False        # nav-ready package only → no actual nav
+    elif re.search(INSTALLED_NAVI, full_text):
         details["navi"] = True
     elif re.search(r'ナビレス|オーディオレス', full_text):
         details["navi"] = False
