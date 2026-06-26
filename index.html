@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
   <script src="data/freed_data.js"></script>
   <script src="data/noah_data.js"></script>
+  <script src="data/stepwgn_data.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -223,6 +224,9 @@
     }
     .cards-row.single-grade {
       grid-template-columns: 1fr;
+    }
+    .cards-row.triple-grade {
+      grid-template-columns: repeat(3, 1fr);
     }
 
     .grade-card {
@@ -865,8 +869,10 @@
 
       main { padding: 22px 14px; gap: 30px; }
 
-      /* Grade cards: single column */
-      .cards-row { grid-template-columns: 1fr; }
+      /* Grade cards: single column (override triple/single layouts too) */
+      .cards-row,
+      .cards-row.single-grade,
+      .cards-row.triple-grade { grid-template-columns: 1fr; }
 
       /* Deal / gem / watchlist grids: single column, properly constrained */
       .deal-grid, .gems-row, .watchlist-grid {
@@ -933,6 +939,7 @@
 <div class="vehicle-switcher" id="vehicle-switcher">
   <button class="vehicle-tab active" data-vehicle="freed">🚗 Honda Freed</button>
   <button class="vehicle-tab" data-vehicle="noah">🚐 Toyota Noah</button>
+  <button class="vehicle-tab" data-vehicle="stepwgn">🚙 Honda StepWGN</button>
 </div>
 
 <main>
@@ -1039,6 +1046,25 @@ const VEHICLE_CONFIGS = {
     chartSubtitle: 'Hybrid S-Z 2WD · Prices in JPY (¥) · CarSensor.net',
     missingMsg:   'Could not load noah_data.js',
     highMileageDesc: '50,000+ km but clean record, solid warranty & fair price — best deal despite wear',
+  },
+  stepwgn: {
+    getData:    () => window.STEPWGN_DATA,
+    gradeColors: {
+      air_ex:           '#4492FF',
+      spada:            '#19C37D',
+      spada_premium:    '#9F7AEA',
+      anniversary_30th: '#F5A623',
+    },
+    watchlistKey: 'stepwgn_watchlist',
+    sourceUrl:    'https://www.carsensor.net/usedcar/bHO/s003/spH/',
+    seatIdeal:    7,
+    seatBad:      [8],
+    nameLeft:     'STEPWGN',
+    nameRight:    'MARKET',
+    logoModel:    'Honda StepWGN · Current Gen e:HEV (2022+) · Air EX · Spada · Premium · 30th Anniv',
+    chartSubtitle: 'e:HEV grades, each valued independently · JPY (¥) · CarSensor.net',
+    missingMsg:   'Could not load stepwgn_data.js',
+    highMileageDesc: '40,000+ km but clean record, solid warranty & fair price — best deal despite wear',
   },
 };
 let activeVehicle = 'freed';
@@ -1259,6 +1285,7 @@ function render() {
   const cardsEl = document.getElementById('cards-row');
   cardsEl.innerHTML = '';
   cardsEl.classList.toggle('single-grade', grades.length === 1);
+  cardsEl.classList.toggle('triple-grade', grades.length === 3);
 
   grades.forEach(grade => {
     const color = VC().gradeColors[grade.id];
