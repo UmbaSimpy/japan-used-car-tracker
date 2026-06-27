@@ -7886,13 +7886,13 @@ window.NOAH_DATA = {
     },
     {
       "date": "2026-06-27",
-      "pages_scraped": 57,
+      "pages_scraped": 58,
       "by_grade": {
         "hybrid_sz": {
-          "avg": 3956774,
+          "avg": 3955537,
           "min": 2450000,
           "max": 5380000,
-          "count": 709
+          "count": 719
         }
       },
       "top_vehicles": [
@@ -7987,6 +7987,36 @@ window.NOAH_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7059499668/index.html"
         },
         {
+          "score": 8.5,
+          "score_breakdown": {
+            "price": 8.6,
+            "mileage": 3.9,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "camera": 10.0
+          },
+          "grade_id": "hybrid_sz",
+          "grade_label": "1.8 ハイブリッド S-Z",
+          "price_man": 345.0,
+          "mileage_km": 61000,
+          "shaken_months": 24,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "camera": true,
+          "color": "白真珠",
+          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/195/419/U00053195419/U00053195419_001L.JPG",
+          "dealer_name": "Ａｕｔｏ　Ｆａｃｅ　オートフェイス",
+          "dealer_rating": 5.0,
+          "dealer_reviews": 28,
+          "seats": 7,
+          "url": "https://www.carsensor.net/usedcar/detail/AU7102138917/index.html"
+        },
+        {
           "score": 8.49,
           "score_breakdown": {
             "price": 10.0,
@@ -8045,36 +8075,6 @@ window.NOAH_DATA = {
           "dealer_reviews": 50,
           "seats": 7,
           "url": "https://www.carsensor.net/usedcar/detail/AU7091199360/index.html"
-        },
-        {
-          "score": 8.42,
-          "score_breakdown": {
-            "price": 8.3,
-            "mileage": 3.9,
-            "shaken": 10.0,
-            "accident": 10.0,
-            "warranty": 8.0,
-            "maintenance": 10.0,
-            "navi": 10.0,
-            "camera": 10.0
-          },
-          "grade_id": "hybrid_sz",
-          "grade_label": "1.8 ハイブリッド S-Z",
-          "price_man": 349.0,
-          "mileage_km": 61000,
-          "shaken_months": 24,
-          "accident": false,
-          "warranty": true,
-          "maintenance": true,
-          "navi": true,
-          "camera": true,
-          "color": "白真珠",
-          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/195/419/U00053195419/U00053195419_001L.JPG",
-          "dealer_name": "Ａｕｔｏ　Ｆａｃｅ　オートフェイス",
-          "dealer_rating": 5.0,
-          "dealer_reviews": 28,
-          "seats": 7,
-          "url": "https://www.carsensor.net/usedcar/detail/AU7102138917/index.html"
         },
         {
           "score": 8.38,

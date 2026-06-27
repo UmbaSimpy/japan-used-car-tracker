@@ -33852,31 +33852,31 @@ window.FREED_DATA = {
     },
     {
       "date": "2026-06-27",
-      "pages_scraped": 102,
+      "pages_scraped": 103,
       "by_grade": {
         "ehev_air_ex_4wd": {
-          "avg": 3516357,
+          "avg": 3521878,
           "min": 3036000,
           "max": 4005000,
-          "count": 42
+          "count": 41
         },
         "ehev_air_ex": {
-          "avg": 3166377,
+          "avg": 3165913,
           "min": 2350000,
           "max": 3811000,
-          "count": 612
+          "count": 619
         },
         "ehev_crosstar_4wd": {
-          "avg": 3598422,
+          "avg": 3596065,
           "min": 2599000,
           "max": 5479000,
-          "count": 45
+          "count": 46
         },
         "ehev_crosstar": {
-          "avg": 3257372,
+          "avg": 3259096,
           "min": 2150000,
           "max": 3839000,
-          "count": 317
+          "count": 312
         }
       },
       "top_vehicles": [
@@ -33971,6 +33971,36 @@ window.FREED_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7093224352/index.html"
         },
         {
+          "score": 6.98,
+          "score_breakdown": {
+            "price": 4.0,
+            "mileage": 9.9,
+            "shaken": 10.0,
+            "accident": 10.0,
+            "warranty": 4.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "camera": 4.0
+          },
+          "grade_id": "ehev_air_ex",
+          "grade_label": "1.5 e:HEV エアー EX",
+          "price_man": 288.0,
+          "mileage_km": 685,
+          "shaken_months": 32,
+          "accident": false,
+          "warranty": null,
+          "maintenance": true,
+          "navi": true,
+          "camera": null,
+          "color": "薄青Ｍ",
+          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/280/719/U00053280719/U00053280719_001L.JPG",
+          "dealer_name": "ＣＡＲ　ＰＬＡＴ　流山",
+          "dealer_rating": 4.8,
+          "dealer_reviews": 26,
+          "seats": 6,
+          "url": "https://www.carsensor.net/usedcar/detail/AU7122297442/index.html"
+        },
+        {
           "score": 6.91,
           "score_breakdown": {
             "price": 6.7,
@@ -33999,36 +34029,6 @@ window.FREED_DATA = {
           "dealer_reviews": 792,
           "seats": 6,
           "url": "https://www.carsensor.net/usedcar/detail/AU7088723883/index.html"
-        },
-        {
-          "score": 6.9,
-          "score_breakdown": {
-            "price": 1.8,
-            "mileage": 9.0,
-            "shaken": 9.7,
-            "accident": 10.0,
-            "warranty": 8.0,
-            "maintenance": 10.0,
-            "navi": 10.0,
-            "camera": 10.0
-          },
-          "grade_id": "ehev_crosstar",
-          "grade_label": "1.5 e:HEV クロスター",
-          "price_man": 319.0,
-          "mileage_km": 10000,
-          "shaken_months": 23,
-          "accident": false,
-          "warranty": true,
-          "maintenance": true,
-          "navi": true,
-          "camera": true,
-          "color": "黒真珠",
-          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/262/235/UZ0053262235/UZ0053262235_001L.JPG",
-          "dealer_name": "ホンダカーズ神奈川中（株） Ｕ－Ｓｅｌｅｃｔ平戸",
-          "dealer_rating": 4.8,
-          "dealer_reviews": 294,
-          "seats": 6,
-          "url": "https://www.carsensor.net/usedcar/detail/AU7116671728/index.html"
         },
         {
           "score": 6.87,
@@ -34123,9 +34123,9 @@ window.FREED_DATA = {
         {
           "score": 6.75,
           "score_breakdown": {
-            "price": 1.6,
-            "mileage": 8.6,
-            "shaken": 9.3,
+            "price": 1.4,
+            "mileage": 9.9,
+            "shaken": 6.0,
             "accident": 10.0,
             "warranty": 8.0,
             "maintenance": 10.0,
@@ -34134,25 +34134,55 @@ window.FREED_DATA = {
           },
           "grade_id": "ehev_air_ex",
           "grade_label": "1.5 e:HEV エアー EX",
-          "price_man": 313.5,
-          "mileage_km": 14000,
-          "shaken_months": 22,
+          "price_man": 315.0,
+          "mileage_km": 997,
+          "shaken_months": 12,
           "accident": false,
           "warranty": true,
           "maintenance": true,
           "navi": true,
           "camera": true,
-          "color": "黒",
-          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/152/706/UZ0053152706/UZ0053152706_001L.JPG",
-          "dealer_name": "ホンダカーズ北大阪 Ｕ－ｓｅｌｅｃｔコーナー茨木彩都店",
-          "dealer_rating": 4.9,
-          "dealer_reviews": 75,
+          "color": "青真珠",
+          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/249/172/UZ0053249172/UZ0053249172_001L.JPG",
+          "dealer_name": "Ｈｏｎｄａ　Ｃａｒｓ　愛知県央 ＵーＳｅｌｅｃｔ岡崎北店",
+          "dealer_rating": 4.5,
+          "dealer_reviews": 22,
           "seats": 6,
-          "url": "https://www.carsensor.net/usedcar/detail/AU7093622343/index.html"
+          "url": "https://www.carsensor.net/usedcar/detail/AU7121241552/index.html"
         }
       ],
       "category_gems": {
         "price": [
+          {
+            "score": 6.7,
+            "score_breakdown": {
+              "price": 5.2,
+              "mileage": 10.0,
+              "shaken": 10.0,
+              "accident": 10.0,
+              "warranty": 8.0,
+              "maintenance": 3.0,
+              "navi": 5.0,
+              "camera": 4.0
+            },
+            "grade_id": "ehev_air_ex",
+            "grade_label": "1.5 e:HEV エアー EX",
+            "price_man": 274.8,
+            "mileage_km": 5,
+            "shaken_months": 28,
+            "accident": false,
+            "warranty": true,
+            "maintenance": false,
+            "navi": null,
+            "camera": null,
+            "color": "黒真珠",
+            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/117/321/U00051117321/U00051117321_001L.JPG",
+            "dealer_name": "（株）カミタケモータース 枚方本店",
+            "dealer_rating": 4.5,
+            "dealer_reviews": 638,
+            "seats": 6,
+            "url": "https://www.carsensor.net/usedcar/detail/AU6695963250/index.html"
+          },
           {
             "score": 6.37,
             "score_breakdown": {
@@ -34184,64 +34214,34 @@ window.FREED_DATA = {
             "url": "https://www.carsensor.net/usedcar/detail/AU7067467929/index.html"
           },
           {
-            "score": 5.6,
+            "score": 6.5,
             "score_breakdown": {
-              "price": 4.9,
-              "mileage": 9.7,
-              "shaken": 5.0,
-              "accident": 1.0,
-              "warranty": 4.0,
+              "price": 4.7,
+              "mileage": 10.0,
+              "shaken": 9.0,
+              "accident": 10.0,
+              "warranty": 8.0,
               "maintenance": 3.0,
-              "navi": 10.0,
+              "navi": 5.0,
               "camera": 4.0
             },
             "grade_id": "ehev_air_ex",
             "grade_label": "1.5 e:HEV エアー EX",
-            "price_man": 278.3,
-            "mileage_km": 3000,
-            "shaken_months": null,
-            "accident": true,
-            "warranty": null,
-            "maintenance": false,
-            "navi": true,
-            "camera": null,
-            "color": "灰",
-            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/731/417/U00051731417/U00051731417_001L.JPG",
-            "dealer_name": "フェニックス 静岡藤枝店",
-            "dealer_rating": 4.4,
-            "dealer_reviews": 17,
-            "seats": 6,
-            "url": "https://www.carsensor.net/usedcar/detail/AU6822349367/index.html"
-          },
-          {
-            "score": 6.28,
-            "score_breakdown": {
-              "price": 4.8,
-              "mileage": 6.7,
-              "shaken": 7.3,
-              "accident": 10.0,
-              "warranty": 8.0,
-              "maintenance": 10.0,
-              "navi": 5.0,
-              "camera": 4.0
-            },
-            "grade_id": "ehev_crosstar",
-            "grade_label": "1.5 e:HEV クロスター",
-            "price_man": 284.8,
-            "mileage_km": 33000,
-            "shaken_months": 16,
+            "price_man": 279.8,
+            "mileage_km": 30,
+            "shaken_months": 21,
             "accident": false,
             "warranty": true,
-            "maintenance": true,
+            "maintenance": false,
             "navi": null,
             "camera": null,
-            "color": "白真珠",
-            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/255/887/U00053255887/U00053255887_001L.JPG",
-            "dealer_name": "（株）ホンダカーズ静岡 御殿場店",
-            "dealer_rating": null,
-            "dealer_reviews": null,
+            "color": "黒真珠",
+            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/242/796/U00049242796/U00049242796_001L.JPG",
+            "dealer_name": "（株）カミタケモータース 枚方本店",
+            "dealer_rating": 4.5,
+            "dealer_reviews": 638,
             "seats": 6,
-            "url": "https://www.carsensor.net/usedcar/detail/AU7116000043/index.html"
+            "url": "https://www.carsensor.net/usedcar/detail/AU6387583177/index.html"
           }
         ],
         "high_mileage": [
@@ -34276,36 +34276,6 @@ window.FREED_DATA = {
             "url": "https://www.carsensor.net/usedcar/detail/AU7091043515/index.html"
           },
           {
-            "score": 6.41,
-            "score_breakdown": {
-              "price": 3.1,
-              "mileage": 8.3,
-              "shaken": 7.7,
-              "accident": 10.0,
-              "warranty": 8.0,
-              "maintenance": 10.0,
-              "navi": 5.0,
-              "camera": 10.0
-            },
-            "grade_id": "ehev_air_ex_4wd",
-            "grade_label": "1.5 e:HEV エアー EX 4WD",
-            "price_man": 329.0,
-            "mileage_km": 17000,
-            "shaken_months": 17,
-            "accident": false,
-            "warranty": true,
-            "maintenance": true,
-            "navi": null,
-            "camera": true,
-            "color": "白",
-            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/188/141/U00053188141/U00053188141_002L.JPG",
-            "dealer_name": "ホンダカーズ南札幌 羊ヶ丘店",
-            "dealer_rating": null,
-            "dealer_reviews": null,
-            "seats": 6,
-            "url": "https://www.carsensor.net/usedcar/detail/AU7101311767/index.html"
-          },
-          {
             "score": 6.39,
             "score_breakdown": {
               "price": 2.0,
@@ -34334,6 +34304,36 @@ window.FREED_DATA = {
             "dealer_reviews": 76,
             "seats": 7,
             "url": "https://www.carsensor.net/usedcar/detail/AU7082716562/index.html"
+          },
+          {
+            "score": 6.33,
+            "score_breakdown": {
+              "price": 1.7,
+              "mileage": 8.5,
+              "shaken": 10.0,
+              "accident": 10.0,
+              "warranty": 8.0,
+              "maintenance": 10.0,
+              "navi": 10.0,
+              "camera": 4.0
+            },
+            "grade_id": "ehev_air_ex",
+            "grade_label": "1.5 e:HEV エアー EX",
+            "price_man": 311.9,
+            "mileage_km": 15000,
+            "shaken_months": 24,
+            "accident": false,
+            "warranty": true,
+            "maintenance": true,
+            "navi": true,
+            "camera": null,
+            "color": "白真珠",
+            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/225/290/U00053225290/U00053225290_002L.JPG",
+            "dealer_name": "ＶＥＲＮＯ　ＣＡＲＬＡ岡崎店 （ベルノカーラ岡崎店）",
+            "dealer_rating": 5.0,
+            "dealer_reviews": 77,
+            "seats": 7,
+            "url": "https://www.carsensor.net/usedcar/detail/AU7114210686/index.html"
           }
         ],
         "no_shaken": [
