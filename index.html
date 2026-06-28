@@ -582,20 +582,65 @@
     .qbadge.bad     { color: var(--red);    border-color: rgba(232,39,42,.3);   background: rgba(232,39,42,.06);   }
     .qbadge.neutral { color: var(--muted);  border-color: var(--border);        background: transparent; }
 
-    .deal-bars { display: flex; flex-direction: column; gap: 4px; }
-    .deal-bar-row { display: flex; align-items: center; gap: 7px; }
-    .deal-bar-label {
+    /* ── Score breakdown table ── */
+    .deal-bars { display: block; }
+    .score-factors {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface2);
+      padding: 5px 8px;
+      display: flex; flex-direction: column;
+    }
+    .sf-row, .sf-head {
+      display: grid;
+      grid-template-columns: 60px 1fr 26px 28px 32px;
+      align-items: center;
+      gap: 6px;
+      padding: 1.5px 0;
+    }
+    .sf-head {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 3px; margin-bottom: 2px;
+    }
+    .sf-head span {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.56rem; color: var(--muted); width: 38px; flex-shrink: 0;
+      font-size: 0.5rem; color: var(--muted);
       text-transform: uppercase; letter-spacing: 0.6px;
     }
-    .deal-bar-track { flex: 1; height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
-    .deal-bar-fill { height: 100%; border-radius: 2px; animation: bar-grow 0.6s cubic-bezier(.4,0,.2,1) both; animation-delay: var(--bar-delay, 0.1s); }
-    .deal-bar-val {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 0.7rem; color: var(--text2); width: 22px; text-align: right; flex-shrink: 0;
-      letter-spacing: 0.5px;
+    .sf-head .sf-score-h, .sf-head .sf-wt, .sf-head .sf-contrib { text-align: right; }
+    .sf-head .sf-meter-h { text-align: left; }
+    .sf-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.62rem; color: var(--text2);
+      text-transform: uppercase; letter-spacing: 0.4px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
+    .sf-meter { height: 5px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
+    .sf-meter-fill { height: 100%; border-radius: 3px; animation: bar-grow 0.6s cubic-bezier(.4,0,.2,1) both; }
+    .sf-score {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 0.74rem; text-align: right; letter-spacing: 0.5px;
+    }
+    .sf-wt {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.58rem; color: var(--muted); text-align: right;
+    }
+    .sf-contrib {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.64rem; color: var(--text2); text-align: right; font-weight: 600;
+    }
+    .sf-row.sf-hi .sf-label { color: var(--text); font-weight: 700; }
+    .sf-row.sf-hi { background: rgba(255,255,255,.03); border-radius: 3px; }
+    .sf-bonus .sf-label, .sf-bonus .sf-contrib { color: var(--green); }
+    .sf-total {
+      border-top: 1px solid var(--border);
+      margin-top: 2px; padding-top: 4px;
+    }
+    .sf-total .sf-label {
+      color: var(--text); font-weight: 700; font-size: 0.66rem;
+    }
+    .sf-total .sf-score { font-size: 0.95rem; }
+    .sf-total .sf-contrib { font-size: 0.78rem; }
 
     .price-per-km-row {
       display: flex; align-items: baseline; justify-content: space-between;
@@ -882,9 +927,9 @@
       /* Cards: prevent any content from blowing out the column */
       .deal-card { overflow: hidden; padding: 13px 14px; }
 
-      /* Score bars: reduce label width so bars have more room */
-      .deal-bar-label { width: 32px; font-size: 0.52rem; }
-      .deal-bar-val   { width: 20px; font-size: 0.65rem; }
+      /* Score table: tighten columns on small screens */
+      .sf-row, .sf-head { grid-template-columns: 54px 1fr 24px 26px 30px; gap: 5px; }
+      .sf-label { font-size: 0.58rem; }
 
       /* Tab bar: shrink text so all three tabs fit */
       .deal-tab { padding: 10px 14px; font-size: 0.68rem; letter-spacing: 0.8px; }
@@ -1137,6 +1182,7 @@ function sparkSVG(data, color) {
 let period       = 6;
 let mainChart    = null;
 let currentGrades = null;
+let currentWeights = null;
 
 /* ── Watchlist (localStorage) ── */
 const VMAP   = {};
@@ -1265,6 +1311,7 @@ function render() {
 
   const { grades, snapshots } = vehicleData;
   currentGrades = grades;
+  currentWeights = vehicleData.weights || null;
   const snap     = snapshots[snapshots.length - 1];
   const prevSnap = snapshots.length >= 2 ? snapshots[snapshots.length - 2] : null;
   const snaps    = snapshots.slice(-period);
@@ -1701,24 +1748,94 @@ function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
     </div>
     <div class="quality-badges">${badges}</div>
     ${colorBand(v.color)}
-    <div class="deal-bars">${buildBars(bd, highlightKey, highlightAccent)}</div>
+    <div class="deal-bars">${buildScoreTable(bd, highlightKey, typeof v.score === 'number' ? v.score : null)}</div>
     ${pricePerKm(v)}
     ${dealerRow(v)}
     ${v.url ? `<a class="deal-card-link" href="${v.url}" target="_blank" rel="noopener">View on CarSensor ↗</a>` : ''}`;
 }
 
-function buildBars(bd, highlightKey, highlightColor) {
-  return ['price', 'mileage', 'shaken'].map((key, idx) => {
-    const val   = bd[key] ?? 0;
-    const hi    = key === highlightKey;
-    const fill  = hi ? highlightColor : barColor(val);
-    const delay = (0.12 + idx * 0.09).toFixed(2);
-    return `<div class="deal-bar-row">
-      <span class="deal-bar-label" style="${hi ? `color:${highlightColor}` : ''}">${key}</span>
-      <div class="deal-bar-track"><div class="deal-bar-fill" style="--bar-w:${val*10}%;--bar-delay:${delay}s;background:${fill}"></div></div>
-      <span class="deal-bar-val" style="${hi ? `color:${highlightColor}` : ''}">${val}</span>
+/* ── Factor score gradient (0 = red → 5 = amber → 10 = green) ── */
+function factorGradient(score) {
+  const s = Math.max(0, Math.min(10, score)) / 10;          // 0..1
+  // red (232,39,42) → amber (245,166,35) → green (25,195,125)
+  let r, g, b;
+  if (s < 0.5) {
+    const t = s / 0.5;
+    r = 232 + (245 - 232) * t; g = 39 + (166 - 39) * t; b = 42 + (35 - 42) * t;
+  } else {
+    const t = (s - 0.5) / 0.5;
+    r = 245 + (25 - 245) * t; g = 166 + (195 - 166) * t; b = 35 + (125 - 35) * t;
+  }
+  return `rgb(${r|0},${g|0},${b|0})`;
+}
+
+/* ── Score breakdown table — shows how the final score is formed ──
+   Each factor: score (0–10, red→green) × weight = weighted contribution.
+   Sum of contributions (+ equipment bonus) = the headline score. */
+const SCORE_FACTORS = [
+  ['price',       'Price'],
+  ['mileage',     'Mileage'],
+  ['navi',        'Screen'],
+  ['camera',      'Multi-cam'],
+  ['accident',    'Accident'],
+  ['warranty',    'Warranty'],
+  ['maintenance', 'Maintenance'],
+  ['shaken',      '車検 Shaken'],
+];
+
+function buildScoreTable(bd, highlightKey, totalScore = null) {
+  const w = currentWeights || {};
+  let sum = 0;
+  const rows = SCORE_FACTORS.filter(([k]) => bd[k] != null).map(([key, label]) => {
+    const val    = bd[key] ?? 0;
+    const wt     = w[key] ?? 0;
+    const contrib = val * wt;
+    sum += contrib;
+    const col    = factorGradient(val);
+    const hi     = key === highlightKey;
+    return `<div class="sf-row${hi ? ' sf-hi' : ''}">
+      <span class="sf-label">${label}</span>
+      <div class="sf-meter"><div class="sf-meter-fill" style="width:${val*10}%;background:${col}"></div></div>
+      <span class="sf-score" style="color:${col}">${val.toFixed(1)}</span>
+      <span class="sf-wt">${wt ? (wt*100).toFixed(0)+'%' : '—'}</span>
+      <span class="sf-contrib">${contrib.toFixed(2)}</span>
     </div>`;
   }).join('');
+
+  // Optional flat equipment bonus (e.g. StepWGN 30th Anniversary)
+  let bonusRow = '';
+  const eq = bd.equipment;
+  if (eq && eq > 0) {
+    sum += eq;
+    bonusRow = `<div class="sf-row sf-bonus">
+      <span class="sf-label">Equipment</span>
+      <div class="sf-meter"></div>
+      <span class="sf-score" style="color:var(--green)">+</span>
+      <span class="sf-wt">bonus</span>
+      <span class="sf-contrib">+${eq.toFixed(2)}</span>
+    </div>`;
+  }
+
+  // Authoritative total = the card's headline score when provided (the row
+  // contributions are rounded for display, so their sum is only approximate).
+  const total = totalScore != null ? totalScore : Math.min(10, sum);
+  return `<div class="score-factors">
+    <div class="sf-head">
+      <span class="sf-label">Factor</span>
+      <span class="sf-meter-h">score</span>
+      <span class="sf-score-h">/10</span>
+      <span class="sf-wt">wt</span>
+      <span class="sf-contrib">pts</span>
+    </div>
+    ${rows}${bonusRow}
+    <div class="sf-row sf-total">
+      <span class="sf-label">Total</span>
+      <div class="sf-meter"></div>
+      <span class="sf-score" style="color:${scoreColor(total)}">${total.toFixed(2)}</span>
+      <span class="sf-wt"></span>
+      <span class="sf-contrib" style="color:${scoreColor(total)}">${total.toFixed(2)}</span>
+    </div>
+  </div>`;
 }
 
 /* ── Top Deals renderer ── */

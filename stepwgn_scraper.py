@@ -76,35 +76,19 @@ GRADE_ID_TO_LABEL = {
 # mileage bonus pushes those cars down and surfaces genuinely well-equipped value.
 WEIGHTS = {
     "price":       0.34,
-    "mileage":     0.14,   # ↓ from 0.20 — ease the near-0 km over-reward
+    "mileage":     0.12,   # ↓ — ease the near-0 km over-reward
     "shaken":      0.04,
     "accident":    0.13,
     "warranty":    0.08,
-    "maintenance": 0.04,
-    "navi":        0.15,   # ↑ from 0.11 — strong signal of a real (vs stripped) car
-    "camera":      0.08,   # ↑ from 0.03 — multi-view camera is a key option
+    "maintenance": 0.03,
+    "navi":        0.18,   # ↑ — a screen (nav OR display audio) installed; no screen is penalised hard
+    "camera":      0.08,   # multi-view camera is a key option
 }
 
-# ── Fixed price anchors (per-grade, stable over time) ─────────────────────────
-#   floor   = realistic floor for a clean used deal (→ scores close to 10)
-#   ceiling = top of the observed market range → scores near 0
-#   typical = fair/average used price — discount-bonus baseline
-# Each grade line is anchored INDEPENDENTLY — the pricier Premium Line / 30th
-# Anniversary is not penalised for costing more than Air EX or Spada.
-# Tuned from the first clean full scrape (current-gen e:HEV only), observed
-# per-grade ranges (万円):
-#   air_ex           n=191  min 352 · avg 392 · max 488
-#   spada            n=565  min 243 · avg 370 · max 438
-#   spada_premium    n=337  min 240 · avg 397 · max 479
-#   anniversary_30th n= 34  min 362 · avg 395 · max 448
-GRADE_PRICE_ANCHORS: dict[str, tuple[float, float, float]] = {
-    # (floor_man, ceiling_man, typical_man)  floor≈min, ceiling≈max, typical≈avg
-    "air_ex":           (345.0, 485.0, 392.0),
-    "spada":            (245.0, 440.0, 370.0),
-    "spada_premium":    (255.0, 480.0, 397.0),
-    "anniversary_30th": (360.0, 452.0, 395.0),
-}
-_DEFAULT_ANCHORS: tuple[float, float, float] = (245.0, 480.0, 385.0)
+# Price is scored RELATIVE within each grade (see score_vehicle / compute_price_bounds):
+# the cheapest car in a grade scores 10 and the score falls off steeply. Because each
+# grade is scored against its own price distribution, the pricier Premium Line / 30th
+# Anniversary is never penalised for costing more than Air EX or Spada.
 
 # ── Equipment-value bonus (per grade) ─────────────────────────────────────────
 # Some lines ship with materially more standard equipment than their price would
@@ -144,6 +128,16 @@ def total_pages_from_html(html: str) -> int:
     return max((int(n) for n in nums), default=1)
 
 
+def _is_flood_damaged(text: str) -> bool:
+    """True if the listing is a flood-damaged car (冠水歴車 / 水没車).
+    Guards against false positives like 冠水歴なし / 冠水歴無し (= NO flood history),
+    which describe a clean car and must NOT be excluded."""
+    return bool(
+        re.search(r'冠水(?!.{0,4}(?:なし|無))', text) or
+        re.search(r'水没(?!.{0,4}(?:なし|無))', text)
+    )
+
+
 def parse_listings(html: str) -> list[dict]:
     """
     Returns list of vehicle dicts with grade_id, price_man,
@@ -154,7 +148,12 @@ def parse_listings(html: str) -> list[dict]:
     containers = soup.select("div.cassetteWrap")
 
     for item in containers:
-        grade_id = _match_grade(item.get_text(" ", strip=True))
+        item_text = item.get_text(" ", strip=True)
+        # Exclude flood-damaged cars (冠水歴車 / 水没車) entirely — never scored or
+        # shown. Keep cars that explicitly advertise NO flood history (冠水歴なし).
+        if _is_flood_damaged(item_text):
+            continue
+        grade_id = _match_grade(item_text)
         if grade_id is None:
             continue
         price = _extract_price(item)
@@ -302,25 +301,29 @@ def _extract_details(item) -> dict:
     # CarSensor embeds equipment keywords in the title, not in structured spec fields.
     full_text = item.get_text(" ", strip=True)
 
-    # OEM Navigation.
-    # CAUTION: "ナビ装着用スペシャルパッケージ" means the car is only WIRED/MOUNTED
-    # for a nav (nav-READY) — it has NO actual nav unit. Many registered-unused
-    # near-new cars carry just this package. So we look for an actually-installed
-    # nav first; if only the nav-ready package (or ナビレス/オーディオレス) is
-    # present, navi = False. (The old loose "Gathers.{0,4}ナビ" pattern matched
-    # "HondaCONNECTforGathers+ナビ装着用…" and wrongly flagged these as having nav.)
+    # Head-unit / screen ("navi" factor — what matters is that a SCREEN is
+    # installed, whether a nav or a display audio unit). A car is positive if it
+    # has an installed nav OR a ディスプレイオーディオ (display audio screen).
+    # It is negative only when explicitly screen-less: ナビレス / オーディオレス /
+    # モニターレス, or a "ナビ装着用" nav-ready package with no actual unit.
+    # ("ナビ装着用スペシャルパッケージ" = wired/mounted for a unit but none fitted.)
     INSTALLED_NAVI = (
         r'純正[^\s　]{0,6}ナビ|'                      # 純正ナビ / 純正9型ナビ / 純正コネクトナビ
         r'\d+\.?\d*\s*(?:インチ|型)[^\s　]{0,6}ナビ|'  # 9インチナビ / 11.4型コネクトナビ
         r'メモリーナビ|HDDナビ|SDナビ|DAナビ|インターナビ|コネクトナビ|メーカーナビ|'
         r'ナビTV|フルセグ[^\s　]{0,4}ナビ|ナビ[^\s　]{0,4}フルセグ'
     )
-    if "ナビ装着用" in full_text and not re.search(INSTALLED_NAVI, full_text):
-        details["navi"] = False        # nav-ready package only → no actual nav
-    elif re.search(INSTALLED_NAVI, full_text):
+    has_screen = bool(
+        re.search(INSTALLED_NAVI, full_text) or
+        "ディスプレイオーディオ" in full_text or "ディスプレイ オーディオ" in full_text or
+        "ディスプレイオーデイオ" in full_text
+    )
+    if re.search(r'ナビレス|オーディオレス|モニターレス', full_text):
+        details["navi"] = False        # explicitly no screen
+    elif "ナビ装着用" in full_text and not has_screen:
+        details["navi"] = False        # nav-ready package only → no unit fitted
+    elif has_screen:
         details["navi"] = True
-    elif re.search(r'ナビレス|オーディオレス', full_text):
-        details["navi"] = False
     # else: None → not mentioned / unknown
 
     # Multi-view / surround camera — a real value option (NOT a plain バックカメラ).
@@ -424,28 +427,25 @@ def _fetch_seat_count(url: str) -> int | None:
 
 # ── Scoring ──────────────────────────────────────────────────────────────────
 
-def score_vehicle(vehicle: dict) -> tuple[float, dict]:
+def score_vehicle(vehicle: dict, price_bounds: dict[str, tuple[float, float]]) -> tuple[float, dict]:
     """
-    Score a vehicle 0–10 using fixed, per-grade price anchors.
+    Score a vehicle 0–10. Returns (score_rounded_to_2dp, breakdown_dict).
 
-    Scores are stable across time — they don't shift with the daily pool.
-    Returns (score_rounded_to_2dp, breakdown_dict).
-
-    Price (35%): two components averaged (70/30):
-      - Range score:    where in [floor, ceiling] does this price sit?
-      - Discount score: how much below the grade's typical market price?
-    Mileage (20%): linear decay from 0 km — 0 km→10, 100k km→0. No flat zone.
+    Price: RELATIVE within the grade and intentionally TIGHT — the cheapest car
+    in a grade scores 10 and the score falls off steeply, so a 10 is effectively
+    reserved for the cheapest (only a small band near it scores high).
+    Mileage: linear decay from 0 km — 0 km→10, 100k km→0.
     """
-    # ── Price: per-grade fixed anchors ────────────────────────────────────────
-    anchors    = GRADE_PRICE_ANCHORS.get(vehicle.get("grade_id", ""), _DEFAULT_ANCHORS)
-    floor, ceiling, typical = anchors
-    price_man  = vehicle["price_man"]
-    price_span = max(ceiling - floor, 1.0)
-
-    range_score    = max(0.0, min(10.0, 10.0 * (ceiling - price_man) / price_span))
-    discount_pct   = (typical - price_man) / max(typical, 1.0)   # >0 = below typical
-    discount_score = max(0.0, min(10.0, 5.0 + discount_pct * 25.0))
-    price_score    = 0.70 * range_score + 0.30 * discount_score
+    # ── Price: relative within grade, tight (cheapest = 10) ───────────────────
+    # price_bounds[grade] = (lo, hi): lo = grade minimum, hi = grade 75th pct.
+    # Cheapest car → 10; falls off steeply; cars at/above the 75th pct → ~0.
+    price_man = vehicle["price_man"]
+    lo, hi    = price_bounds.get(vehicle.get("grade_id", ""), (price_man, price_man))
+    span      = hi - lo
+    if span <= 0:
+        price_score = 10.0          # only one price point in the grade
+    else:
+        price_score = max(0.0, min(10.0, 10.0 * (hi - price_man) / span))
 
     # ── Mileage: linear from 0, no flat zone ──────────────────────────────────
     km = vehicle.get("mileage_km")
@@ -485,12 +485,13 @@ def score_vehicle(vehicle: dict) -> tuple[float, dict]:
     else:
         maintenance_score = 5.0  # unknown = neutral
 
-    # OEM Navigation (メーカー純正ナビ): present = 10, absent = 2, unknown = 5 (neutral)
+    # Screen / head unit (nav OR display audio): installed = 10, none = 0
+    # (screen-less stripped cars penalised hard), unknown = 5 (neutral).
     navi = vehicle.get("navi")
     if navi is True:
         navi_score = 10.0
     elif navi is False:
-        navi_score = 2.0
+        navi_score = 0.0
     else:
         navi_score = 5.0  # not mentioned → neutral
 
@@ -531,6 +532,35 @@ def score_vehicle(vehicle: dict) -> tuple[float, dict]:
 
 
 # ── Statistics ───────────────────────────────────────────────────────────────
+
+def _percentile(sorted_vals: list[float], pct: float) -> float:
+    """Linear-interpolated percentile of an already-sorted list."""
+    if not sorted_vals:
+        return 0.0
+    if len(sorted_vals) == 1:
+        return sorted_vals[0]
+    k = (len(sorted_vals) - 1) * pct
+    lo = int(k)
+    hi = min(lo + 1, len(sorted_vals) - 1)
+    return sorted_vals[lo] + (sorted_vals[hi] - sorted_vals[lo]) * (k - lo)
+
+
+def compute_price_bounds(by_grade_prices: dict[str, list[float]]) -> dict[str, tuple[float, float]]:
+    """Per-grade (lo, hi) for the relative/tight price score: lo = grade minimum,
+    hi = grade 75th percentile (robust high — keeps a few pricey outliers from
+    flattening the scale). Cheapest car scores 10, cars at/above hi score ~0."""
+    bounds: dict[str, tuple[float, float]] = {}
+    for gid, prices in by_grade_prices.items():
+        if not prices:
+            continue
+        s = sorted(prices)
+        lo = s[0]
+        hi = _percentile(s, 0.75)
+        if hi <= lo:                     # tiny/degenerate grade — widen slightly
+            hi = lo * 1.10
+        bounds[gid] = (lo, hi)
+    return bounds
+
 
 def compute_stats(prices: list[float]) -> dict:
     if not prices:
@@ -816,9 +846,12 @@ def run(max_pages: int | None) -> None:
     for v in all_vehicles:
         by_grade_prices[v["grade_id"]].append(v["price_man"])
 
-    # ── Score every vehicle (fixed per-grade anchors — no global stats needed) ──
+    # ── Per-grade price bounds for the relative (tight) price score ──────────
+    price_bounds = compute_price_bounds(by_grade_prices)
+
+    # ── Score every vehicle ───────────────────────────────────────────────
     for v in all_vehicles:
-        v["score"], v["score_breakdown"] = score_vehicle(v)
+        v["score"], v["score_breakdown"] = score_vehicle(v, price_bounds)
 
     # ── Top N across all grades (excluding 8-seat configurations) ────────
     # Seating capacity is only on the detail page, so we fetch detail pages
@@ -961,6 +994,9 @@ def run(max_pages: int | None) -> None:
     canonical = _default_structure()
     data["vehicle"] = canonical["vehicle"]
     data["grades"]  = canonical["grades"]
+    # Expose scoring config so the dashboard can show how each total is formed.
+    data["weights"]            = WEIGHTS
+    data["grade_value_bonus"]  = GRADE_VALUE_BONUS
 
     existing_today = next((s for s in data["snapshots"] if s["date"] == today), None)
     prev_snapshot  = None
