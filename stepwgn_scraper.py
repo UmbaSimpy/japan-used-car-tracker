@@ -328,7 +328,9 @@ def _extract_details(item) -> dict:
 
     # Multi-view / surround camera — a real value option (NOT a plain バックカメラ).
     # Honda calls it マルチビューカメラシステム; also accept 全周囲/アラウンドビュー/360°.
-    if re.search(r'マルチビューカメラ|マルチビュー|アラウンドビュー|全周囲カメラ|全方位カメラ|パノラミックビュー|360°|３６０°', full_text):
+    # NOTE: do NOT match "360°" — that is CarSensor's "360°画像付" listing-photo
+    # badge (a 360° photo viewer), not a surround-camera on the car.
+    if re.search(r'マルチビューカメラ|マルチビュー|アラウンドビュー|全周囲カメラ|全方位カメラ|パノラミックビュー', full_text):
         details["camera"] = True
     # else: None → not mentioned (can't reliably detect absence from listing text)
 
@@ -485,15 +487,11 @@ def score_vehicle(vehicle: dict, price_bounds: dict[str, tuple[float, float]]) -
     else:
         maintenance_score = 5.0  # unknown = neutral
 
-    # Screen / head unit (nav OR display audio): installed = 10, none = 0
-    # (screen-less stripped cars penalised hard), unknown = 5 (neutral).
+    # Screen / head unit (nav OR display audio): installed = 10; otherwise 0.
+    # Both confirmed-absent AND unclear/unmentioned score 0 — only a clearly
+    # installed screen earns points.
     navi = vehicle.get("navi")
-    if navi is True:
-        navi_score = 10.0
-    elif navi is False:
-        navi_score = 0.0
-    else:
-        navi_score = 5.0  # not mentioned → neutral
+    navi_score = 10.0 if navi is True else 0.0
 
     # Multi-view camera: detected = 10 (a genuinely valuable option), not
     # mentioned = 4 (mild below-neutral — most well-equipped cars advertise it,
@@ -846,8 +844,19 @@ def run(max_pages: int | None) -> None:
     for v in all_vehicles:
         by_grade_prices[v["grade_id"]].append(v["price_man"])
 
-    # ── Per-grade price bounds for the relative (tight) price score ──────────
-    price_bounds = compute_price_bounds(by_grade_prices)
+    # ── Price bounds for the relative (tight) price score ──────────────────
+    # StepWGN's four grades sit in a similar price band, so price is scored
+    # across ALL grades POOLED (absolute cheapness) — the cheapest StepWGN
+    # overall scores 10, regardless of grade. (Freed scores per-grade.)
+    all_prices = [p for prices in by_grade_prices.values() for p in prices]
+    if all_prices:
+        _lo = min(all_prices)
+        _hi = _percentile(sorted(all_prices), 0.75)
+        if _hi <= _lo:
+            _hi = _lo * 1.10
+        price_bounds = {gid: (_lo, _hi) for gid in by_grade_prices}
+    else:
+        price_bounds = {}
 
     # ── Score every vehicle ───────────────────────────────────────────────
     for v in all_vehicles:

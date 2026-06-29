@@ -582,6 +582,17 @@
     .qbadge.bad     { color: var(--red);    border-color: rgba(232,39,42,.3);   background: rgba(232,39,42,.06);   }
     .qbadge.neutral { color: var(--muted);  border-color: var(--border);        background: transparent; }
 
+    /* ── Option-package badges (Noah) ── */
+    .opt-pills { display: flex; flex-wrap: wrap; gap: 4px; }
+    .opt-pill {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.58rem; font-weight: 600; letter-spacing: 0.3px;
+      color: var(--purple);
+      border: 1px solid rgba(159,122,234,.4);
+      background: rgba(159,122,234,.08);
+      border-radius: 4px; padding: 2px 7px; white-space: nowrap;
+    }
+
     /* ── Score breakdown (compact) ── */
     .deal-bars { display: block; }
     .score-mini {
@@ -597,19 +608,26 @@
       row-gap: 1px;
     }
     .sf-chip {
-      display: flex; align-items: baseline; justify-content: space-between;
+      display: flex; align-items: baseline;
       gap: 5px; padding: 1px 3px; border-radius: 3px;
       border-bottom: 1px solid rgba(255,255,255,.025);
     }
     .sf-k {
+      flex: 1; min-width: 0;
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.58rem; color: var(--muted);
+      font-size: 0.6rem; color: var(--text);
       text-transform: uppercase; letter-spacing: 0.4px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .sf-pts {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.6rem; color: var(--text);
+      flex-shrink: 0; text-align: right;
     }
     .sf-v {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 0.78rem; letter-spacing: 0.5px; flex-shrink: 0;
+      min-width: 20px; text-align: right;
     }
     .sf-chip.sf-hi { background: rgba(255,255,255,.05); }
     .sf-chip.sf-hi .sf-k { color: var(--text2); }
@@ -1680,6 +1698,14 @@ function pricePerKm(v) {
   </div>`;
 }
 
+/* ── Desirable option-package badges (Noah) ── */
+function optionPills(v) {
+  if (!v.options || !v.options.length) return '';
+  return `<div class="opt-pills">` +
+    v.options.map(o => `<span class="opt-pill">✦ ${o}</span>`).join('') +
+    `</div>`;
+}
+
 function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
                          highlightKey = null, highlightAccent = null, watchlist = false, isNew = false,
                          minPrice = null, minKm = null }) {
@@ -1729,6 +1755,7 @@ function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
       ${seatPill(v)}
     </div>
     <div class="quality-badges">${badges}</div>
+    ${optionPills(v)}
     ${colorBand(v.color)}
     <div class="deal-bars">${buildScoreTable(bd, highlightKey, typeof v.score === 'number' ? v.score : null)}</div>
     ${pricePerKm(v)}
@@ -1769,7 +1796,7 @@ function buildScoreTable(bd, highlightKey, totalScore = null) {
   const w = currentWeights || {};
   let sum = 0;
   // Compact 2-column grid of factor chips: LABEL + colored score (0–10).
-  // Weight + weighted points live in the hover tooltip to stay sleek.
+  // Each chip shows: label · weighted points (pts that go into the total) · raw score /10.
   const cells = SCORE_FACTORS.filter(([k]) => bd[k] != null).map(([key, label]) => {
     const val     = bd[key] ?? 0;
     const wt      = w[key] ?? 0;
@@ -1780,6 +1807,7 @@ function buildScoreTable(bd, highlightKey, totalScore = null) {
     const tip     = `${label}: ${val.toFixed(1)}/10 × ${(wt*100).toFixed(0)}% = ${contrib.toFixed(2)} pts`;
     return `<div class="sf-chip${hi ? ' sf-hi' : ''}" title="${tip}">
       <span class="sf-k">${label}</span>
+      <span class="sf-pts">${contrib.toFixed(2)}</span>
       <span class="sf-v" style="color:${col}">${val.toFixed(1)}</span>
     </div>`;
   }).join('');
@@ -1791,7 +1819,8 @@ function buildScoreTable(bd, highlightKey, totalScore = null) {
     sum += eq;
     bonusChip = `<div class="sf-chip" title="Equipment bonus: +${eq.toFixed(2)} pts">
       <span class="sf-k">Equip</span>
-      <span class="sf-v" style="color:var(--green)">+${eq.toFixed(1)}</span>
+      <span class="sf-pts">+${eq.toFixed(2)}</span>
+      <span class="sf-v" style="color:var(--green)">+</span>
     </div>`;
   }
 

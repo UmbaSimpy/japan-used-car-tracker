@@ -76,6 +76,17 @@ WEIGHTS = {
 # Price is scored RELATIVE within each grade (see score_vehicle / compute_price_bounds):
 # the cheapest car in a grade scores 10 and the score falls off steeply.
 
+# ── Desirable option packages (Noah) ──────────────────────────────────────────
+# Each adds a CUMULATIVE value bonus to the score — a car with several stacks all
+# of them (like the StepWGN equipment bonus, but per option). Detected from the
+# listing text and surfaced as badges on the dashboard. (label, bonus, regex)
+OPTION_PACKAGES = [
+    ("快適利便PKG",     0.15, re.compile(r"快適利便(?:パッケージ|ＰＫＧ|PKG)?")),
+    ("Adv.ドライブ",    0.30, re.compile(r"アドバンスト\s*ドライブ|Advanced\s*Drive", re.I)),
+    ("Adv.パーク+PVM",  0.25, re.compile(r"アドバンスト\s*パーク|Advanced\s*Park", re.I)),
+]
+_OPTION_BONUS = {label: bonus for label, bonus, _ in OPTION_PACKAGES}
+
 
 # ── Scraping ─────────────────────────────────────────────────────────────────
 
@@ -171,6 +182,7 @@ def _extract_details(item) -> dict:
         "maintenance":   None,   # True = 法定整備付, False = 法定整備無
         "navi":          None,   # True = メーカー純正ナビ present, False = ナビレス, None = unknown
         "camera":        None,   # True = マルチビューカメラ detected, None = not mentioned
+        "options":       [],     # detected desirable option packages (cumulative bonus)
         "color":         None,   # body color string from listing card
         "photo_url":     None,   # main listing photo (CDN URL)
         "dealer_name":    None,   # dealer / shop display name
@@ -256,9 +268,14 @@ def _extract_details(item) -> dict:
     # else: None → not mentioned / unknown
 
     # Multi-view / surround camera — a real value option (NOT a plain バックカメラ).
-    if re.search(r'マルチビューカメラ|マルチビュー|アラウンドビュー|全周囲カメラ|全方位カメラ|パノラミックビュー|360°|３６０°', full_text):
+    # NOTE: do NOT match "360°" — that is CarSensor's "360°画像付" listing-photo
+    # badge (a 360° photo viewer), not a surround-camera on the car.
+    if re.search(r'マルチビューカメラ|マルチビュー|アラウンドビュー|全周囲カメラ|全方位カメラ|パノラミックビュー', full_text):
         details["camera"] = True
     # else: None → not mentioned (can't reliably detect absence from listing text)
+
+    # Desirable option packages (cumulative) — match each independently.
+    details["options"] = [label for label, _, rx in OPTION_PACKAGES if rx.search(full_text)]
 
     # Body color — CarSensor puts it as the 2nd <li> in carBodyInfoList
     # (1st item is body type e.g. ミニバン, 2nd is the color name)
@@ -412,15 +429,11 @@ def score_vehicle(vehicle: dict, price_bounds: dict[str, tuple[float, float]]) -
     else:
         maintenance_score = 5.0  # unknown = neutral
 
-    # Screen / head unit (nav OR display audio): installed = 10, none = 0
-    # (screen-less stripped cars penalised hard), unknown = 5 (neutral).
+    # Screen / head unit (nav OR display audio): installed = 10; otherwise 0.
+    # Both confirmed-absent AND unclear/unmentioned score 0 — only a clearly
+    # installed screen earns points.
     navi = vehicle.get("navi")
-    if navi is True:
-        navi_score = 10.0
-    elif navi is False:
-        navi_score = 0.0
-    else:
-        navi_score = 5.0  # not mentioned → neutral
+    navi_score = 10.0 if navi is True else 0.0
 
     # Multi-view camera: detected = 10 (a genuinely valuable option), not
     # mentioned = 4 (mild below-neutral — well-equipped cars advertise it,
@@ -439,6 +452,11 @@ def score_vehicle(vehicle: dict, price_bounds: dict[str, tuple[float, float]]) -
         camera_score      * WEIGHTS["camera"]
     )
 
+    # Cumulative option-package bonus (快適利便PKG / Advanced Drive / Advanced Park
+    # + Panoramic View). Stacks across all packages a car has; clamped to 10.
+    opt_bonus = sum(_OPTION_BONUS.get(o, 0.0) for o in (vehicle.get("options") or []))
+    total = min(10.0, total + opt_bonus)
+
     breakdown = {
         "price":       round(price_score,       1),
         "mileage":     round(mileage_score,     1),
@@ -448,6 +466,7 @@ def score_vehicle(vehicle: dict, price_bounds: dict[str, tuple[float, float]]) -
         "maintenance": round(maintenance_score, 1),
         "navi":        round(navi_score,        1),
         "camera":      round(camera_score,      1),
+        "equipment":   round(opt_bonus,         2),
     }
     return round(total, 2), breakdown
 
@@ -509,6 +528,7 @@ def _clean_vehicle(v: dict) -> dict:
         "maintenance":     v.get("maintenance"),
         "navi":            v.get("navi"),
         "camera":          v.get("camera"),
+        "options":         v.get("options", []),
         "color":           v.get("color"),
         "photo_url":       v.get("photo_url"),
         "dealer_name":     v.get("dealer_name"),

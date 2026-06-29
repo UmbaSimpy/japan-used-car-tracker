@@ -253,7 +253,9 @@ def _extract_details(item) -> dict:
     # else: None → not mentioned / unknown
 
     # Multi-view / surround camera — a real value option (NOT a plain バックカメラ).
-    if re.search(r'マルチビューカメラ|マルチビュー|アラウンドビュー|全周囲カメラ|全方位カメラ|パノラミックビュー|360°|３６０°', full_text):
+    # NOTE: do NOT match "360°" — that is CarSensor's "360°画像付" listing-photo
+    # badge (a 360° photo viewer), not a surround-camera on the car.
+    if re.search(r'マルチビューカメラ|マルチビュー|アラウンドビュー|全周囲カメラ|全方位カメラ|パノラミックビュー', full_text):
         details["camera"] = True
     # else: None → not mentioned (can't reliably detect absence from listing text)
 
@@ -409,15 +411,11 @@ def score_vehicle(vehicle: dict, price_bounds: dict[str, tuple[float, float]]) -
     else:
         maintenance_score = 5.0  # unknown = neutral
 
-    # Screen / head unit (nav OR display audio): installed = 10, none = 0
-    # (screen-less stripped cars penalised hard), unknown = 5 (neutral).
+    # Screen / head unit (nav OR display audio): installed = 10; otherwise 0.
+    # Both confirmed-absent AND unclear/unmentioned score 0 — only a clearly
+    # installed screen earns points.
     navi = vehicle.get("navi")
-    if navi is True:
-        navi_score = 10.0
-    elif navi is False:
-        navi_score = 0.0
-    else:
-        navi_score = 5.0  # not mentioned → neutral
+    navi_score = 10.0 if navi is True else 0.0
 
     # Multi-view camera: detected = 10 (a genuinely valuable option), not
     # mentioned = 4 (mild below-neutral — well-equipped cars advertise it,
