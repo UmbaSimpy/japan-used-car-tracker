@@ -54,8 +54,8 @@ HEADERS = {
     "Accept-Language": "ja,en;q=0.9",
 }
 DELAY_SEC  = 2
-TOP_N           = 9    # number of top-scored vehicles to store per snapshot
-SEAT_CHECK_CAP  = 60   # max detail pages to fetch when filtering 8-seat cars
+TOP_N           = 18    # number of top-scored vehicles to store per snapshot
+SEAT_CHECK_CAP  = 90   # max detail pages to fetch when filtering 8-seat cars
 
 # Grade lines tracked (current-gen e:HEV only). Matching is gen-gated on the
 # "e:HEV" badge (see _match_grade) so the previous-gen i-MMD "スパーダ ハイブリッド G"
@@ -75,28 +75,32 @@ GRADE_ID_TO_LABEL = {
 # units typically lack nav/camera. Rewarding equipment and easing the near-zero-km
 # mileage bonus pushes those cars down and surfaces genuinely well-equipped value.
 WEIGHTS = {
-    "price":       0.34,
-    "mileage":     0.12,   # ↓ — ease the near-0 km over-reward
+    "price":       0.42,   # incl. the old camera weight (camera is now an accessory bonus)
+    "mileage":     0.12,
     "shaken":      0.04,
     "accident":    0.13,
     "warranty":    0.08,
     "maintenance": 0.03,
-    "navi":        0.18,   # ↑ — a screen (nav OR display audio) installed; no screen is penalised hard
-    "camera":      0.08,   # multi-view camera is a key option
+    "navi":        0.18,   # a screen (nav OR display audio) installed; no screen is penalised hard
 }
 
-# Price is scored RELATIVE within each grade (see score_vehicle / compute_price_bounds):
-# the cheapest car in a grade scores 10 and the score falls off steeply. Because each
-# grade is scored against its own price distribution, the pricier Premium Line / 30th
-# Anniversary is never penalised for costing more than Air EX or Spada.
+# Price is scored across ALL grades POOLED (absolute cheapness — see run()), so the
+# cheapest StepWGN overall scores 10 regardless of grade.
+
+# ── Accessories / option packages ─────────────────────────────────────────────
+# The multi-view camera is the one worthwhile factory addon on the StepWGN, so it
+# is tracked as an accessory (cumulative bonus + purple badge), not a weighted
+# factor. (label, bonus, regex)
+OPTION_PACKAGES = [
+    ("マルチビュー", 0.30, re.compile(r"マルチビューカメラ|マルチビュー|アラウンドビュー|全周囲カメラ|全方位カメラ|パノラミックビュー")),
+]
+_OPTION_BONUS = {label: bonus for label, bonus, _ in OPTION_PACKAGES}
 
 # ── Equipment-value bonus (per grade) ─────────────────────────────────────────
-# Some lines ship with materially more standard equipment than their price would
-# suggest. The 30th Anniversary special edition bundles the large 11.4" Honda
-# CONNECT nav, multi-view camera, both-row seat heaters and exclusive trim as
-# STANDARD — it costs more, but you get more for the money. This flat bonus is
-# added to the final score (clamped to 10) so that extra value is credited
-# rather than the car merely looking "expensive". Other grades default to 0.
+# The 30th Anniversary special edition bundles materially more standard equipment
+# (big Honda CONNECT nav, dual-row seat heaters, exclusive trim) than its price
+# implies — a flat per-grade bonus credits that. Added on top of any accessory
+# bonus, clamped to 10.
 GRADE_VALUE_BONUS: dict[str, float] = {
     "anniversary_30th": 0.3,
 }
@@ -233,7 +237,8 @@ def _extract_details(item) -> dict:
         "warranty":      None,   # True = present, False = none
         "maintenance":   None,   # True = 法定整備付, False = 法定整備無
         "navi":          None,   # True = メーカー純正ナビ present, False = ナビレス, None = unknown
-        "camera":        None,   # True = マルチビューカメラ detected, None = not mentioned
+        "camera":        None,   # legacy field (multi-view camera is now an accessory)
+        "options":       [],     # detected accessories (cumulative bonus)
         "year":          None,   # model year (年式) — used for the gen filter
         "color":         None,   # body color string from listing card
         "photo_url":     None,   # main listing photo (CDN URL)
@@ -326,13 +331,10 @@ def _extract_details(item) -> dict:
         details["navi"] = True
     # else: None → not mentioned / unknown
 
-    # Multi-view / surround camera — a real value option (NOT a plain バックカメラ).
-    # Honda calls it マルチビューカメラシステム; also accept 全周囲/アラウンドビュー/360°.
-    # NOTE: do NOT match "360°" — that is CarSensor's "360°画像付" listing-photo
-    # badge (a 360° photo viewer), not a surround-camera on the car.
-    if re.search(r'マルチビューカメラ|マルチビュー|アラウンドビュー|全周囲カメラ|全方位カメラ|パノラミックビュー', full_text):
-        details["camera"] = True
-    # else: None → not mentioned (can't reliably detect absence from listing text)
+    # Accessories — the multi-view camera (NOT a plain バックカメラ; and NOT
+    # CarSensor's "360°画像付" photo badge) is tracked as a cumulative accessory
+    # bonus + purple badge rather than a weighted factor.
+    details["options"] = [label for label, _, rx in OPTION_PACKAGES if rx.search(full_text)]
 
     # Body color — CarSensor puts it as the 2nd <li> in carBodyInfoList
     # (1st item is body type e.g. ミニバン, 2nd is the color name)
@@ -493,12 +495,6 @@ def score_vehicle(vehicle: dict, price_bounds: dict[str, tuple[float, float]]) -
     navi = vehicle.get("navi")
     navi_score = 10.0 if navi is True else 0.0
 
-    # Multi-view camera: detected = 10 (a genuinely valuable option), not
-    # mentioned = 4 (mild below-neutral — most well-equipped cars advertise it,
-    # so silence usually means it's absent on this model).
-    camera = vehicle.get("camera")
-    camera_score = 10.0 if camera is True else 4.0
-
     total = (
         price_score       * WEIGHTS["price"]       +
         mileage_score     * WEIGHTS["mileage"]     +
@@ -506,13 +502,14 @@ def score_vehicle(vehicle: dict, price_bounds: dict[str, tuple[float, float]]) -
         accident_score    * WEIGHTS["accident"]    +
         warranty_score    * WEIGHTS["warranty"]    +
         maintenance_score * WEIGHTS["maintenance"] +
-        navi_score        * WEIGHTS["navi"]        +
-        camera_score      * WEIGHTS["camera"]
+        navi_score        * WEIGHTS["navi"]
     )
 
-    # Equipment-value bonus for richly-equipped special editions (e.g. 30th
-    # Anniversary). Added on top, then clamped so the score stays within 0–10.
-    bonus = GRADE_VALUE_BONUS.get(vehicle.get("grade_id", ""), 0.0)
+    # Accessory bonus (multi-view camera) + per-grade equipment bonus (30th
+    # Anniversary). Cumulative, added on top, then clamped to 10.
+    opt_bonus   = sum(_OPTION_BONUS.get(o, 0.0) for o in (vehicle.get("options") or []))
+    grade_bonus = GRADE_VALUE_BONUS.get(vehicle.get("grade_id", ""), 0.0)
+    bonus = opt_bonus + grade_bonus
     total = min(10.0, total + bonus)
 
     breakdown = {
@@ -523,7 +520,6 @@ def score_vehicle(vehicle: dict, price_bounds: dict[str, tuple[float, float]]) -
         "warranty":    round(warranty_score,    1),
         "maintenance": round(maintenance_score, 1),
         "navi":        round(navi_score,        1),
-        "camera":      round(camera_score,      1),
         "equipment":   round(bonus,             2),
     }
     return round(total, 2), breakdown
@@ -588,6 +584,7 @@ def _clean_vehicle(v: dict) -> dict:
         "maintenance":     v.get("maintenance"),
         "navi":            v.get("navi"),
         "camera":          v.get("camera"),
+        "options":         v.get("options", []),
         "color":           v.get("color"),
         "photo_url":       v.get("photo_url"),
         "dealer_name":     v.get("dealer_name"),

@@ -10,6 +10,7 @@
   <script src="data/freed_data.js"></script>
   <script src="data/noah_data.js"></script>
   <script src="data/stepwgn_data.js"></script>
+  <script src="data/voxy_data.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -53,6 +54,16 @@
       z-index: 200;
     }
 
+    /* ── Sticky top bar (header + model selector) ── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+      padding-top: 3px;                 /* clear the fixed red stripe */
+      box-shadow: 0 3px 12px rgba(0,0,0,.4);
+    }
+
     /* ── Header ── */
     header {
       display: flex;
@@ -62,12 +73,8 @@
       gap: 12px;
       padding: 0 40px;
       height: 66px;
-      margin-top: 3px;
       border-bottom: 1px solid var(--border);
       background: var(--bg);
-      position: sticky;
-      top: 3px;
-      z-index: 100;
     }
 
     .logo {
@@ -155,10 +162,11 @@
     /* ── Vehicle switcher ── */
     .vehicle-switcher {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
       max-width: 1200px;
       margin: 0 auto;
-      padding: 16px 40px 0;
+      padding: 12px 40px;
       width: 100%;
     }
     .vehicle-tab {
@@ -958,6 +966,7 @@
 </head>
 <body>
 
+<div class="topbar">
 <header>
   <div class="logo">
     <div class="logo-nameplate">
@@ -985,17 +994,12 @@
   <button class="vehicle-tab active" data-vehicle="freed">🚗 Honda Freed</button>
   <button class="vehicle-tab" data-vehicle="noah">🚐 Toyota Noah</button>
   <button class="vehicle-tab" data-vehicle="stepwgn">🚙 Honda StepWGN</button>
+  <button class="vehicle-tab" data-vehicle="voxy">🚐 Toyota Voxy</button>
 </div>
+</div><!-- /.topbar -->
 
 <main>
   <div id="notice-area"></div>
-
-  <div class="section-label">
-    <div class="section-label-bar"></div>
-    <span class="section-label-text">市場分析 &nbsp;·&nbsp; Grade Overview</span>
-    <div class="section-label-line"></div>
-  </div>
-  <div class="cards-row" id="cards-row"></div>
 
   <div class="section-label">
     <div class="section-label-bar"></div>
@@ -1024,6 +1028,13 @@
     <div id="gems-list" style="display:none"></div>
     <div id="watchlist-panel" class="watchlist-panel" style="display:none"></div>
   </div>
+
+  <div class="section-label">
+    <div class="section-label-bar"></div>
+    <span class="section-label-text">市場分析 &nbsp;·&nbsp; Grade Overview</span>
+    <div class="section-label-line"></div>
+  </div>
+  <div class="cards-row" id="cards-row"></div>
 
   <div class="section-label">
     <div class="section-label-bar"></div>
@@ -1110,6 +1121,22 @@ const VEHICLE_CONFIGS = {
     chartSubtitle: 'e:HEV grades, each valued independently · JPY (¥) · CarSensor.net',
     missingMsg:   'Could not load stepwgn_data.js',
     highMileageDesc: '40,000+ km but clean record, solid warranty & fair price — best deal despite wear',
+  },
+  voxy: {
+    getData:    () => window.VOXY_DATA,
+    gradeColors: {
+      hybrid_sz: '#4492FF',
+    },
+    watchlistKey: 'voxy_watchlist',
+    sourceUrl:    'https://www.carsensor.net/usedcar/bTO/s021/spH/',
+    seatIdeal:    7,
+    seatBad:      [8],
+    nameLeft:     'VOXY',
+    nameRight:    'MARKET',
+    logoModel:    'Toyota Voxy · 1.8 Hybrid S-Z 2WD',
+    chartSubtitle: 'Hybrid S-Z 2WD · Prices in JPY (¥) · CarSensor.net',
+    missingMsg:   'Could not load voxy_data.js',
+    highMileageDesc: '50,000+ km but clean record, solid warranty & fair price — best deal despite wear',
   },
 };
 let activeVehicle = 'freed';
@@ -1921,16 +1948,13 @@ function renderGems(snap, grades, prevDayUrls = new Set(), minPrice = null, minK
         const bd           = v.score_breakdown || {};
         const gc           = VC().gradeColors[v.grade_id] || 'var(--border2)';
         const highlightKey = { price: 'price', high_mileage: 'mileage', no_shaken: 'shaken' }[cat.key] || null;
-        const accOnly      = v.accident === false ? `<span class="qbadge good">${_ico.circleCheck} Clean</span>`
-                           : v.accident === true  ? `<span class="qbadge bad">${_ico.circleX} Accident</span>`
-                           :                        `<span class="qbadge neutral">${_ico.circleX} Acc N/A</span>`;
         const rankHtml     = `<span style="color:${cat.accent};font-size:0.9rem">${cat.icon}</span>`;
         const card = document.createElement('div');
         card.className = 'deal-card';
         card.style.setProperty('--card-grade-color', cat.accent);
         card.style.setProperty('--card-delay', `${gemIdx * 0.05}s`);
         const isNew = v.url ? !prevDayUrls.has(v.url) : false;
-        card.innerHTML = buildCardHTML({ v, grade, gc, rankHtml, badges: accOnly, bd,
+        card.innerHTML = buildCardHTML({ v, grade, gc, rankHtml, badges: buildBadges(v, true), bd,
                                          highlightKey, highlightAccent: cat.accent, isNew, minPrice, minKm });
         row.appendChild(card);
       });
