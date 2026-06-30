@@ -184,6 +184,75 @@
     .vehicle-tab:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
     .vehicle-tab.active { color: #fff; background: var(--red); border-color: var(--red); }
 
+    /* ── FAQ / Label guide ── */
+    .faq-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .faq-intro {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.86rem; line-height: 1.6; color: var(--text2);
+    }
+    .faq-intro strong { color: var(--text); }
+    .faq-swatch {
+      display: inline-block; width: 11px; height: 11px; border-radius: 3px;
+      vertical-align: middle; margin: 0 1px;
+    }
+    .faq-group { display: flex; flex-direction: column; }
+    .faq-group-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.92rem; font-weight: 700; letter-spacing: 0.6px;
+      color: var(--text); text-transform: uppercase;
+      padding: 10px 0 6px; border-bottom: 2px solid var(--border2);
+      margin-bottom: 2px;
+    }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-item summary {
+      list-style: none; cursor: pointer;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 13px 28px 13px 0; position: relative;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.96rem; font-weight: 600; letter-spacing: 0.3px;
+      color: var(--text);
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after {
+      content: '+'; position: absolute; right: 4px; top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem;
+      color: var(--muted); line-height: 1;
+    }
+    .faq-item[open] summary::after { content: '−'; color: var(--red); }
+    .faq-item[open] summary { color: var(--red); }
+    .faq-item p {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.84rem; line-height: 1.65; color: var(--text2);
+      padding: 0 28px 15px 0; margin: 0;
+    }
+    .faq-item p strong { color: var(--text); font-weight: 600; }
+    .faq-item p em { color: var(--text); font-style: italic; }
+    .faq-tag {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.62rem; font-weight: 600; letter-spacing: 0.4px;
+      color: var(--text2); border: 1px solid var(--border2);
+      border-radius: 4px; padding: 1px 7px; text-transform: none;
+    }
+    .faq-mini {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.66rem; font-weight: 600;
+      border: 1px solid var(--border); border-radius: 4px;
+      padding: 1px 6px; white-space: nowrap;
+    }
+    .faq-mini.good    { color: var(--green); border-color: rgba(25,195,125,.4); }
+    .faq-mini.bad     { color: var(--red);   border-color: rgba(232,39,42,.4); }
+    .faq-mini.neutral { color: var(--muted); border-color: var(--border); }
+
     /* ── Main ── */
     main {
       max-width: 1200px;
@@ -1053,6 +1122,235 @@
       <div class="chart-wrap">
         <canvas id="main-chart"></canvas>
       </div>
+    </div>
+  </div>
+
+  <div class="section-label">
+    <div class="section-label-bar"></div>
+    <span class="section-label-text">ガイド &nbsp;·&nbsp; Label Guide &amp; FAQ</span>
+    <div class="section-label-line"></div>
+  </div>
+  <div class="faq-section">
+    <p class="faq-intro">
+      Every car is rated <strong>0–10</strong> from the factors below. Each factor gets a
+      0–10 sub-score, multiplied by a weight, and summed into the total; some lines also add
+      flat <em>accessory</em> bonuses on top. Scores are colour-graded
+      <span class="faq-swatch" style="background:#E8272A"></span> low →
+      <span class="faq-swatch" style="background:#F5A623"></span> mid →
+      <span class="faq-swatch" style="background:#19C37D"></span> high.
+      Tap any item to expand.
+    </p>
+
+    <div class="faq-group">
+      <div class="faq-group-title">📊 The score &amp; its factors</div>
+
+      <details class="faq-item">
+        <summary>Total score <span class="faq-tag" style="color:#19C37D;border-color:#19C37D55">8.4</span></summary>
+        <p>The headline 0–10 number, shown top-right of each card and at the bottom of the
+        breakdown box. It is the weighted sum of every factor below (plus any accessory bonus).
+        <strong>Green ≥ 7.5, amber 5.5–7.4, red &lt; 5.5.</strong> It’s a relative “value &amp;
+        condition” signal, <em>not</em> a guarantee — always read the individual factors, because
+        two cars with the same total can be strong in very different areas.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Price <span class="faq-tag">weight 34–42%</span></summary>
+        <p><strong>What it is:</strong> how cheap the car is <em>relative to others of the same
+        kind</em>. The cheapest car scores 10 and the score falls off steeply, so a 10 is
+        effectively reserved for the lowest price; most cars sit mid-to-low. For most models price
+        is judged within each grade; for the StepWGN all grades share one pool (the cheapest
+        StepWGN overall = 10).<br>
+        <strong>Why it matters:</strong> it’s the single biggest factor (34–42% of the score)
+        because price is what you actually pay. <strong>But</strong> a very high price score often
+        means high mileage, no warranty, or short/expired shaken — a “cheap” car can cost more
+        later. Always cross-check the cheap ones against mileage and condition.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Mileage <span class="faq-tag">🛣 weight 12%</span></summary>
+        <p><strong>What it is:</strong> lower kilometres score higher (≈ 0 km → 10, 100,000 km → 0).
+        Shown as the 🛣 pill.<br>
+        <strong>Why it matters:</strong> lower mileage usually means less wear. <strong>But</strong>
+        watch the trap: a near-0 km “登録済未使用車” (registered-unused) car scores a perfect mileage
+        10 yet is priced like new — not a bargain. That’s why mileage is deliberately weighted
+        modestly. A 20–50k km car with a good price and full kit is often better value than a 5 km
+        one at full retail.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Screen <span class="faq-tag">weight 18%</span></summary>
+        <p><strong>What it is:</strong> whether a head-unit / display is fitted — either a real
+        navigation unit <em>or</em> a display-audio screen (<span lang="ja">ディスプレイオーディオ</span>).
+        Installed = 10; <strong>confirmed missing or unclear = 0.</strong> Cars advertised as
+        <span lang="ja">ナビレス</span>/<span lang="ja">オーディオレス</span>, or that only carry the
+        “nav-ready package” (<span lang="ja">ナビ装着用スペシャルパッケージ</span> — wiring only, no unit),
+        score 0.<br>
+        <strong>Why it matters:</strong> retro-fitting a screen/nav is expensive and fiddly, and a
+        missing one is a classic way dealers hit a low sticker price on near-new cars. Heavily
+        weighted so those stripped units don’t look like bargains.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Accident <span class="qbadge good" style="display:inline-flex">No Accident</span></summary>
+        <p><strong>What it is:</strong> the repair-history flag (<span lang="ja">修復歴</span>).
+        <span class="faq-mini good">No Accident</span> = no structural repair history (best),
+        <span class="faq-mini bad">Accident</span> = has repair history,
+        <span class="faq-mini neutral">Acc N/A</span> = not stated. Weight 13%.<br>
+        <strong>Why it matters:</strong> in Japan 修復歴 specifically means frame/structural damage
+        was repaired — it hurts resale value and can hide alignment or safety issues. For a family
+        minivan most buyers want <em>No Accident</em>. A repaired car can be fine and cheaper, but
+        only with a trusted inspection.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Warranty <span class="qbadge good" style="display:inline-flex">保証付</span></summary>
+        <p><strong>What it is:</strong> whether a dealer warranty is included.
+        <span class="faq-mini good">保証付</span> = warranty included,
+        <span class="faq-mini bad">保証なし</span> = none,
+        <span class="faq-mini neutral">保証 N/A</span> = not stated. Weight 8%.<br>
+        <strong>Why it matters:</strong> a warranty covers you if something fails soon after
+        purchase. Valuable on a used car, but secondary to price/condition — and the length/scope
+        varies a lot, so confirm the details with the dealer.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Maintenance <span class="qbadge good" style="display:inline-flex">法定整備付</span></summary>
+        <p><strong>What it is:</strong> whether the legally-required pre-delivery servicing
+        (<span lang="ja">法定整備</span>) is included.
+        <span class="faq-mini good">法定整備付</span> = included,
+        <span class="faq-mini bad">法定整備無</span> = not included,
+        <span class="faq-mini neutral">整備 N/A</span> = not stated. Weight 3%.<br>
+        <strong>Why it matters:</strong> “付” means the car is serviced/checked before handover —
+        peace of mind, and any cost is already in the price. “無” means you may pay for that
+        servicing on top. Low weight because it’s a relatively small, one-off amount.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>車検 Shaken <span class="faq-tag">🔧 weight 4%</span></summary>
+        <p><strong>What it is:</strong> how many months of valid Japanese statutory inspection
+        (<span lang="ja">車検</span>) remain. 0 months → low, ≥ 24 months → high. Shown as the 🔧 pill.<br>
+        <strong>Why it matters:</strong> a fresh 車検 saves you an inspection (often ¥100,000+) soon
+        after buying. <strong>But</strong> it’s deliberately low-weighted: cars with little/no shaken
+        are usually priced lower to compensate, and you can renew it yourself — so “車検なし” can
+        still be a great buy (see the Hidden Gems category).</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Multi-cam <span class="faq-tag">Freed only · weight 8%</span></summary>
+        <p><strong>What it is:</strong> a multi-view / surround-view camera
+        (<span lang="ja">マルチビューカメラ</span> / 全周囲 / パノラミックビュー) — <em>not</em> a plain
+        reversing camera. On the <strong>Freed</strong> it’s still a scored factor; on the Noah,
+        Voxy and StepWGN it’s instead an <em>accessory tag</em> (see below).<br>
+        <strong>Why it matters:</strong> genuinely useful for parking a big minivan in tight
+        Japanese spaces, and a factory option that’s costly to add later. Note: a listing’s
+        “360°画像付” badge is just CarSensor’s photo viewer and is deliberately ignored.</p>
+      </details>
+    </div>
+
+    <div class="faq-group">
+      <div class="faq-group-title">🪑 Spec pills &amp; accessory tags</div>
+
+      <details class="faq-item">
+        <summary>Seats <span class="faq-mini" style="color:var(--green);border-color:rgba(25,195,125,.35)">🪑 7名</span></summary>
+        <p><strong>What it is:</strong> seating capacity from the detail page.
+        <strong>Green = the preferred layout</strong> for that model (e.g. 6-seat captain chairs on
+        the Freed, 7-seat on the Noah/Voxy/StepWGN); <strong>red = a less-wanted count</strong>
+        (e.g. 8-seat bench). Cars with the un-preferred count are filtered out of the top list
+        entirely.<br>
+        <strong>Why it matters:</strong> the seat layout changes the whole interior (captain chairs
+        vs bench, walk-through, luggage space) and is impossible to change later — for many buyers
+        it’s a hard requirement.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Colour band <span class="faq-tag">e.g. ⬛ 黒</span></summary>
+        <p><strong>What it is:</strong> the body colour from the listing, shown as a swatch + name.
+        Not scored.<br>
+        <strong>Why it matters:</strong> purely personal preference / resale taste — white &amp;
+        black hold value best in Japan. Informational only; it never affects the score.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Accessory tags <span class="opt-pill" style="display:inline-flex">✦ マルチビュー</span></summary>
+        <p><strong>What they are:</strong> desirable factory option packages, shown as
+        <span style="color:var(--purple)">purple tags</span> and added as a small <em>cumulative</em>
+        bonus (they stack) that appears as the <strong>Equip</strong> row in the breakdown:</p>
+        <p style="margin-top:6px">
+        • <strong>マルチビュー</strong> — multi-view/surround camera (StepWGN: the one worthwhile
+        add-on, +0.30).<br>
+        • <strong>快適利便PKG</strong> (Noah/Voxy) — the Comfort &amp; Convenience package
+        (heated seats, extra USB/power, etc.), +0.15.<br>
+        • <strong>Adv.ドライブ</strong> — Toyota Teammate <em>Advanced Drive</em> (hands-off
+        highway assist), +0.30.<br>
+        • <strong>Adv.パーク+PVM</strong> — <em>Advanced Park</em> (automated parking) bundled with
+        the Panoramic View Monitor, +0.25. A car with this does <em>not</em> also get the standalone
+        PVM bonus (no double-counting).<br>
+        • <strong>PVM</strong> (Noah/Voxy) — standalone Panoramic View Monitor, +0.15.</p>
+        <p><strong>Why they matter:</strong> these are pricey factory options that can’t be added
+        afterwards, so two otherwise-identical cars aren’t equal if one has them. The bonus is
+        deliberately small — a nice tiebreaker, not something that should override price/condition.</p>
+      </details>
+    </div>
+
+    <div class="faq-group">
+      <div class="faq-group-title">🏷️ Quick-spot badges</div>
+
+      <details class="faq-item">
+        <summary><span class="faq-mini" style="color:#fff;background:var(--red);border-color:var(--red)">NEW</span> &nbsp;Newly listed</summary>
+        <p>The car wasn’t on this board in the previous daily snapshot — i.e. a fresh listing.
+        Worth a look because good new listings sell fast; it says nothing about quality.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary><span class="faq-mini" style="color:var(--green);border-color:rgba(25,195,125,.4)">¥ BEST</span> &nbsp;Lowest price</summary>
+        <p>The cheapest car in that section (Best Overall, or a given Hidden-Gems category).
+        A quick flag for the absolute price floor — but check why it’s cheapest (mileage, shaken,
+        condition) before assuming it’s the best deal.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary><span class="faq-mini" style="color:var(--blue);border-color:rgba(68,146,255,.4)">LOW KM</span> &nbsp;Lowest mileage</summary>
+        <p>The lowest-mileage car in that section. Great for longevity, but remember the
+        near-0 km cars are often priced like new — low km alone isn’t value.</p>
+      </details>
+    </div>
+
+    <div class="faq-group">
+      <div class="faq-group-title">🗂️ Sections &amp; other info</div>
+
+      <details class="faq-item">
+        <summary>🏆 Best Overall · 💎 Hidden Gems · ⭐ Watchlist</summary>
+        <p><strong>Best Overall</strong> — the 18 highest-scoring cars across all grades.<br>
+        <strong>Hidden Gems</strong> — cars that win on one specific angle:
+        <em>Best Price</em> (cheapest, trade-offs likely), <em>High Mileage, Strong Value</em>
+        (higher km but clean/well-kept and priced right), and <em>車検なし — No Shaken</em>
+        (little/no inspection left, usually cheaper — you arrange the 車検).<br>
+        <strong>Watchlist</strong> — cars you’ve starred (saved in your browser, per model).</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Cost per km · Dealer rating <span class="faq-tag">★ 4.6</span></summary>
+        <p><strong>Cost per km</strong> (¥/km) = price ÷ mileage — a rough “how much you’re paying
+        per kilometre of life used.” Mainly useful for comparing higher-mileage cars; near-new cars
+        show a huge ¥/km simply because the denominator is tiny.<br>
+        <strong>Dealer rating</strong> = CarSensor’s buyer review score (★ out of 5) and review
+        count. A higher score with many reviews is reassuring; it doesn’t affect the car’s score.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>3M / 6M / 1Y &amp; the price chart</summary>
+        <p>The period buttons set how far back the price-history chart and trend comments look.
+        The chart tracks each grade’s <em>average listed price</em> over time — useful for spotting
+        whether prices are rising or softening before you commit.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Why don’t flood-damaged cars appear?</summary>
+        <p>Listings flagged as flood-damaged (<span lang="ja">冠水歴車 / 水没車</span>) are removed
+        entirely — they’re excluded from the rankings and even from the price statistics, because
+        flood history is a serious long-term reliability risk. Cars explicitly stating
+        <span lang="ja">冠水歴なし</span> (no flood history) are kept.</p>
+      </details>
     </div>
   </div>
 </main>
