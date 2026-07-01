@@ -162,10 +162,13 @@ def _match_grade(text: str) -> str | None:
 
 
 def _extract_price(tag) -> float | None:
-    for sel in ("div.basePrice", "div.totalPrice"):
+    # Use 支払総額 (total out-the-door price) first, falling back to 車両本体価格
+    # (vehicle-only) only if the total is absent. The fees bundled into the total
+    # vary a lot between listings, so the total is the truly comparable cost.
+    for sel in ("div.totalPrice", "div.basePrice"):
         el = tag.select_one(sel)
         if el:
-            m = re.search(r"([\d]+\.?\d*)\s*万円", el.get_text())
+            m = re.search(r"([\d]+\.?\d*)\s*万円", el.get_text().replace(" ", ""))
             if m:
                 return float(m.group(1))
     return None
