@@ -253,6 +253,150 @@
     .faq-mini.bad     { color: var(--red);   border-color: rgba(232,39,42,.4); }
     .faq-mini.neutral { color: var(--muted); border-color: var(--border); }
 
+    /* ── Compare: card button ── */
+    .compare-btn {
+      width: 100%; margin-top: 8px;
+      background: transparent; cursor: pointer;
+      border: 1px solid var(--border2); border-radius: var(--radius-sm);
+      color: var(--text2);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
+      padding: 7px 10px; transition: all .15s;
+    }
+    .compare-btn:hover { border-color: var(--purple); color: var(--purple); background: rgba(159,122,234,.06); }
+    .compare-btn.active { border-color: var(--purple); color: #fff; background: var(--purple); }
+
+    /* ── Compare: floating tray ── */
+    .compare-bar {
+      position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+      z-index: 300; display: none; align-items: center; gap: 12px;
+      max-width: calc(100vw - 28px);
+      background: var(--surface2);
+      border: 1px solid var(--purple);
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 34px rgba(0,0,0,.55);
+    }
+    .compare-bar.show { display: flex; }
+    .compare-bar-chips { display: flex; gap: 8px; align-items: center; }
+    .compare-chip {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--surface3); border: 1px solid var(--border);
+      border-radius: 8px; padding: 5px 6px 5px 8px; max-width: 168px;
+    }
+    .compare-chip-txt { display: flex; flex-direction: column; line-height: 1.05; min-width: 0; }
+    .compare-chip-model {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 0.56rem;
+      letter-spacing: .4px; color: var(--muted); text-transform: uppercase;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .compare-chip-price { font-family: 'Bebas Neue', sans-serif; font-size: 0.84rem; color: var(--text); letter-spacing: .5px; }
+    .compare-chip-x {
+      background: none; border: none; color: var(--muted); cursor: pointer;
+      font-size: 1rem; line-height: 1; padding: 2px 3px; flex-shrink: 0;
+    }
+    .compare-chip-x:hover { color: var(--red); }
+    .compare-bar-empty {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 0.74rem;
+      color: var(--muted); letter-spacing: .5px; padding: 0 4px;
+    }
+    .compare-go {
+      background: var(--purple); color: #fff; border: none; cursor: pointer;
+      border-radius: 8px; padding: 9px 16px;
+      font-family: 'Barlow Condensed', sans-serif; font-size: 0.82rem; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; transition: filter .15s;
+    }
+    .compare-go:hover { filter: brightness(1.12); }
+    .compare-go:disabled { opacity: .4; cursor: not-allowed; }
+    .compare-clear {
+      background: none; border: none; color: var(--muted); cursor: pointer;
+      font-family: 'Barlow Condensed', sans-serif; font-size: 0.68rem;
+      letter-spacing: .6px; text-transform: uppercase; white-space: nowrap;
+    }
+    .compare-clear:hover { color: var(--red); }
+
+    /* ── Compare: overlay modal ── */
+    .compare-modal-overlay {
+      position: fixed; inset: 0; z-index: 400;
+      background: rgba(8,8,12,.78); backdrop-filter: blur(3px);
+      display: flex; align-items: flex-start; justify-content: center;
+      padding: 24px 14px; overflow-y: auto;
+    }
+    .compare-modal {
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: var(--radius); width: 100%; max-width: 920px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.6); overflow: hidden;
+    }
+    .compare-modal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--bg2);
+    }
+    .compare-modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 1px; color: var(--text); }
+    .compare-modal-x {
+      background: none; border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text2); cursor: pointer; font-size: 1rem; line-height: 1; padding: 5px 10px;
+    }
+    .compare-modal-x:hover { border-color: var(--red); color: var(--red); }
+    .compare-modal-body { padding: 4px 0 18px; }
+
+    /* comparison grid */
+    .cmp-table { width: 100%; }
+    .cmp-row {
+      display: grid; align-items: stretch;
+      border-bottom: 1px solid var(--border);
+    }
+    .cmp-row-label {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem;
+      letter-spacing: .6px; text-transform: uppercase; color: var(--muted);
+      padding: 9px 12px; display: flex; align-items: center;
+      border-right: 1px solid var(--border); background: var(--bg2);
+    }
+    .cmp-cell { padding: 9px 12px; display: flex; flex-direction: column; justify-content: center; gap: 2px; border-right: 1px solid var(--border); min-width: 0; }
+    .cmp-cell:last-child { border-right: none; }
+    .cmp-cell.win { background: rgba(25,195,125,.10); }
+    .cmp-cell-main { font-family: 'Bebas Neue', sans-serif; font-size: 0.98rem; letter-spacing: .5px; color: var(--text); }
+    .cmp-cell-sub  { font-family: 'DM Sans', sans-serif; font-size: 0.7rem; color: var(--text2); }
+    .cmp-win-flag { color: var(--green); font-size: 0.62rem; font-family: 'Barlow Condensed', sans-serif; letter-spacing: .5px; }
+    .cmp-head .cmp-cell { background: var(--bg2); gap: 4px; }
+    .cmp-head-photo { width: 100%; height: 84px; object-fit: cover; border-radius: 5px; background: var(--surface3); }
+    .cmp-head-model { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; letter-spacing: .6px; text-transform: uppercase; color: var(--purple); }
+    .cmp-head-grade { font-family: 'Barlow Condensed', sans-serif; font-size: 0.74rem; color: var(--text2); }
+    .cmp-head-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: var(--text); letter-spacing: .5px; }
+    .cmp-good { color: var(--green); } .cmp-bad { color: var(--red); } .cmp-na { color: var(--muted); }
+
+    /* advice */
+    .cmp-advice { padding: 18px 20px; }
+    .cmp-verdict {
+      background: linear-gradient(135deg, rgba(159,122,234,.14), rgba(68,146,255,.08));
+      border: 1px solid rgba(159,122,234,.4); border-radius: 8px;
+      padding: 13px 15px; margin-bottom: 14px;
+    }
+    .cmp-verdict-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; letter-spacing: 1.2px; text-transform: uppercase; color: var(--purple); margin-bottom: 3px; }
+    .cmp-verdict-text { font-family: 'DM Sans', sans-serif; font-size: 0.92rem; line-height: 1.5; color: var(--text); }
+    .cmp-insights { display: flex; flex-direction: column; gap: 9px; }
+    .cmp-insight {
+      display: flex; gap: 9px; font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem; line-height: 1.5; color: var(--text2);
+    }
+    .cmp-insight b { color: var(--text); font-weight: 600; }
+    .cmp-insight-ico { flex-shrink: 0; }
+    .cmp-closing {
+      margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
+      font-family: 'DM Sans', sans-serif; font-size: 0.84rem; line-height: 1.55; color: var(--text2);
+    }
+    .cmp-closing b { color: var(--text); }
+    .cmp-disclaimer { margin-top: 10px; font-size: 0.68rem; color: var(--muted); font-style: italic; }
+
+    @media (max-width: 600px) {
+      .compare-bar { bottom: 10px; gap: 8px; padding: 8px; }
+      .compare-chip { max-width: 96px; padding: 4px 4px 4px 6px; }
+      .compare-go { padding: 8px 11px; font-size: 0.74rem; }
+      .cmp-row-label { font-size: 0.54rem; padding: 7px 6px; }
+      .cmp-cell { padding: 7px 6px; }
+      .cmp-cell-main { font-size: 0.84rem; }
+      .compare-modal-body { overflow-x: auto; }
+    }
+
     /* ── Main ── */
     main {
       max-width: 1200px;
@@ -1363,6 +1507,12 @@
   <span id="last-snap-date"></span>
 </footer>
 
+<!-- Floating comparison tray -->
+<div class="compare-bar" id="compare-bar"></div>
+
+<!-- Comparison overlay -->
+<div class="compare-modal-overlay" id="compare-modal" style="display:none"></div>
+
 <script>
 /* ── Vehicle configs ── */
 const VEHICLE_CONFIGS = {
@@ -1544,6 +1694,238 @@ function favBtn(url) {
   const title  = active ? 'Remove from watchlist' : 'Add to watchlist';
   return `<button class="fav-btn${active}" data-url="${url || ''}" title="${title}" onclick="toggleFav(this)">${icoStarSVG}</button>`;
 }
+
+/* ───────────────────────── Comparison feature ───────────────────────── */
+const CMP_KEY = 'compare_list';
+const CMP_MAX = 3;
+const MODEL_NAME = { freed:'Honda Freed', noah:'Toyota Noah', stepwgn:'Honda StepWGN', voxy:'Toyota Voxy' };
+
+let compareList = (function(){ try { return JSON.parse(localStorage.getItem(CMP_KEY) || '[]'); } catch { return []; } })();
+function saveCompare(){ localStorage.setItem(CMP_KEY, JSON.stringify(compareList)); }
+function inCompare(url){ return !!url && compareList.some(e => e.url === url); }
+
+function compareBtnHTML(url){
+  const active = inCompare(url);
+  return `<button class="compare-btn${active?' active':''}" data-url="${url||''}" onclick="toggleCompare(this)">${active?'✓ In comparison':'＋ Add to compare'}</button>`;
+}
+
+function toggleCompare(btn){
+  const url = btn.dataset.url; if (!url) return;
+  const idx = compareList.findIndex(e => e.url === url);
+  if (idx >= 0) { compareList.splice(idx, 1); }
+  else {
+    if (compareList.length >= CMP_MAX) { flashCompareBar(); return; }
+    const v = VMAP[url]; if (!v) return;
+    compareList.push(Object.assign({}, v, { _model: activeVehicle }));
+  }
+  saveCompare(); refreshCompareButtons(); renderCompareBar();
+}
+
+function refreshCompareButtons(){
+  document.querySelectorAll('.compare-btn').forEach(b => {
+    const active = inCompare(b.dataset.url);
+    b.classList.toggle('active', active);
+    b.textContent = active ? '✓ In comparison' : '＋ Add to compare';
+  });
+}
+
+function removeCompare(url){
+  const i = compareList.findIndex(e => e.url === url);
+  if (i >= 0) { compareList.splice(i, 1); saveCompare(); refreshCompareButtons(); renderCompareBar(); }
+}
+function clearCompare(){ compareList = []; saveCompare(); refreshCompareButtons(); renderCompareBar(); }
+
+function flashCompareBar(){
+  const bar = document.getElementById('compare-bar'); if (!bar) return;
+  bar.animate([{transform:'translateX(-50%) scale(1)'},{transform:'translateX(-50%) scale(1.05)'},{transform:'translateX(-50%) scale(1)'}], {duration:280});
+}
+
+function renderCompareBar(){
+  const bar = document.getElementById('compare-bar'); if (!bar) return;
+  if (compareList.length === 0) { bar.classList.remove('show'); bar.innerHTML = ''; return; }
+  const chips = compareList.map(v => `
+    <div class="compare-chip">
+      <div class="compare-chip-txt">
+        <span class="compare-chip-model">${MODEL_NAME[v._model] || ''}</span>
+        <span class="compare-chip-price">¥${v.price_man}万</span>
+      </div>
+      <button class="compare-chip-x" title="Remove" onclick="removeCompare('${(v.url||'').replace(/'/g,'')}')">×</button>
+    </div>`).join('');
+  const canCompare = compareList.length >= 2;
+  bar.innerHTML = `
+    <span class="compare-bar-empty">Compare ${compareList.length}/${CMP_MAX}</span>
+    <div class="compare-bar-chips">${chips}</div>
+    <button class="compare-go" ${canCompare?'':'disabled'} title="${canCompare?'':'Add at least 2 vehicles'}" onclick="openCompareModal()">Compare Now</button>
+    <button class="compare-clear" onclick="clearCompare()">Clear</button>`;
+  bar.classList.add('show');
+}
+
+/* ── Comparison table ── */
+function _cmpCostPerKm(v){ return (v.mileage_km==null || v.mileage_km<2000) ? null : Math.round(v.price_man*10000/v.mileage_km); }
+
+function buildCompareTable(list){
+  const n = list.length;
+  const gt = `minmax(90px,116px) repeat(${n}, minmax(0,1fr))`;
+  const rows = [];
+  const bestMax = arr => { const v=arr.filter(x=>x!=null); if(!v.length) return arr.map(()=>false); const m=Math.max(...v); return arr.map(x=>x!=null&&x===m); };
+  const bestMin = arr => { const v=arr.filter(x=>x!=null); if(!v.length) return arr.map(()=>false); const m=Math.min(...v); return arr.map(x=>x!=null&&x===m); };
+
+  // header row
+  rows.push(`<div class="cmp-row cmp-head" style="grid-template-columns:${gt}">
+    <div class="cmp-row-label"></div>
+    ${list.map(v => `<div class="cmp-cell">
+      ${v.photo_url ? `<img class="cmp-head-photo" src="${v.photo_url}" alt="">` : `<div class="cmp-head-photo"></div>`}
+      <span class="cmp-head-model">${MODEL_NAME[v._model]||''}</span>
+      <span class="cmp-head-grade">${v.grade_label||''}</span>
+      <span class="cmp-head-price">¥${v.price_man}万</span>
+    </div>`).join('')}
+  </div>`);
+
+  function addRow(label, vals, winners){
+    winners = winners || [];
+    rows.push(`<div class="cmp-row" style="grid-template-columns:${gt}">
+      <div class="cmp-row-label">${label}</div>
+      ${vals.map((c,i)=>`<div class="cmp-cell${winners[i]?' win':''}">
+        <span class="cmp-cell-main ${c.cls||''}">${c.main}</span>
+        ${c.sub?`<span class="cmp-cell-sub">${c.sub}</span>`:''}
+        ${winners[i]?'<span class="cmp-win-flag">▲ best</span>':''}
+      </div>`).join('')}
+    </div>`);
+  }
+
+  const scores=list.map(v=>typeof v.score==='number'?v.score:null);
+  addRow('Score', list.map((v,i)=>({main: scores[i]!=null?scores[i].toFixed(2):'—'})), bestMax(scores));
+  addRow('Price', list.map(v=>({main:'¥'+v.price_man+'万'})), bestMin(list.map(v=>v.price_man)));
+  addRow('Mileage', list.map(v=>({main: v.mileage_km!=null?v.mileage_km.toLocaleString()+' km':'—'})), bestMin(list.map(v=>v.mileage_km)));
+  const cpk=list.map(_cmpCostPerKm);
+  if(cpk.some(x=>x!=null)) addRow('Cost / km', list.map((v,i)=>({main: cpk[i]!=null?'¥'+cpk[i].toLocaleString():'—'})), bestMin(cpk));
+  addRow('Screen', list.map(v=>({main: v.navi===true?'✓ Yes':(v.navi===false?'✗ No':'— ?'), cls: v.navi===true?'cmp-good':(v.navi===false?'cmp-bad':'cmp-na')})), list.map(v=>v.navi===true));
+  addRow('Accident', list.map(v=>({main: v.accident===false?'✓ Clean':(v.accident===true?'✗ History':'— ?'), cls: v.accident===false?'cmp-good':(v.accident===true?'cmp-bad':'cmp-na')})), list.map(v=>v.accident===false));
+  addRow('Warranty', list.map(v=>({main: v.warranty===true?'✓ Yes':(v.warranty===false?'✗ No':'— ?'), cls: v.warranty===true?'cmp-good':(v.warranty===false?'cmp-bad':'cmp-na')})), list.map(v=>v.warranty===true));
+  addRow('Maintenance', list.map(v=>({main: v.maintenance===true?'✓ Incl.':(v.maintenance===false?'✗ No':'— ?'), cls: v.maintenance===true?'cmp-good':(v.maintenance===false?'cmp-bad':'cmp-na')})), list.map(v=>v.maintenance===true));
+  addRow('車検 left', list.map(v=>({main: v.shaken_months!=null?v.shaken_months+' mo':'— ?'})), bestMax(list.map(v=>v.shaken_months)));
+  addRow('Seats', list.map(v=>{ const ideal=(VEHICLE_CONFIGS[v._model]||{}).seatIdeal; const ok=v.seats!=null&&v.seats===ideal; return {main: v.seats!=null?v.seats+'名':'— ?', cls: ok?'cmp-good':''}; }), list.map(v=>{ const ideal=(VEHICLE_CONFIGS[v._model]||{}).seatIdeal; return v.seats!=null&&v.seats===ideal; }));
+  if(list.some(v=>(v.options||[]).length)) addRow('Extras', list.map(v=>({main:(v.options&&v.options.length)?v.options.join(', '):'—', cls:(v.options&&v.options.length)?'':'cmp-na'})), []);
+  const dr=list.map(v=>v.dealer_rating!=null?v.dealer_rating:null);
+  if(dr.some(x=>x!=null)) addRow('Dealer', list.map(v=>({main: v.dealer_rating!=null?'★ '+v.dealer_rating.toFixed(1):'—', sub: v.dealer_name||''})), bestMax(dr));
+  if(list.some(v=>v.year)) addRow('Year', list.map(v=>({main: v.year||'—'})), []);
+  if(list.some(v=>v.color)) addRow('Colour', list.map(v=>({main: v.color||'—'})), []);
+  rows.push(`<div class="cmp-row" style="grid-template-columns:${gt}">
+    <div class="cmp-row-label">Listing</div>
+    ${list.map(v=>`<div class="cmp-cell">${v.url?`<a class="cmp-cell-sub" style="color:var(--blue)" href="${v.url}" target="_blank" rel="noopener">CarSensor ↗</a>`:'—'}</div>`).join('')}
+  </div>`);
+
+  return `<div class="cmp-table">${rows.join('')}</div>`;
+}
+
+/* ── Comparison advice engine (wide pattern set) ── */
+function buildCompareAdvice(list){
+  const n = list.length;
+  const name  = v => `${MODEL_NAME[v._model]||''} ${v.grade_label||''}`.trim();
+  const short = v => `${MODEL_NAME[v._model]||''} (¥${v.price_man}万)`;
+  const insights = [];
+  const add = (ico, html) => insights.push({ico, html});
+
+  const byPriceAsc = [...list].sort((a,b)=>a.price_man-b.price_man);
+  const cheapest = byPriceAsc[0], priciest = byPriceAsc[n-1];
+  const priceGap = Math.round((priciest.price_man - cheapest.price_man) * 10) / 10;
+  const priceGapPct = cheapest.price_man ? (priceGap/cheapest.price_man*100) : 0;
+  const byScore = [...list].sort((a,b)=>(b.score||0)-(a.score||0));
+  const topScore = byScore[0];
+  const withKm = list.filter(v=>v.mileage_km!=null);
+  const lowKm  = withKm.length ? withKm.reduce((a,b)=>a.mileage_km<=b.mileage_km?a:b) : null;
+  const highKm = withKm.length ? withKm.reduce((a,b)=>a.mileage_km>=b.mileage_km?a:b) : null;
+  const clean = list.filter(v=>v.accident===false);
+  const accident = list.filter(v=>v.accident===true);
+  const noScreen = list.filter(v=>v.navi===false);
+  const withWarranty = list.filter(v=>v.warranty===true);
+  const noWarranty = list.filter(v=>v.warranty===false);
+  const models = new Set(list.map(v=>v._model));
+  const crossModel = models.size > 1;
+  const gradeSet = new Set(list.map(v=>v._model+'|'+v.grade_id));
+  const longShaken = list.filter(v=>v.shaken_months!=null).sort((a,b)=>b.shaken_months-a.shaken_months)[0];
+  const noShaken = list.filter(v=>!v.shaken_months);
+  const withOpts = list.filter(v=>(v.options||[]).length);
+
+  // ── Headline verdict ──
+  let verdict;
+  if (cheapest === topScore) {
+    verdict = `<b>${name(topScore)}</b> stands out — it's both the <b>cheapest</b> (¥${topScore.price_man}万) and the <b>highest-scored</b> (${(topScore.score||0).toFixed(2)}/10). Unless you specifically need something only the others offer, it's the clear value pick.`;
+  } else if (priceGapPct < 5) {
+    verdict = `These are priced within ${priceGapPct.toFixed(0)}% of each other, so price isn't the deciding factor — <b>${name(topScore)}</b> edges ahead on overall score (${(topScore.score||0).toFixed(2)}/10). Decide on condition & equipment.`;
+  } else {
+    verdict = `It's a trade-off: <b>${name(cheapest)}</b> is the budget pick (¥${cheapest.price_man}万), while <b>${name(topScore)}</b> scores highest (${(topScore.score||0).toFixed(2)}/10). The gap is ¥${priceGap}万 — worth paying up only if its advantages below matter to you.`;
+  }
+
+  // ── Insight patterns ──
+  if (crossModel) {
+    const hasFreed = list.some(v=>v._model==='freed');
+    add('🚗', `You're comparing <b>different models</b>${hasFreed?' — the Freed is a smaller 6-seater; the Noah/Voxy/StepWGN are larger 7-seat minivans':' (siblings of similar size)'}. Decide on size & seating first; scores aren't perfectly apples-to-apples across models.`);
+  } else if (gradeSet.size > 1) {
+    add('🏷️', `Same model, <b>different grades</b> — higher grades add equipment but cost more. Check the Extras row for what you actually gain.`);
+  } else {
+    add('🟰', `Same model and grade — this is a like-for-like fight, so condition, price and remaining 車検 decide it.`);
+  }
+  if (priceGapPct >= 15) add('💰', `Large price spread: <b>${short(cheapest)}</b> is ~${priceGapPct.toFixed(0)}% cheaper than <b>${short(priciest)}</b> (¥${priceGap}万). That's real money — make sure the extras justify it.`);
+  if (accident.length && clean.length) add('⚠️', `<b>${accident.map(name).join(', ')}</b> ${accident.length>1?'have':'has'} recorded accident/repair history (修復歴), while ${clean.map(name).join(', ')} ${clean.length>1?'are':'is'} clean. For a family car, lean toward clean unless the price gap is large and you trust an inspection.`);
+  else if (accident.length === n) add('⚠️', `All of these carry accident/repair history — get an independent inspection before committing to any of them.`);
+  if (noScreen.length && noScreen.length < n) add('📺', `<b>${noScreen.map(name).join(', ')}</b> ${noScreen.length>1?'have':'has'} no screen/nav fitted — budget for a retrofit, which eats into any price advantage versus the others.`);
+  if (withWarranty.length && noWarranty.length) add('🛡️', `Only <b>${withWarranty.map(name).join(', ')}</b> include${withWarranty.length>1?'':'s'} a dealer warranty — worthwhile peace of mind, especially if buying without your own inspection.`);
+  if (noShaken.length && longShaken && longShaken.shaken_months>=12) add('🔧', `<b>${name(longShaken)}</b> has the most 車検 left (${longShaken.shaken_months}mo), whereas ${noShaken.map(name).join(', ')} ${noShaken.length>1?'have':'has'} little or none — add a ~¥100,000 inspection to ${noShaken.length>1?'their':'its'} real cost.`);
+  if (lowKm && highKm && lowKm!==highKm && (highKm.mileage_km-lowKm.mileage_km)>=20000) {
+    if (lowKm === priciest) add('🛣', `<b>${name(lowKm)}</b> has the lowest mileage (${lowKm.mileage_km.toLocaleString()}km) but is also the priciest — you're paying for those unused kilometres. <b>${name(highKm)}</b> has more km (${highKm.mileage_km.toLocaleString()}) for less.`);
+    else add('🛣', `<b>${name(lowKm)}</b> has notably lower mileage (${lowKm.mileage_km.toLocaleString()}km vs ${highKm.mileage_km.toLocaleString()}km) at a similar or lower price — better long-term.`);
+  }
+  if (withOpts.length && withOpts.length < n) add('✦', `<b>${withOpts.map(name).join(', ')}</b> carr${withOpts.length>1?'y':'ies'} extra factory options (${withOpts.map(v=>(v.options||[]).join('/')).join('; ')}) the other${n-withOpts.length>1?'s':''} lack — these can't be added cheaply later.`);
+  const rated = list.filter(v=>v.dealer_rating!=null).sort((a,b)=>b.dealer_rating-a.dealer_rating);
+  if (rated.length>=2 && (rated[0].dealer_rating - rated[rated.length-1].dealer_rating) >= 0.4) add('🏪', `<b>${name(rated[0])}</b> is from a higher-rated dealer (★${rated[0].dealer_rating.toFixed(1)} vs ★${rated[rated.length-1].dealer_rating.toFixed(1)}) — fewer surprises in the buying process.`);
+  const seatSet = new Set(list.filter(v=>v.seats!=null).map(v=>v.seats));
+  if (seatSet.size>1) add('🪑', `Seat counts differ (${[...seatSet].sort().join('名 vs ')}名) — pick the layout your family needs; it can't be changed later.`);
+  if (!insights.length) add('✅', `These are very close on every measure — go with the cheaper one, the longer 車検, or the better-rated dealer.`);
+
+  // ── Closing general advice ──
+  let closing = `<b>Bottom line:</b> for outright value, <b>${name(cheapest)}</b> wins on price; for the most complete, lower-risk car, <b>${name(topScore)}</b> is the stronger all-rounder. `;
+  if (cheapest === topScore) closing = `<b>Bottom line:</b> <b>${name(cheapest)}</b> is both cheapest and highest-scored — the others need a specific advantage (lower km, an option you want, a better dealer) to justify choosing them. `;
+  if (noScreen.length || accident.length || noShaken.length) closing += `Weigh the flagged trade-offs above (screen, accident history, remaining 車検) against the price gap. `;
+  closing += `Always confirm condition with the listing photos and, ideally, an in-person or third-party inspection before deciding.`;
+
+  return { verdict, insights, closing };
+}
+
+/* ── Comparison modal ── */
+function openCompareModal(){
+  if (compareList.length < 2) return;
+  const list = compareList.slice(0, CMP_MAX);
+  const a = buildCompareAdvice(list);
+  const modal = document.getElementById('compare-modal');
+  modal.innerHTML = `<div class="compare-modal" role="dialog" aria-modal="true">
+    <div class="compare-modal-head">
+      <span class="compare-modal-title">⚖ Compare ${list.length} vehicles</span>
+      <button class="compare-modal-x" onclick="closeCompareModal()">✕ Close</button>
+    </div>
+    <div class="compare-modal-body">
+      ${buildCompareTable(list)}
+      <div class="cmp-advice">
+        <div class="cmp-verdict">
+          <div class="cmp-verdict-label">⚖ Recommendation</div>
+          <div class="cmp-verdict-text">${a.verdict}</div>
+        </div>
+        <div class="cmp-insights">${a.insights.map(i=>`<div class="cmp-insight"><span class="cmp-insight-ico">${i.ico}</span><span>${i.html}</span></div>`).join('')}</div>
+        <div class="cmp-closing">${a.closing}</div>
+        <div class="cmp-disclaimer">Automated guidance from listing data only — not a substitute for inspecting the car. Equipment flags are detected from listing text and may be incomplete.</div>
+      </div>
+    </div>
+  </div>`;
+  modal.style.display = 'flex';
+  modal.onclick = e => { if (e.target === modal) closeCompareModal(); };
+  document.addEventListener('keydown', _cmpEsc);
+}
+function closeCompareModal(){
+  const m = document.getElementById('compare-modal');
+  m.style.display = 'none'; m.innerHTML = '';
+  document.removeEventListener('keydown', _cmpEsc);
+}
+function _cmpEsc(e){ if (e.key === 'Escape') closeCompareModal(); }
 
 /* ── Price trend comment ── */
 function buildTrendComment(grade_id, allSnapshots) {
@@ -2085,6 +2467,7 @@ function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
     <div class="deal-bars">${buildScoreTable(bd, highlightKey, typeof v.score === 'number' ? v.score : null)}</div>
     ${pricePerKm(v)}
     ${dealerRow(v)}
+    ${v.url ? compareBtnHTML(v.url) : ''}
     ${v.url ? `<a class="deal-card-link" href="${v.url}" target="_blank" rel="noopener">View on CarSensor ↗</a>` : ''}`;
 }
 
@@ -2371,6 +2754,7 @@ document.getElementById('vehicle-switcher').addEventListener('click', e => {
 });
 
 render();
+renderCompareBar();   // restore any saved comparison from a previous visit
 
 // Initialize tab indicator position after render
 setTimeout(() => {
