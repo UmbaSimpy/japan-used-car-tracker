@@ -287,7 +287,7 @@
     .compare-chip-txt { display: flex; flex-direction: column; line-height: 1.05; min-width: 0; }
     .compare-chip-model {
       font-family: 'Barlow Condensed', sans-serif; font-size: 0.56rem;
-      letter-spacing: .4px; color: var(--muted); text-transform: uppercase;
+      letter-spacing: .4px; color: var(--text2); text-transform: uppercase;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .compare-chip-price { font-family: 'Bebas Neue', sans-serif; font-size: 0.84rem; color: var(--text); letter-spacing: .5px; }
@@ -297,8 +297,8 @@
     }
     .compare-chip-x:hover { color: var(--red); }
     .compare-bar-empty {
-      font-family: 'Barlow Condensed', sans-serif; font-size: 0.74rem;
-      color: var(--muted); letter-spacing: .5px; padding: 0 4px;
+      font-family: 'Barlow Condensed', sans-serif; font-size: 0.74rem; font-weight: 700;
+      color: var(--text2); letter-spacing: .5px; padding: 0 4px; text-transform: uppercase;
     }
     .compare-go {
       background: var(--purple); color: #fff; border: none; cursor: pointer;
@@ -316,100 +316,134 @@
     .compare-clear:hover { color: var(--red); }
 
     /* ── Compare: overlay modal ── */
+    @keyframes cmpOverlayIn { from { opacity: 0 } to { opacity: 1 } }
+    @keyframes cmpModalIn { from { opacity: 0; transform: translateY(28px) scale(.965) } to { opacity: 1; transform: none } }
+    @keyframes cmpRowIn { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
+    @keyframes cmpSheen { from { background-position: -60% 0 } to { background-position: 160% 0 } }
+    @keyframes cmpLetterPop { 0% { transform: scale(0) rotate(-12deg) } 62% { transform: scale(1.2) } 100% { transform: scale(1) } }
+
     .compare-modal-overlay {
       position: fixed; inset: 0; z-index: 400;
-      background: rgba(8,8,12,.78); backdrop-filter: blur(3px);
+      background: radial-gradient(130% 120% at 50% -10%, rgba(24,24,38,.82), rgba(5,5,9,.92));
+      backdrop-filter: blur(6px);
       display: flex; align-items: flex-start; justify-content: center;
-      padding: 24px 14px; overflow-y: auto;
+      padding: 26px 14px; overflow-y: auto;
+      animation: cmpOverlayIn .22s ease;
     }
     .compare-modal {
-      background: var(--surface); border: 1px solid var(--border2);
-      border-radius: var(--radius); width: 100%; max-width: 920px;
-      box-shadow: 0 24px 70px rgba(0,0,0,.6); overflow: hidden;
+      position: relative;
+      background: linear-gradient(180deg, var(--surface2), var(--surface) 70%);
+      border: 1px solid var(--border2); border-radius: 16px;
+      width: 100%; max-width: 940px;
+      box-shadow: 0 30px 90px rgba(0,0,0,.7), inset 0 0 0 1px rgba(255,255,255,.03);
+      overflow: hidden;
+      animation: cmpModalIn .4s cubic-bezier(.2,.75,.2,1);
+    }
+    .compare-modal::before {                       /* animated tri-colour top accent */
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #4492FF, #F5A623, #9F7AEA, #4492FF);
+      background-size: 220% 100%; animation: cmpSheen 4.5s linear infinite;
     }
     .compare-modal-head {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--bg2);
+      padding: 17px 22px; border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,.015);
     }
-    .compare-modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 1px; color: var(--text); }
+    .compare-modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.45rem; letter-spacing: 1.5px; color: #fff; }
     .compare-modal-x {
-      background: none; border: 1px solid var(--border); border-radius: 6px;
-      color: var(--text2); cursor: pointer; font-size: 1rem; line-height: 1; padding: 5px 10px;
+      background: none; border: 1px solid var(--border2); border-radius: 8px;
+      color: var(--text2); cursor: pointer; font-size: .82rem; line-height: 1; padding: 7px 13px;
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+      transition: all .16s;
     }
-    .compare-modal-x:hover { border-color: var(--red); color: var(--red); }
-    .compare-modal-body { padding: 4px 0 18px; }
+    .compare-modal-x:hover { border-color: var(--red); color: #fff; background: var(--red); }
+    .compare-modal-body { padding: 6px 0 20px; }
 
     /* comparison grid */
     .cmp-table { width: 100%; }
     .cmp-row {
       display: grid; align-items: stretch;
       border-bottom: 1px solid var(--border);
+      animation: cmpRowIn .34s ease both; animation-delay: calc(var(--i,0) * 26ms);
     }
+    .cmp-row:hover .cmp-cell:not(.win) { background: rgba(255,255,255,.022); }
     .cmp-row-label {
-      font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem;
-      letter-spacing: .6px; text-transform: uppercase; color: var(--muted);
-      padding: 9px 12px; display: flex; align-items: center;
-      border-right: 1px solid var(--border); background: var(--bg2);
+      font-family: 'Barlow Condensed', sans-serif; font-size: 0.64rem;
+      letter-spacing: .8px; text-transform: uppercase; color: var(--text2);
+      padding: 10px 13px; display: flex; align-items: center;
+      border-right: 1px solid var(--border); background: rgba(255,255,255,.022);
     }
-    .cmp-cell { padding: 9px 12px; display: flex; flex-direction: column; justify-content: center; gap: 2px; border-right: 1px solid var(--border); min-width: 0; }
+    .cmp-cell { padding: 10px 13px; display: flex; flex-direction: column; justify-content: center; gap: 2px; border-right: 1px solid var(--border); min-width: 0; transition: background .15s; }
     .cmp-cell:last-child { border-right: none; }
-    .cmp-cell.win { background: rgba(25,195,125,.10); }
-    .cmp-cell-main { font-family: 'Bebas Neue', sans-serif; font-size: 0.98rem; letter-spacing: .5px; color: var(--text); }
+    .cmp-cell.win { background: linear-gradient(180deg, rgba(25,195,125,.17), rgba(25,195,125,.055)); box-shadow: inset 0 0 20px rgba(25,195,125,.09); }
+    .cmp-cell-main { font-family: 'Bebas Neue', sans-serif; font-size: 1.04rem; letter-spacing: .5px; color: #fff; }
     .cmp-cell-sub  { font-family: 'DM Sans', sans-serif; font-size: 0.7rem; color: var(--text2); }
-    .cmp-win-flag { color: var(--green); font-size: 0.62rem; font-family: 'Barlow Condensed', sans-serif; letter-spacing: .5px; }
-    .cmp-head .cmp-cell { background: var(--bg2); gap: 4px; }
-    .cmp-head-photo { width: 100%; height: 84px; object-fit: cover; border-radius: 5px; background: var(--surface3); }
-    .cmp-head-model { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; letter-spacing: .6px; text-transform: uppercase; color: var(--purple); }
-    .cmp-head-grade { font-family: 'Barlow Condensed', sans-serif; font-size: 0.74rem; color: var(--text2); }
-    .cmp-head-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: var(--text); letter-spacing: .5px; }
-    .cmp-good { color: var(--green); } .cmp-bad { color: var(--red); } .cmp-na { color: var(--muted); }
+    .cmp-win-flag { color: var(--green); font-size: 0.6rem; font-family: 'Barlow Condensed', sans-serif; letter-spacing: .6px; font-weight: 700; }
+    .cmp-head .cmp-cell { gap: 5px; padding-top: 13px; }
+    .cmp-head-photo {
+      width: 100%; height: 112px; object-fit: contain; border-radius: 8px;
+      background: radial-gradient(circle at 50% 40%, rgba(255,255,255,.08), rgba(0,0,0,.3) 72%), #0b0b10;
+      border: 1px solid var(--border); padding: 3px;
+    }
+    .cmp-head-model { font-family: 'Barlow Condensed', sans-serif; font-size: 0.64rem; letter-spacing: .7px; text-transform: uppercase; color: var(--text2); }
+    .cmp-head-grade { font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem; color: var(--text); }
+    .cmp-head-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.32rem; color: #fff; letter-spacing: .5px; }
+    .cmp-good { color: var(--green); } .cmp-bad { color: var(--red); } .cmp-na { color: var(--text2); }
 
     /* A / B / C column badges & inline references */
     .cmp-letter {
       display: inline-flex; align-items: center; justify-content: center;
-      width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0;
-      font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem; line-height: 1;
-      color: #fff; letter-spacing: .5px;
+      width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
+      font-family: 'Bebas Neue', sans-serif; font-size: 0.98rem; line-height: 1;
+      color: #fff; letter-spacing: .5px; box-shadow: 0 2px 9px rgba(0,0,0,.4);
     }
-    .cmp-head .cmp-cell .cmp-letter { align-self: flex-start; margin-bottom: 2px; }
+    .cmp-head .cmp-cell .cmp-letter { align-self: flex-start; animation: cmpLetterPop .42s cubic-bezier(.2,.8,.3,1.1) both; animation-delay: calc(var(--i,0)*90ms + .12s); }
     .cmp-ref {
-      display: inline-block; min-width: 15px; text-align: center;
+      display: inline-block; min-width: 16px; text-align: center;
       font-family: 'Bebas Neue', sans-serif; font-weight: 400;
-      font-size: 0.95rem; letter-spacing: .5px;
+      font-size: 1rem; letter-spacing: .5px;
       border-bottom: 2px solid currentColor; line-height: 1.1;
     }
     .cmp-refmodel { color: var(--text2); font-size: 0.82rem; }
 
     /* advice */
-    .cmp-advice { padding: 18px 20px; }
+    .cmp-advice { padding: 20px 22px; animation: cmpRowIn .42s ease both; animation-delay: .14s; }
     .cmp-verdict {
-      background: linear-gradient(135deg, rgba(159,122,234,.14), rgba(68,146,255,.08));
-      border: 1px solid rgba(159,122,234,.4); border-radius: 8px;
-      padding: 13px 15px; margin-bottom: 14px;
+      position: relative; overflow: hidden;
+      background: linear-gradient(135deg, rgba(159,122,234,.20), rgba(68,146,255,.11) 55%, rgba(25,195,125,.07));
+      border: 1px solid rgba(159,122,234,.45); border-radius: 12px;
+      padding: 15px 17px; margin-bottom: 16px;
     }
-    .cmp-verdict-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; letter-spacing: 1.2px; text-transform: uppercase; color: var(--purple); margin-bottom: 3px; }
-    .cmp-verdict-text { font-family: 'DM Sans', sans-serif; font-size: 0.92rem; line-height: 1.5; color: var(--text); }
-    .cmp-insights { display: flex; flex-direction: column; gap: 9px; }
+    .cmp-verdict-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; letter-spacing: 1.5px; text-transform: uppercase; color: #c9b6f7; margin-bottom: 5px; }
+    .cmp-verdict-text { font-family: 'DM Sans', sans-serif; font-size: 0.95rem; line-height: 1.55; color: #fff; }
+    .cmp-insights { display: flex; flex-direction: column; gap: 10px; }
     .cmp-insight {
-      display: flex; gap: 9px; font-family: 'DM Sans', sans-serif;
-      font-size: 0.82rem; line-height: 1.5; color: var(--text2);
+      display: flex; gap: 10px; font-family: 'DM Sans', sans-serif;
+      font-size: 0.84rem; line-height: 1.5; color: var(--text2);
+      padding: 9px 12px; border-radius: 10px;
+      background: rgba(255,255,255,.022); border: 1px solid var(--border);
+      animation: cmpRowIn .34s ease both; animation-delay: calc(var(--i,0)*45ms + .2s);
+      transition: border-color .15s, transform .15s;
     }
-    .cmp-insight b { color: var(--text); font-weight: 600; }
-    .cmp-insight-ico { flex-shrink: 0; }
+    .cmp-insight:hover { border-color: var(--border2); transform: translateX(2px); }
+    .cmp-insight b { color: #fff; font-weight: 600; }
+    .cmp-insight-ico { flex-shrink: 0; font-size: 1rem; }
     .cmp-closing {
-      margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
-      font-family: 'DM Sans', sans-serif; font-size: 0.84rem; line-height: 1.55; color: var(--text2);
+      margin-top: 16px; padding: 13px 15px; border-radius: 10px;
+      background: rgba(255,255,255,.028); border: 1px solid var(--border);
+      font-family: 'DM Sans', sans-serif; font-size: 0.86rem; line-height: 1.6; color: var(--text2);
     }
-    .cmp-closing b { color: var(--text); }
-    .cmp-disclaimer { margin-top: 10px; font-size: 0.68rem; color: var(--muted); font-style: italic; }
+    .cmp-closing b { color: #fff; }
+    .cmp-disclaimer { margin-top: 11px; font-size: 0.7rem; color: var(--text2); opacity: .7; font-style: italic; }
 
     @media (max-width: 600px) {
       .compare-bar { bottom: 10px; gap: 8px; padding: 8px; }
       .compare-chip { max-width: 96px; padding: 4px 4px 4px 6px; }
       .compare-go { padding: 8px 11px; font-size: 0.74rem; }
-      .cmp-row-label { font-size: 0.54rem; padding: 7px 6px; }
-      .cmp-cell { padding: 7px 6px; }
-      .cmp-cell-main { font-size: 0.84rem; }
+      .cmp-row-label { font-size: 0.56rem; padding: 8px 7px; }
+      .cmp-cell { padding: 8px 7px; }
+      .cmp-cell-main { font-size: 0.9rem; }
+      .cmp-head-photo { height: 78px; }
       .compare-modal-body { overflow-x: auto; }
     }
 
@@ -1795,9 +1829,9 @@ function buildCompareTable(list){
   const colStyle = i => `box-shadow:inset 3px 0 0 ${CMP_COLORS[i]||'transparent'}`;
 
   // header row
-  rows.push(`<div class="cmp-row cmp-head" style="grid-template-columns:${gt}">
+  rows.push(`<div class="cmp-row cmp-head" style="--i:0;grid-template-columns:${gt}">
     <div class="cmp-row-label"></div>
-    ${list.map((v,i) => `<div class="cmp-cell" style="${colStyle(i)};border-top:3px solid ${CMP_COLORS[i]}">
+    ${list.map((v,i) => `<div class="cmp-cell" style="--i:${i};${colStyle(i)};border-top:3px solid ${CMP_COLORS[i]};background:linear-gradient(180deg, ${CMP_COLORS[i]}1f, transparent 62%)">
       <span class="cmp-letter" style="background:${CMP_COLORS[i]}">${CMP_LETTERS[i]}</span>
       ${v.photo_url ? `<img class="cmp-head-photo" src="${v.photo_url}" alt="">` : `<div class="cmp-head-photo"></div>`}
       <span class="cmp-head-model">${MODEL_NAME[v._model]||''}</span>
@@ -1808,7 +1842,7 @@ function buildCompareTable(list){
 
   function addRow(label, vals, winners){
     winners = winners || [];
-    rows.push(`<div class="cmp-row" style="grid-template-columns:${gt}">
+    rows.push(`<div class="cmp-row" style="--i:${rows.length};grid-template-columns:${gt}">
       <div class="cmp-row-label">${label}</div>
       ${vals.map((c,i)=>`<div class="cmp-cell${winners[i]?' win':''}" style="${colStyle(i)}">
         <span class="cmp-cell-main ${c.cls||''}">${c.main}</span>
@@ -1835,7 +1869,7 @@ function buildCompareTable(list){
   if(dr.some(x=>x!=null)) addRow('Dealer', list.map(v=>({main: v.dealer_rating!=null?'★ '+v.dealer_rating.toFixed(1):'—', sub: v.dealer_name||''})), bestMax(dr));
   if(list.some(v=>v.year)) addRow('Year', list.map(v=>({main: v.year||'—'})), []);
   if(list.some(v=>v.color)) addRow('Colour', list.map(v=>({main: v.color||'—'})), []);
-  rows.push(`<div class="cmp-row" style="grid-template-columns:${gt}">
+  rows.push(`<div class="cmp-row" style="--i:${rows.length};grid-template-columns:${gt}">
     <div class="cmp-row-label">Listing</div>
     ${list.map((v,i)=>`<div class="cmp-cell" style="${colStyle(i)}">${v.url?`<a class="cmp-cell-sub" style="color:var(--blue)" href="${v.url}" target="_blank" rel="noopener">CarSensor ↗</a>`:'—'}</div>`).join('')}
   </div>`);
@@ -1939,7 +1973,7 @@ function openCompareModal(){
           <div class="cmp-verdict-label">⚖ Recommendation</div>
           <div class="cmp-verdict-text">${a.verdict}</div>
         </div>
-        <div class="cmp-insights">${a.insights.map(i=>`<div class="cmp-insight"><span class="cmp-insight-ico">${i.ico}</span><span>${i.html}</span></div>`).join('')}</div>
+        <div class="cmp-insights">${a.insights.map((i,ix)=>`<div class="cmp-insight" style="--i:${ix}"><span class="cmp-insight-ico">${i.ico}</span><span>${i.html}</span></div>`).join('')}</div>
         <div class="cmp-closing">${a.closing}</div>
         <div class="cmp-disclaimer">Automated guidance from listing data only — not a substitute for inspecting the car. Equipment flags are detected from listing text and may be incomplete.</div>
       </div>
