@@ -10486,10 +10486,10 @@ window.NOAH_DATA = {
       "pages_scraped": 56,
       "by_grade": {
         "hybrid_sz": {
-          "avg": 4074202,
+          "avg": 4072676,
           "min": 2968000,
           "max": 5749000,
-          "count": 702
+          "count": 712
         }
       },
       "top_vehicles": [
@@ -10615,7 +10615,7 @@ window.NOAH_DATA = {
           "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/196/629/UZ0053196629/UZ0053196629_001L.JPG",
           "dealer_name": "ガリバー 宮崎港店",
           "dealer_rating": 4.7,
-          "dealer_reviews": 340,
+          "dealer_reviews": 344,
           "seats": 7,
           "url": "https://www.carsensor.net/usedcar/detail/AU7102531847/index.html"
         },
@@ -11246,7 +11246,7 @@ window.NOAH_DATA = {
             "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/199/480/UT0053199480/UT0053199480_001L.JPG",
             "dealer_name": "トヨタカローラ南海（株） 高石プラザ",
             "dealer_rating": 4.7,
-            "dealer_reviews": 50,
+            "dealer_reviews": 51,
             "seats": 7,
             "url": "https://www.carsensor.net/usedcar/detail/AU7103747548/index.html"
           }

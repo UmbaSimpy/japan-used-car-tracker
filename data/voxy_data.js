@@ -893,10 +893,10 @@ window.VOXY_DATA = {
       "pages_scraped": 85,
       "by_grade": {
         "hybrid_sz": {
-          "avg": 4172980,
+          "avg": 4172168,
           "min": 2945000,
           "max": 5759000,
-          "count": 1368
+          "count": 1364
         }
       },
       "top_vehicles": [

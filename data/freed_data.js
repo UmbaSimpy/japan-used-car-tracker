@@ -36445,25 +36445,25 @@ window.FREED_DATA = {
       "pages_scraped": 100,
       "by_grade": {
         "ehev_air_ex_4wd": {
-          "avg": 3637150,
+          "avg": 3637100,
           "min": 3190000,
           "max": 4138000,
           "count": 40
         },
         "ehev_air_ex": {
-          "avg": 3276637,
+          "avg": 3275980,
           "min": 2521000,
           "max": 3906000,
-          "count": 590
+          "count": 589
         },
         "ehev_crosstar_4wd": {
-          "avg": 3658977,
+          "avg": 3657093,
           "min": 2795000,
           "max": 4336000,
           "count": 43
         },
         "ehev_crosstar": {
-          "avg": 3366974,
+          "avg": 3367549,
           "min": 2339000,
           "max": 3986000,
           "count": 306
@@ -36561,7 +36561,7 @@ window.FREED_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7130218267/index.html"
         },
         {
-          "score": 7.39,
+          "score": 7.4,
           "score_breakdown": {
             "price": 9.0,
             "mileage": 7.4,
@@ -36574,7 +36574,7 @@ window.FREED_DATA = {
           },
           "grade_id": "ehev_air_ex",
           "grade_label": "1.5 e:HEV エアー EX",
-          "price_man": 261.2,
+          "price_man": 260.9,
           "mileage_km": 26000,
           "shaken_months": 14,
           "accident": true,
@@ -36706,7 +36706,7 @@ window.FREED_DATA = {
           "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/032/889/U00053032889/U00053032889_002L.JPG",
           "dealer_name": "（株）トヨナガ スズキアリーナトヨナガ沼田",
           "dealer_rating": 5.0,
-          "dealer_reviews": 73,
+          "dealer_reviews": 74,
           "seats": 6,
           "url": "https://www.carsensor.net/usedcar/detail/AU7072559002/index.html"
         },

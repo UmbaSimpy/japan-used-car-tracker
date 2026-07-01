@@ -2806,29 +2806,29 @@ window.STEPWGN_DATA = {
       "date": "2026-07-01",
       "pages_scraped": 52,
       "by_grade": {
-        "spada_premium": {
-          "avg": 4113180,
-          "min": 2572000,
-          "max": 4941000,
-          "count": 339
-        },
         "air_ex": {
-          "avg": 4040210,
+          "avg": 4039232,
           "min": 3659000,
           "max": 5010000,
-          "count": 186
+          "count": 185
+        },
+        "spada_premium": {
+          "avg": 4110413,
+          "min": 2572000,
+          "max": 4941000,
+          "count": 341
+        },
+        "spada": {
+          "avg": 3821360,
+          "min": 2598000,
+          "max": 4529000,
+          "count": 570
         },
         "anniversary_30th": {
-          "avg": 4202952,
+          "avg": 4202762,
           "min": 3799000,
           "max": 4611000,
           "count": 21
-        },
-        "spada": {
-          "avg": 3821092,
-          "min": 2598000,
-          "max": 4529000,
-          "count": 567
         }
       },
       "top_vehicles": [
