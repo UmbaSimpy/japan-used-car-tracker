@@ -364,6 +364,22 @@
     .cmp-head-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: var(--text); letter-spacing: .5px; }
     .cmp-good { color: var(--green); } .cmp-bad { color: var(--red); } .cmp-na { color: var(--muted); }
 
+    /* A / B / C column badges & inline references */
+    .cmp-letter {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0;
+      font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem; line-height: 1;
+      color: #fff; letter-spacing: .5px;
+    }
+    .cmp-head .cmp-cell .cmp-letter { align-self: flex-start; margin-bottom: 2px; }
+    .cmp-ref {
+      display: inline-block; min-width: 15px; text-align: center;
+      font-family: 'Bebas Neue', sans-serif; font-weight: 400;
+      font-size: 0.95rem; letter-spacing: .5px;
+      border-bottom: 2px solid currentColor; line-height: 1.1;
+    }
+    .cmp-refmodel { color: var(--text2); font-size: 0.82rem; }
+
     /* advice */
     .cmp-advice { padding: 18px 20px; }
     .cmp-verdict {
@@ -1699,6 +1715,8 @@ function favBtn(url) {
 const CMP_KEY = 'compare_list';
 const CMP_MAX = 3;
 const MODEL_NAME = { freed:'Honda Freed', noah:'Toyota Noah', stepwgn:'Honda StepWGN', voxy:'Toyota Voxy' };
+const CMP_LETTERS = ['A', 'B', 'C'];
+const CMP_COLORS  = ['#4492FF', '#F5A623', '#9F7AEA'];   // A = blue, B = amber, C = purple
 
 let compareList = (function(){ try { return JSON.parse(localStorage.getItem(CMP_KEY) || '[]'); } catch { return []; } })();
 function saveCompare(){ localStorage.setItem(CMP_KEY, JSON.stringify(compareList)); }
@@ -1743,8 +1761,9 @@ function flashCompareBar(){
 function renderCompareBar(){
   const bar = document.getElementById('compare-bar'); if (!bar) return;
   if (compareList.length === 0) { bar.classList.remove('show'); bar.innerHTML = ''; return; }
-  const chips = compareList.map(v => `
+  const chips = compareList.map((v, i) => `
     <div class="compare-chip">
+      <span class="cmp-letter" style="background:${CMP_COLORS[i]}">${CMP_LETTERS[i]}</span>
       <div class="compare-chip-txt">
         <span class="compare-chip-model">${MODEL_NAME[v._model] || ''}</span>
         <span class="compare-chip-price">¥${v.price_man}万</span>
@@ -1770,10 +1789,13 @@ function buildCompareTable(list){
   const bestMax = arr => { const v=arr.filter(x=>x!=null); if(!v.length) return arr.map(()=>false); const m=Math.max(...v); return arr.map(x=>x!=null&&x===m); };
   const bestMin = arr => { const v=arr.filter(x=>x!=null); if(!v.length) return arr.map(()=>false); const m=Math.min(...v); return arr.map(x=>x!=null&&x===m); };
 
+  const colStyle = i => `box-shadow:inset 3px 0 0 ${CMP_COLORS[i]||'transparent'}`;
+
   // header row
   rows.push(`<div class="cmp-row cmp-head" style="grid-template-columns:${gt}">
     <div class="cmp-row-label"></div>
-    ${list.map(v => `<div class="cmp-cell">
+    ${list.map((v,i) => `<div class="cmp-cell" style="${colStyle(i)};border-top:3px solid ${CMP_COLORS[i]}">
+      <span class="cmp-letter" style="background:${CMP_COLORS[i]}">${CMP_LETTERS[i]}</span>
       ${v.photo_url ? `<img class="cmp-head-photo" src="${v.photo_url}" alt="">` : `<div class="cmp-head-photo"></div>`}
       <span class="cmp-head-model">${MODEL_NAME[v._model]||''}</span>
       <span class="cmp-head-grade">${v.grade_label||''}</span>
@@ -1785,7 +1807,7 @@ function buildCompareTable(list){
     winners = winners || [];
     rows.push(`<div class="cmp-row" style="grid-template-columns:${gt}">
       <div class="cmp-row-label">${label}</div>
-      ${vals.map((c,i)=>`<div class="cmp-cell${winners[i]?' win':''}">
+      ${vals.map((c,i)=>`<div class="cmp-cell${winners[i]?' win':''}" style="${colStyle(i)}">
         <span class="cmp-cell-main ${c.cls||''}">${c.main}</span>
         ${c.sub?`<span class="cmp-cell-sub">${c.sub}</span>`:''}
         ${winners[i]?'<span class="cmp-win-flag">▲ best</span>':''}
@@ -1812,7 +1834,7 @@ function buildCompareTable(list){
   if(list.some(v=>v.color)) addRow('Colour', list.map(v=>({main: v.color||'—'})), []);
   rows.push(`<div class="cmp-row" style="grid-template-columns:${gt}">
     <div class="cmp-row-label">Listing</div>
-    ${list.map(v=>`<div class="cmp-cell">${v.url?`<a class="cmp-cell-sub" style="color:var(--blue)" href="${v.url}" target="_blank" rel="noopener">CarSensor ↗</a>`:'—'}</div>`).join('')}
+    ${list.map((v,i)=>`<div class="cmp-cell" style="${colStyle(i)}">${v.url?`<a class="cmp-cell-sub" style="color:var(--blue)" href="${v.url}" target="_blank" rel="noopener">CarSensor ↗</a>`:'—'}</div>`).join('')}
   </div>`);
 
   return `<div class="cmp-table">${rows.join('')}</div>`;
@@ -1821,8 +1843,11 @@ function buildCompareTable(list){
 /* ── Comparison advice engine (wide pattern set) ── */
 function buildCompareAdvice(list){
   const n = list.length;
-  const name  = v => `${MODEL_NAME[v._model]||''} ${v.grade_label||''}`.trim();
-  const short = v => `${MODEL_NAME[v._model]||''} (¥${v.price_man}万)`;
+  const idxOf = v => list.indexOf(v);
+  const ref   = v => `<b class="cmp-ref" style="color:${CMP_COLORS[idxOf(v)]}">${CMP_LETTERS[idxOf(v)]}</b>`;
+  const name  = v => ref(v);   // insight rows reference vehicles by their colour-coded letter
+  const short = v => `${ref(v)} (¥${v.price_man}万)`;
+  const full  = v => `${ref(v)} <span class="cmp-refmodel">(${MODEL_NAME[v._model]||''}, ¥${v.price_man}万)</span>`;
   const insights = [];
   const add = (ico, html) => insights.push({ico, html});
 
@@ -1849,12 +1874,13 @@ function buildCompareAdvice(list){
 
   // ── Headline verdict ──
   let verdict;
+  const topScoreStr = (topScore.score||0).toFixed(2);
   if (cheapest === topScore) {
-    verdict = `<b>${name(topScore)}</b> stands out — it's both the <b>cheapest</b> (¥${topScore.price_man}万) and the <b>highest-scored</b> (${(topScore.score||0).toFixed(2)}/10). Unless you specifically need something only the others offer, it's the clear value pick.`;
+    verdict = `${full(topScore)} is the standout — it's both the <b>cheapest</b> and the <b>highest-scored</b> (${topScoreStr}/10). Unless you specifically need something only the others offer, it's the clear value pick.`;
   } else if (priceGapPct < 5) {
-    verdict = `These are priced within ${priceGapPct.toFixed(0)}% of each other, so price isn't the deciding factor — <b>${name(topScore)}</b> edges ahead on overall score (${(topScore.score||0).toFixed(2)}/10). Decide on condition & equipment.`;
+    verdict = `These are priced within ${priceGapPct.toFixed(0)}% of each other, so price isn't the deciding factor — ${full(topScore)} edges ahead on overall score (${topScoreStr}/10). Decide on condition & equipment.`;
   } else {
-    verdict = `It's a trade-off: <b>${name(cheapest)}</b> is the budget pick (¥${cheapest.price_man}万), while <b>${name(topScore)}</b> scores highest (${(topScore.score||0).toFixed(2)}/10). The gap is ¥${priceGap}万 — worth paying up only if its advantages below matter to you.`;
+    verdict = `It's a trade-off: ${full(cheapest)} is the budget pick, while ${full(topScore)} scores highest (${topScoreStr}/10) — a ¥${priceGap}万 gap. Worth paying up only if its advantages below matter to you.`;
   }
 
   // ── Insight patterns ──
@@ -1884,8 +1910,8 @@ function buildCompareAdvice(list){
   if (!insights.length) add('✅', `These are very close on every measure — go with the cheaper one, the longer 車検, or the better-rated dealer.`);
 
   // ── Closing general advice ──
-  let closing = `<b>Bottom line:</b> for outright value, <b>${name(cheapest)}</b> wins on price; for the most complete, lower-risk car, <b>${name(topScore)}</b> is the stronger all-rounder. `;
-  if (cheapest === topScore) closing = `<b>Bottom line:</b> <b>${name(cheapest)}</b> is both cheapest and highest-scored — the others need a specific advantage (lower km, an option you want, a better dealer) to justify choosing them. `;
+  let closing = `<b>Bottom line:</b> for outright value, ${full(cheapest)} wins on price; for the most complete, lower-risk car, ${full(topScore)} is the stronger all-rounder. `;
+  if (cheapest === topScore) closing = `<b>Bottom line:</b> ${full(cheapest)} is both cheapest and highest-scored — the others need a specific advantage (lower km, an option you want, a better dealer) to justify choosing them. `;
   if (noScreen.length || accident.length || noShaken.length) closing += `Weigh the flagged trade-offs above (screen, accident history, remaining 車検) against the price gap. `;
   closing += `Always confirm condition with the listing photos and, ideally, an in-person or third-party inspection before deciding.`;
 
