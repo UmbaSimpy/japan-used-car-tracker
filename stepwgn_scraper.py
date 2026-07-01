@@ -109,12 +109,13 @@ GRADE_VALUE_BONUS: dict[str, float] = {
 # Honda メーカー希望小売価格 (税込), current lineup, e:HEV FF 7-seat (万円), from
 # Honda / webCG (May 2025) and the 30th-anniversary release (Dec 2025).
 # To approximate an out-the-door 支払総額 (comparable to the used total price) we add
-# a flat 諸費用 estimate — e:HEV StepWGN is eco-car tax-exempt so registration/fees
-# total only ≈ ¥9万 (自賠責 + 登録代行 + リサイクル等; source: dealer 見積 examples).
-# The マルチビューカメラシステム is a ¥8.8万 factory option on Air EX / Spada and is
-# STANDARD on Premium Line and the 30th Anniversary editions.
-NEW_CAR_FEES_MAN       = 9.0     # 諸費用 (registration/insurance/recycling)
-NEW_CAR_CAMERA_OPT_MAN = 8.8     # マルチビューカメラシステム メーカーオプション
+# the 諸費用 subtotal from an actual Honda 見積 (¥136,370 ≈ ¥13.6万):
+#   自動車税 21,000 + 環境性能割 0 + 重量税 15,000 + 自賠責(37ヶ月) 24,190
+#   + 手続き費用 47,300 + 預かり法定費用 6,400 + リサイクル 22,480 = 136,370円.
+# The マルチビューカメラ (incl. the nav needed to use it) runs ≈ ¥10万 as a factory
+# option on Air EX / Spada; it is STANDARD on Premium Line and the 30th editions.
+NEW_CAR_FEES_MAN       = 13.6    # 諸費用 subtotal (from a real StepWGN e:HEV 見積)
+NEW_CAR_CAMERA_OPT_MAN = 10.0    # マルチビューカメラ option (as seen on the 見積)
 NEW_CAR_MSRP_MAN = {
     "air_ex":        393.8,      # camera optional
     "spada":         399.85,     # camera optional
