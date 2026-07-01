@@ -15,53 +15,93 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #070708;
-      --bg2:      #0B0B0D;
-      --surface:  #0F0F13;
-      --surface2: #141419;
-      --surface3: #1B1B22;
-      --border:   #212128;
-      --border2:  #2D2D3A;
+      /* deep, slightly cool near-black base — reads richer than flat black */
+      --bg:       #07080c;
+      --bg2:      #0b0c11;
+      --surface:  #0f1016;
+      --surface2: #15161d;
+      --surface3: #1d1e27;
+      --border:   #22232d;
+      --border2:  #33344360;
       --red:      #E8272A;
       --red2:     #B81E21;
       --green:    #19C37D;
       --amber:    #F5A623;
       --purple:   #9F7AEA;
       --blue:     #4492FF;
-      --text:     #EEEEF3;
-      --text2:    #AAAABB;
-      --muted:    #5A5A72;
-      --radius:   6px;
-      --radius-sm:4px;
+      --text:     #F1F2F7;
+      --text2:    #A9AABC;
+      --muted:    #66677e;
+      --radius:   10px;
+      --radius-sm:6px;
+      --glow-red:    rgba(232,39,42,.35);
+      --ring:        rgba(120,150,255,.55);
     }
+
+    html { scroll-behavior: smooth; }
 
     body {
       font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
       color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      /* layered ambient glows over a deep gradient base */
+      background:
+        radial-gradient(1200px 620px at 12% -8%, rgba(232,39,42,.07), transparent 58%),
+        radial-gradient(1000px 720px at 102% -4%, rgba(68,146,255,.06), transparent 55%),
+        radial-gradient(1100px 900px at 50% 118%, rgba(159,122,234,.06), transparent 60%),
+        linear-gradient(180deg, #08090e 0%, #06070a 100%);
+      background-attachment: fixed;
     }
 
-    /* Signature red top stripe */
+    /* faint technical grid + vignette, fixed behind content */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: -1;
+      background-image:
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size: 46px 46px;
+      -webkit-mask-image: radial-gradient(circle at 50% 12%, #000 0%, transparent 78%);
+              mask-image: radial-gradient(circle at 50% 12%, #000 0%, transparent 78%);
+    }
+
+    /* Signature red top stripe (now with a soft glow) */
     body::before {
       content: '';
       position: fixed;
       top: 0; left: 0; right: 0;
       height: 3px;
-      background: var(--red);
+      background: linear-gradient(90deg, var(--red), #ff5a4d 45%, var(--red));
+      box-shadow: 0 0 16px var(--glow-red);
       z-index: 200;
     }
+
+    /* Custom scrollbar */
+    * { scrollbar-width: thin; scrollbar-color: #2b2c39 transparent; }
+    *::-webkit-scrollbar { width: 11px; height: 11px; }
+    *::-webkit-scrollbar-track { background: transparent; }
+    *::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #2b2c39, #202028);
+      border-radius: 10px; border: 3px solid transparent; background-clip: padding-box;
+    }
+    *::-webkit-scrollbar-thumb:hover { background: #3a3b4b; background-clip: padding-box; }
+
+    ::selection { background: rgba(232,39,42,.32); color: #fff; }
+    :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 
     /* ── Sticky top bar (header + model selector) ── */
     .topbar {
       position: sticky;
       top: 0;
       z-index: 100;
-      background: var(--bg);
       padding-top: 3px;                 /* clear the fixed red stripe */
-      box-shadow: 0 3px 12px rgba(0,0,0,.4);
+      background: linear-gradient(180deg, rgba(12,13,19,.92), rgba(9,10,15,.82));
+      backdrop-filter: blur(14px) saturate(1.3);
+      -webkit-backdrop-filter: blur(14px) saturate(1.3);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 8px 30px rgba(0,0,0,.5);
     }
 
     /* ── Header ── */
@@ -73,8 +113,7 @@
       gap: 12px;
       padding: 0 40px;
       height: 66px;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg);
+      background: transparent;
     }
 
     .logo {
@@ -94,13 +133,14 @@
       color: var(--text);
       line-height: 1;
     }
-    .logo-dot { color: var(--red); }
+    .logo-dot { color: var(--red); text-shadow: 0 0 12px var(--glow-red); }
     .logo-market {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 1.65rem;
       letter-spacing: 2px;
       color: var(--red);
       line-height: 1;
+      text-shadow: 0 0 18px rgba(232,39,42,.4);
     }
     .logo-rule {
       width: 1px; height: 26px;
@@ -170,29 +210,34 @@
       width: 100%;
     }
     .vehicle-tab {
-      background: var(--surface);
+      background: linear-gradient(180deg, var(--surface2), var(--surface));
       border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
+      border-radius: 9px;
       color: var(--text2);
       font-family: 'Barlow Condensed', sans-serif;
       font-size: 0.78rem; font-weight: 700; letter-spacing: 1.2px;
       text-transform: uppercase;
       padding: 10px 22px;
       cursor: pointer;
-      transition: all .18s;
+      transition: transform .16s, color .16s, border-color .16s, box-shadow .16s, background .16s;
     }
-    .vehicle-tab:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
-    .vehicle-tab.active { color: #fff; background: var(--red); border-color: var(--red); }
+    .vehicle-tab:hover { color: var(--text); border-color: var(--border2); transform: translateY(-1px); }
+    .vehicle-tab.active {
+      color: #fff; border-color: transparent;
+      background: linear-gradient(180deg, #ff3d3f, var(--red));
+      box-shadow: 0 6px 22px -4px var(--glow-red), inset 0 1px 0 rgba(255,255,255,.18);
+    }
 
     /* ── FAQ / Label guide ── */
     .faq-section {
-      background: var(--surface);
+      background: linear-gradient(180deg, var(--surface2), var(--surface));
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 22px 26px;
       display: flex;
       flex-direction: column;
       gap: 18px;
+      box-shadow: 0 10px 34px -18px rgba(0,0,0,.8);
     }
     .faq-intro {
       font-family: 'DM Sans', sans-serif;
@@ -501,14 +546,18 @@
     }
 
     .grade-card {
-      background: var(--surface);
+      background: linear-gradient(180deg, var(--surface2), var(--surface));
       display: flex;
       flex-direction: column;
-      transition: background .2s;
+      transition: transform .22s cubic-bezier(.2,.7,.2,1), box-shadow .22s, background .2s;
       position: relative;
       border-left: 3px solid var(--card-color, var(--border2));
     }
-    .grade-card:hover { background: var(--surface2); }
+    .grade-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 34px rgba(0,0,0,.45), -6px 0 26px -12px var(--card-color, transparent);
+      z-index: 2;
+    }
 
     /* Accent bar kept but hidden — left border does the job now */
     .card-accent-bar { display: none; }
@@ -642,10 +691,11 @@
 
     /* ── Chart section ── */
     .chart-section {
-      background: var(--surface);
+      background: linear-gradient(180deg, var(--surface2), var(--surface));
       border: 1px solid var(--border);
       border-radius: var(--radius);
       overflow: hidden;
+      box-shadow: 0 10px 34px -18px rgba(0,0,0,.8);
     }
     .chart-header {
       display: flex; align-items: center;
@@ -711,10 +761,11 @@
 
     /* ── Top Deals section ── */
     .top-deals {
-      background: var(--surface);
+      background: linear-gradient(180deg, var(--surface2), var(--surface));
       border: 1px solid var(--border);
       border-radius: var(--radius);
       overflow: hidden;
+      box-shadow: 0 10px 34px -18px rgba(0,0,0,.8);
     }
     .top-deals-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -769,21 +820,21 @@
     }
 
     .deal-card {
-      background: var(--surface2);
+      background: linear-gradient(180deg, var(--surface2), var(--surface));
       padding: 16px 17px;
       display: flex;
       flex-direction: column;
       gap: 9px;
-      transition: background .18s, transform .22s cubic-bezier(.4,0,.2,1), box-shadow .22s;
+      transition: transform .24s cubic-bezier(.2,.7,.2,1), box-shadow .24s;
       position: relative;
       border-left: 2px solid var(--card-grade-color, var(--border2));
       animation: card-in 0.35s ease both;
       animation-delay: var(--card-delay, 0s);
     }
     .deal-card:hover {
-      background: var(--surface3);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(0,0,0,.5), 0 0 0 1px var(--border2);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,.55), -8px 0 30px -14px var(--card-grade-color, transparent), inset 0 0 0 1px var(--border2);
+      z-index: 3;
     }
 
     .deal-card-header {
