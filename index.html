@@ -1198,7 +1198,16 @@
       display: flex; align-items: flex-start;
       justify-content: space-between; gap: 6px; margin-top: 1px;
     }
+    .deal-card-price-wrap { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
     .deal-card-hero-right { text-align: right; min-width: 0; flex-shrink: 0; }
+
+    /* used-vs-new price gap */
+    .deal-card-newcmp {
+      display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px;
+      font-family: 'Barlow Condensed', sans-serif; line-height: 1.1;
+    }
+    .dcn-new { font-size: 0.72rem; color: var(--text2); letter-spacing: .3px; }
+    .dcn-diff { font-size: 0.78rem; font-weight: 700; letter-spacing: .3px; }
 
     /* Dealer row hover */
     .dealer-row { transition: background .15s; cursor: default; }
@@ -2527,6 +2536,23 @@ function optionPills(v) {
     `</div>`;
 }
 
+/* ── New-car price gap (shown under the used price where available) ──
+   new_price_man = out-the-door price of the SAME config bought new. The gap
+   (new − used) is coloured by size: bigger discount → greener. */
+function newCompareHTML(v) {
+  if (v.new_price_man == null || v.price_man == null) return '';
+  const nw   = v.new_price_man, used = v.price_man;
+  const diff = Math.round((nw - used) * 10) / 10;          // + = cheaper than new
+  const pct  = nw > 0 ? (diff / nw * 100) : 0;
+  const col  = factorGradient(Math.max(0, Math.min(10, pct / 2.5)));  // 25%+ off → full green
+  const sign = diff >= 0 ? '−' : '+';
+  const arrow= diff >= 0 ? '▼' : '▲';
+  return `<div class="deal-card-newcmp" title="Estimated out-the-door price if bought new (MSRP + fees${(v.options||[]).includes('マルチビュー')?' + multi-view camera option':''})">
+    <span class="dcn-new">new ¥${nw}万</span>
+    <span class="dcn-diff" style="color:${col}">${arrow} ${sign}¥${Math.abs(diff)}万 · ${sign}${Math.abs(pct).toFixed(0)}%</span>
+  </div>`;
+}
+
 function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
                          highlightKey = null, highlightAccent = null, watchlist = false, isNew = false,
                          minPrice = null, minKm = null }) {
@@ -2563,7 +2589,10 @@ function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
     </div>
     ${photoBlock}
     <div class="deal-card-hero">
-      <div class="deal-card-price" style="color:${gc}">¥${v.price_man}万</div>
+      <div class="deal-card-price-wrap">
+        <div class="deal-card-price" style="color:${gc}">¥${v.price_man}万</div>
+        ${newCompareHTML(v)}
+      </div>
       <div class="deal-card-hero-right">
         <div class="deal-card-grade" style="color:${gc}">${grade.label || v.grade_label}</div>
         <div class="deal-card-grade-en">${grade.label_en || ''}</div>

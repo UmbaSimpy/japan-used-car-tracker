@@ -105,6 +105,44 @@ GRADE_VALUE_BONUS: dict[str, float] = {
     "anniversary_30th": 0.3,
 }
 
+# ── New-car reference prices (for the used-vs-new gap on each card) ────────────
+# Honda メーカー希望小売価格 (税込), current lineup, e:HEV FF 7-seat (万円), from
+# Honda / webCG (May 2025) and the 30th-anniversary release (Dec 2025).
+# To approximate an out-the-door 支払総額 (comparable to the used total price) we add
+# a flat 諸費用 estimate — e:HEV StepWGN is eco-car tax-exempt so registration/fees
+# total only ≈ ¥9万 (自賠責 + 登録代行 + リサイクル等; source: dealer 見積 examples).
+# The マルチビューカメラシステム is a ¥8.8万 factory option on Air EX / Spada and is
+# STANDARD on Premium Line and the 30th Anniversary editions.
+NEW_CAR_FEES_MAN       = 9.0     # 諸費用 (registration/insurance/recycling)
+NEW_CAR_CAMERA_OPT_MAN = 8.8     # マルチビューカメラシステム メーカーオプション
+NEW_CAR_MSRP_MAN = {
+    "air_ex":        393.8,      # camera optional
+    "spada":         399.85,     # camera optional
+    "spada_premium": 426.8,      # camera standard
+    # anniversary_30th resolved per listing (Air EX-based 409.86 / Spada-based 415.91)
+}
+
+
+def _new_car_total(grade_id: str, options: list | None, text: str) -> float | None:
+    """Out-the-door new-car price (万円) for the SAME configuration as this used car:
+    grade MSRP + 諸費用, plus the multi-view camera option only when the used car has
+    it and the camera isn't already standard on that grade."""
+    opts = options or []
+    has_cam = "マルチビュー" in opts
+    if grade_id == "anniversary_30th":
+        base = 409.86 if re.search(r"エアー\s*EX", text) else 415.91
+        cam_standard = True
+    elif grade_id == "spada_premium":
+        base = NEW_CAR_MSRP_MAN["spada_premium"]; cam_standard = True
+    elif grade_id in NEW_CAR_MSRP_MAN:
+        base = NEW_CAR_MSRP_MAN[grade_id]; cam_standard = False
+    else:
+        return None
+    total = base + NEW_CAR_FEES_MAN
+    if has_cam and not cam_standard:
+        total += NEW_CAR_CAMERA_OPT_MAN
+    return round(total, 1)
+
 
 # ── Scraping ─────────────────────────────────────────────────────────────────
 
@@ -168,6 +206,7 @@ def parse_listings(html: str) -> list[dict]:
         # older that slipped past the grade-string gen filter (2022 boundary).
         if details.get("year") is not None and details["year"] < 2022:
             continue
+        details["new_price_man"] = _new_car_total(grade_id, details.get("options"), item_text)
         results.append({"grade_id": grade_id, "price_man": price, **details})
 
     if not containers:
@@ -579,6 +618,7 @@ def _clean_vehicle(v: dict) -> dict:
         "grade_id":        v["grade_id"],
         "grade_label":     GRADE_ID_TO_LABEL.get(v["grade_id"], v["grade_id"]),
         "price_man":       v["price_man"],
+        "new_price_man":   v.get("new_price_man"),
         "year":            v.get("year"),
         "mileage_km":      v.get("mileage_km"),
         "shaken_months":   v.get("shaken_months"),
