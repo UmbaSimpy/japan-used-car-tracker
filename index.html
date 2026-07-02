@@ -838,12 +838,16 @@
     }
 
     .deal-card-header {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center; gap: 8px;
     }
     .deal-card-rank {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 1rem; letter-spacing: 1px; color: var(--muted);
+      font-size: 1rem; letter-spacing: 1px; color: var(--muted); flex-shrink: 0;
     }
+    .deal-card-model {
+      flex: 1; min-width: 0; display: flex; flex-direction: column;
+    }
+    .deal-card-actions { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
     .deal-card-score {
       font-family: 'Bebas Neue', sans-serif;
       font-size: 0.95rem; letter-spacing: 0.5px;
@@ -852,12 +856,14 @@
 
     .deal-card-grade {
       font-family: 'Barlow Condensed', sans-serif;
-      font-size: 0.88rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.3px; line-height: 1.2;
+      font-size: 0.9rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.3px; line-height: 1.15;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .deal-card-grade-en {
       font-family: 'DM Sans', sans-serif;
       font-size: 0.6rem; color: var(--text2); margin-top: 1px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
     .deal-card-price {
@@ -1195,19 +1201,20 @@
 
     /* Price + grade hero cluster */
     .deal-card-hero {
-      display: flex; align-items: flex-start;
-      justify-content: space-between; gap: 6px; margin-top: 1px;
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 8px; margin-top: 1px;
     }
-    .deal-card-price-wrap { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-    .deal-card-hero-right { text-align: right; min-width: 0; flex-shrink: 0; }
+    .deal-card-hero-right { min-width: 0; flex-shrink: 0; }
 
-    /* used-vs-new price gap */
+    /* used-vs-new price gap — colour-coded chip (big discount → green, small → red) */
     .deal-card-newcmp {
-      display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px;
-      font-family: 'Barlow Condensed', sans-serif; line-height: 1.1;
+      display: flex; flex-direction: column; align-items: flex-end; gap: 1px;
+      padding: 4px 9px; border-radius: 8px; border: 1px solid;
+      font-family: 'Barlow Condensed', sans-serif; text-align: right;
     }
-    .dcn-new { font-size: 0.72rem; color: var(--text2); letter-spacing: .3px; }
-    .dcn-diff { font-size: 0.78rem; font-weight: 700; letter-spacing: .3px; }
+    .dcn-pct { font-family: 'Bebas Neue', sans-serif; font-size: 1.05rem; letter-spacing: .5px; line-height: 1; }
+    .dcn-amt { font-size: 0.64rem; font-weight: 700; letter-spacing: .3px; line-height: 1.1; }
+    .dcn-new { font-size: 0.58rem; color: var(--text2); letter-spacing: .3px; opacity: .85; }
 
     /* Dealer row hover */
     .dealer-row { transition: background .15s; cursor: default; }
@@ -2544,12 +2551,15 @@ function newCompareHTML(v) {
   const nw   = v.new_price_man, used = v.price_man;
   const diff = Math.round((nw - used) * 10) / 10;          // + = cheaper than new
   const pct  = nw > 0 ? (diff / nw * 100) : 0;
-  const col  = factorGradient(Math.max(0, Math.min(10, pct / 2.5)));  // 25%+ off → full green
+  const rgb  = factorGradient(Math.max(0, Math.min(10, pct / 2.5)));   // 25%+ off → full green
+  const rgba = a => rgb.replace('rgb(', 'rgba(').replace(')', `,${a})`);
   const sign = diff >= 0 ? '−' : '+';
   const arrow= diff >= 0 ? '▼' : '▲';
-  return `<div class="deal-card-newcmp" title="Estimated out-the-door price if bought new (MSRP + fees${(v.options||[]).includes('マルチビュー')?' + multi-view camera option':''})">
+  return `<div class="deal-card-newcmp" style="color:${rgb};background:${rgba(.12)};border-color:${rgba(.45)}"
+       title="Estimated out-the-door price if bought new (MSRP + fees${(v.options||[]).includes('マルチビュー')?' + multi-view camera option':''})">
+    <span class="dcn-pct">${arrow} ${sign}${Math.abs(pct).toFixed(0)}%</span>
+    <span class="dcn-amt">${sign}¥${Math.abs(diff)}万 vs new</span>
     <span class="dcn-new">new ¥${nw}万</span>
-    <span class="dcn-diff" style="color:${col}">${arrow} ${sign}¥${Math.abs(diff)}万 · ${sign}${Math.abs(pct).toFixed(0)}%</span>
   </div>`;
 }
 
@@ -2582,21 +2592,19 @@ function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
   return `
     <div class="deal-card-header">
       <span class="deal-card-rank">${rankHtml}</span>
-      <div style="display:flex;align-items:center;gap:5px">
+      <div class="deal-card-model">
+        <span class="deal-card-grade" style="color:${gc}">${grade.label || v.grade_label}</span>
+        ${grade.label_en ? `<span class="deal-card-grade-en">${grade.label_en}</span>` : ''}
+      </div>
+      <div class="deal-card-actions">
         ${favHtml}
         <span class="deal-card-score" style="color:${color};border-color:${color}22;background:${color}14">${score}</span>
       </div>
     </div>
     ${photoBlock}
     <div class="deal-card-hero">
-      <div class="deal-card-price-wrap">
-        <div class="deal-card-price" style="color:${gc}">¥${v.price_man}万</div>
-        ${newCompareHTML(v)}
-      </div>
-      <div class="deal-card-hero-right">
-        <div class="deal-card-grade" style="color:${gc}">${grade.label || v.grade_label}</div>
-        <div class="deal-card-grade-en">${grade.label_en || ''}</div>
-      </div>
+      <div class="deal-card-price" style="color:${gc}">¥${v.price_man}万</div>
+      <div class="deal-card-hero-right">${newCompareHTML(v)}</div>
     </div>
     <div class="deal-card-divider"></div>
     <div class="deal-card-pills">
