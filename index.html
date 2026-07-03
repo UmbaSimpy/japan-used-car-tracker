@@ -798,6 +798,33 @@
       border-bottom: 1px solid var(--border);
       background: var(--bg2);
     }
+    /* Best-Overall filter chips */
+    .deal-filters {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+      padding: 12px 26px; border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,.012);
+    }
+    .deal-filters-label {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem;
+      letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-right: 2px;
+    }
+    .deal-filter {
+      cursor: pointer; background: var(--surface2);
+      border: 1px solid var(--border2); border-radius: 999px;
+      color: var(--text2); padding: 6px 14px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: .6px; text-transform: uppercase;
+      transition: all .16s;
+    }
+    .deal-filter:hover { color: var(--text); border-color: var(--text2); }
+    .deal-filter[data-filter="noacc"].active {
+      color: #fff; background: var(--green); border-color: var(--green);
+      box-shadow: 0 4px 16px -4px rgba(25,195,125,.5);
+    }
+    .deal-filter[data-filter="acc"].active {
+      color: #fff; background: var(--purple); border-color: var(--purple);
+      box-shadow: 0 4px 16px -4px rgba(159,122,234,.5);
+    }
     .deal-tab {
       background: none; border: none; cursor: pointer;
       font-family: 'Barlow Condensed', sans-serif;
@@ -1353,6 +1380,11 @@
       <button class="deal-tab" data-tab="gems">💎 Hidden Gems</button>
       <button class="deal-tab" data-tab="watchlist">⭐ Watchlist</button>
       <div class="tab-indicator" id="tab-indicator"></div>
+    </div>
+    <div class="deal-filters" id="deal-filters">
+      <span class="deal-filters-label">Filters</span>
+      <button class="deal-filter" data-filter="noacc" onclick="toggleDealFilter('noacc', this)">✓ No accident</button>
+      <button class="deal-filter" data-filter="acc" onclick="toggleDealFilter('acc', this)">✦ With accessories</button>
     </div>
     <div id="deal-list"></div>
     <div id="gems-list" style="display:none"></div>
@@ -2694,20 +2726,50 @@ function buildScoreTable(bd, highlightKey, totalScore = null) {
   </div>`;
 }
 
+/* ── Best-Overall filters (toggleable, session state) ── */
+let filterNoAccident = false, filterWithAccessories = false;
+let _topDealsCtx = null;
+
+function toggleDealFilter(which, btn) {
+  if (which === 'noacc') filterNoAccident = !filterNoAccident;
+  else                   filterWithAccessories = !filterWithAccessories;
+  btn.classList.toggle('active');
+  if (_topDealsCtx) renderTopDeals(_topDealsCtx.snap, _topDealsCtx.grades, _topDealsCtx.prevDayUrls, _topDealsCtx.minPrice, _topDealsCtx.minKm);
+}
+
 /* ── Top Deals renderer ── */
 function renderTopDeals(snap, grades, prevDayUrls = new Set(), minPrice = null, minKm = null) {
+  _topDealsCtx = { snap, grades, prevDayUrls, minPrice, minKm };
   const listEl = document.getElementById('deal-list');
   listEl.innerHTML = '';
   listEl.className = 'deal-grid';
 
-  const vehicles = snap.top_vehicles;
-  if (!vehicles || vehicles.length === 0) {
+  const all = snap.top_vehicles;
+  if (!all || all.length === 0) {
     listEl.className = '';
     listEl.style.padding = '24px';
     listEl.innerHTML = `<div style="color:var(--muted);font-size:.82rem;text-align:center">
       No vehicle data yet — run a full scrape to populate this section.</div>`;
     return;
   }
+
+  // Apply the active filters (accident cars out; accessory-less cars out)
+  let vehicles = all;
+  if (filterNoAccident)      vehicles = vehicles.filter(v => v.accident !== true);
+  if (filterWithAccessories) vehicles = vehicles.filter(v => (v.options || []).length > 0);
+
+  if (vehicles.length === 0) {
+    listEl.className = '';
+    listEl.style.padding = '24px';
+    listEl.innerHTML = `<div style="color:var(--text2);font-size:.85rem;text-align:center">
+      No cars match the current filters — try turning one off.</div>`;
+    return;
+  }
+
+  // Recompute the ¥BEST / LOW KM badge anchors over the filtered set
+  const fMinPrice = Math.min(...vehicles.map(v => v.price_man).filter(x => x != null));
+  const kmVals    = vehicles.map(v => v.mileage_km).filter(x => x != null);
+  const fMinKm    = kmVals.length ? Math.min(...kmVals) : null;
 
   const gradeMap = {};
   grades.forEach(g => { gradeMap[g.id] = g; });
@@ -2722,7 +2784,7 @@ function renderTopDeals(snap, grades, prevDayUrls = new Set(), minPrice = null, 
     card.style.setProperty('--card-grade-color', gc);
     card.style.setProperty('--card-delay', `${i * 0.05}s`);
     const isNew = v.url ? !prevDayUrls.has(v.url) : false;
-    card.innerHTML = buildCardHTML({ v, grade, gc, rankHtml: `#${i + 1}`, badges: buildBadges(v, true), bd, isNew, minPrice, minKm });
+    card.innerHTML = buildCardHTML({ v, grade, gc, rankHtml: `#${i + 1}`, badges: buildBadges(v, true), bd, isNew, minPrice: fMinPrice, minKm: fMinKm });
     listEl.appendChild(card);
   });
 }
@@ -2875,6 +2937,9 @@ document.getElementById('top-deals').addEventListener('click', e => {
       el.classList.remove('tab-fade');
     }
   });
+  // Filters belong to Best Overall only
+  const df = document.getElementById('deal-filters');
+  if (df) df.style.display = which === 'top' ? '' : 'none';
   if (which === 'watchlist') renderWatchlist();
 });
 
