@@ -54,8 +54,8 @@ HEADERS = {
     "Accept-Language": "ja,en;q=0.9",
 }
 DELAY_SEC  = 2
-TOP_N           = 18    # number of top-scored vehicles to store per snapshot
-SEAT_CHECK_CAP  = 90   # max detail pages to fetch when filtering 8-seat cars
+TOP_N           = 40    # number of top-scored vehicles to store per snapshot
+SEAT_CHECK_CAP  = 160   # max detail pages to fetch when filtering 8-seat cars
 
 # Grade lines tracked (current-gen e:HEV only). Matching is gen-gated on the
 # "e:HEV" badge (see _match_grade) so the previous-gen i-MMD "スパーダ ハイブリッド G"

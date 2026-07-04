@@ -45,8 +45,8 @@ HEADERS = {
     "Accept-Language": "ja,en;q=0.9",
 }
 DELAY_SEC  = 2
-TOP_N           = 18    # number of top-scored vehicles to store per snapshot
-SEAT_CHECK_CAP  = 90   # max detail pages to fetch when filtering 8-seat cars
+TOP_N           = 40    # number of top-scored vehicles to store per snapshot
+SEAT_CHECK_CAP  = 160   # max detail pages to fetch when filtering 8-seat cars
 
 # Longest names first so substring matching can't misfire.
 # "_skip_4wd" marks the E-Four 4WD variant, which is a superstring of the
