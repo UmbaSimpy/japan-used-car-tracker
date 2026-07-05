@@ -1738,8 +1738,8 @@ const VEHICLE_CONFIGS = {
     seatBad:      [8],
     nameLeft:     'STEPWGN',
     nameRight:    'NEWEST',
-    logoModel:    'Honda StepWGN · Newest / Low-KM · Multi-cam + Screen + Clean + 7-seat · excl. 未使用車',
-    chartSubtitle: 'Registered used only (excl. 未使用車) · camera + screen + clean · newest & lowest-km · JPY (¥)',
+    logoModel:    'Honda StepWGN · Newest / Low-KM · Multi-cam + Screen + Clean + 7-seat (未使用車 incl.)',
+    chartSubtitle: 'Multi-view + screen + clean · newest & lowest-km ranked · 未使用車 badged · JPY (¥)',
     missingMsg:   'Could not load stepwgn_lowkm_data.js',
     highMileageDesc: '',   // unused — this tab defines its own gemCategories
     // Newness-focused Hidden-Gem lanes (override the default price/high-mileage/no-shaken set)
@@ -2611,6 +2611,10 @@ function optionPills(v) {
     const big = v.screen_size >= 11;
     const style = big ? 'color:var(--green);border-color:rgba(25,195,125,.45);background:rgba(25,195,125,.08)' : '';
     pills.push(`<span class="opt-pill" style="${style}">🖥 ${v.screen_size}"${big ? ' big' : ''}</span>`);
+  }
+  // Registered-unused (near-new) flag — shown, not excluded.
+  if (v.unused) {
+    pills.push(`<span class="opt-pill" style="color:var(--amber);border-color:rgba(245,166,35,.45);background:rgba(245,166,35,.08)" title="登録済未使用車 — registered but unused (near-new)">未使用</span>`);
   }
   if (!pills.length) return '';
   return `<div class="opt-pills">${pills.join('')}</div>`;
