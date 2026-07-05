@@ -10,6 +10,7 @@
   <script src="data/freed_data.js"></script>
   <script src="data/noah_data.js"></script>
   <script src="data/stepwgn_data.js"></script>
+  <script src="data/stepwgn_lowkm_data.js"></script>
   <script src="data/voxy_data.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1351,6 +1352,7 @@
   <button class="vehicle-tab active" data-vehicle="freed">🚗 Honda Freed</button>
   <button class="vehicle-tab" data-vehicle="noah">🚐 Toyota Noah</button>
   <button class="vehicle-tab" data-vehicle="stepwgn">🚙 Honda StepWGN</button>
+  <button class="vehicle-tab" data-vehicle="stepwgn_lowkm">✨ StepWGN Newest</button>
   <button class="vehicle-tab" data-vehicle="voxy">🚐 Toyota Voxy</button>
 </div>
 </div><!-- /.topbar -->
@@ -1721,6 +1723,40 @@ const VEHICLE_CONFIGS = {
     chartSubtitle: 'e:HEV grades, each valued independently · JPY (¥) · CarSensor.net',
     missingMsg:   'Could not load stepwgn_data.js',
     highMileageDesc: '40,000+ km but clean record, solid warranty & fair price — best deal despite wear',
+  },
+  stepwgn_lowkm: {
+    getData:    () => window.STEPWGN_LOWKM_DATA,
+    gradeColors: {
+      air_ex:           '#4492FF',
+      spada:            '#19C37D',
+      spada_premium:    '#9F7AEA',
+      anniversary_30th: '#F5A623',
+    },
+    watchlistKey: 'stepwgn_lowkm_watchlist',
+    sourceUrl:    'https://www.carsensor.net/usedcar/bHO/s003/spH/',
+    seatIdeal:    7,
+    seatBad:      [8],
+    nameLeft:     'STEPWGN',
+    nameRight:    'NEWEST',
+    logoModel:    'Honda StepWGN · Newest / Low-KM · Multi-cam + Screen + Clean + 7-seat · excl. 未使用車',
+    chartSubtitle: 'Registered used only (excl. 未使用車) · camera + screen + clean · newest & lowest-km · JPY (¥)',
+    missingMsg:   'Could not load stepwgn_lowkm_data.js',
+    highMileageDesc: '',   // unused — this tab defines its own gemCategories
+    // Newness-focused Hidden-Gem lanes (override the default price/high-mileage/no-shaken set)
+    gemCategories: [
+      { key: 'newest',     icon: '✨', title: 'Freshest Registration',
+        desc: 'Newest model-year cars in stock — the closest thing to buying new',
+        accent: 'var(--amber)', highlight: 'year' },
+      { key: 'lowest_km',  icon: '📉', title: 'Lowest Odometer',
+        desc: 'Absolute fewest kilometres on the clock — barely driven',
+        accent: 'var(--green)', highlight: 'mileage' },
+      { key: 'best_value', icon: '💰', title: 'Best Value, Still Fresh',
+        desc: 'Cheapest of the camera-equipped, clean-record, low-km set',
+        accent: 'var(--blue)', highlight: 'price' },
+      { key: 'screen_unknown', icon: '❓', title: 'Screen Unverified',
+        desc: 'Would rank high — but the listing didn’t confirm a screen. Verify the head-unit before buying.',
+        accent: 'var(--purple)', highlight: 'screen' },
+    ],
   },
   voxy: {
     getData:    () => window.VOXY_DATA,
@@ -2567,12 +2603,17 @@ function pricePerKm(v) {
   </div>`;
 }
 
-/* ── Desirable option-package badges (Noah) ── */
+/* ── Desirable option-package badges (Noah) + factory screen size ── */
 function optionPills(v) {
-  if (!v.options || !v.options.length) return '';
-  return `<div class="opt-pills">` +
-    v.options.map(o => `<span class="opt-pill">✦ ${o}</span>`).join('') +
-    `</div>`;
+  const pills = (v.options || []).map(o => `<span class="opt-pill">✦ ${o}</span>`);
+  // Screen size (Low-KM tab): a bigger factory screen (11.4") is highlighted green.
+  if (v.screen_size != null) {
+    const big = v.screen_size >= 11;
+    const style = big ? 'color:var(--green);border-color:rgba(25,195,125,.45);background:rgba(25,195,125,.08)' : '';
+    pills.push(`<span class="opt-pill" style="${style}">🖥 ${v.screen_size}"${big ? ' big' : ''}</span>`);
+  }
+  if (!pills.length) return '';
+  return `<div class="opt-pills">${pills.join('')}</div>`;
 }
 
 /* ── New-car price gap (shown under the used price where available) ──
@@ -2675,6 +2716,8 @@ function factorGradient(score) {
 const SCORE_FACTORS = [
   ['price',       'Price'],
   ['mileage',     'Mileage'],
+  ['year',        'Reg. Year'],
+  ['screen',      'Screen'],
   ['navi',        'Screen'],
   ['camera',      'Multi-cam'],
   ['accident',    'Accident'],
@@ -2804,7 +2847,7 @@ function renderGems(snap, grades, prevDayUrls = new Set(), minPrice = null, minK
   const gradeMap = {};
   grades.forEach(g => { gradeMap[g.id] = g; });
 
-  const CATEGORIES = [
+  const CATEGORIES = VC().gemCategories || [
     { key: 'price',    icon: '💰', title: 'Best Price',
       desc: 'Cheapest cars on the market — trade-offs may include mileage or shaken',
       accent: 'var(--green)' },
@@ -2841,7 +2884,7 @@ function renderGems(snap, grades, prevDayUrls = new Set(), minPrice = null, minK
         const grade        = gradeMap[v.grade_id] || {};
         const bd           = v.score_breakdown || {};
         const gc           = VC().gradeColors[v.grade_id] || 'var(--border2)';
-        const highlightKey = { price: 'price', high_mileage: 'mileage', no_shaken: 'shaken' }[cat.key] || null;
+        const highlightKey = cat.highlight || { price: 'price', high_mileage: 'mileage', no_shaken: 'shaken' }[cat.key] || null;
         const rankHtml     = `<span style="color:${cat.accent};font-size:0.9rem">${cat.icon}</span>`;
         const card = document.createElement('div');
         card.className = 'deal-card';

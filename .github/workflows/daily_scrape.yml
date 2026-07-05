@@ -52,7 +52,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/freed_data.js data/noah_data.js data/stepwgn_data.js data/voxy_data.js
+          git add data/freed_data.js data/noah_data.js data/stepwgn_data.js data/stepwgn_lowkm_data.js data/voxy_data.js
           git diff --cached --quiet || git commit -m "chore: daily price snapshot $(date +%Y-%m-%d)"
           git pull --rebase origin master
           git push

@@ -27,6 +27,7 @@ Usage:
 
 import argparse
 import json
+import math
 import re
 import sys
 import time
@@ -44,6 +45,7 @@ from bs4 import BeautifulSoup
 
 BASE_URL             = "https://www.carsensor.net/usedcar/bHO/s003/spH/"
 DATA_FILE            = Path(__file__).parent / "data" / "stepwgn_data.js"
+LOWKM_DATA_FILE      = Path(__file__).parent / "data" / "stepwgn_lowkm_data.js"
 TELEGRAM_CONFIG_FILE = Path(__file__).parent / "telegram_config.json"
 HEADERS = {
     "User-Agent": (
@@ -279,8 +281,10 @@ def _extract_details(item) -> dict:
         "accident":      None,
         "warranty":      None,   # True = present, False = none
         "maintenance":   None,   # True = 法定整備付, False = 法定整備無
-        "navi":          None,   # True = メーカー純正ナビ present, False = ナビレス, None = unknown
+        "navi":          None,   # True = screen (nav OR display audio) present, False = none, None = unknown
+        "screen_size":   None,   # float inches (9 / 11.4) parsed from the listing, else None
         "camera":        None,   # legacy field (multi-view camera is now an accessory)
+        "unused":        None,   # True = 未使用車 / 登録済未使用車 (near-new, priced like new)
         "options":       [],     # detected accessories (cumulative bonus)
         "year":          None,   # model year (年式) — used for the gen filter
         "color":         None,   # body color string from listing card
@@ -374,10 +378,40 @@ def _extract_details(item) -> dict:
         details["navi"] = True
     # else: None → not mentioned / unknown
 
+    # Screen SIZE (inches) — the size token must sit right next to a screen word
+    # (ナビ / ディスプレイ / オーディオ / コネクト) so we don't pick up アルミ 16インチ
+    # wheels. A plausibility clamp (6–13") is a second backstop against wheels.
+    # Screen SIZE (inches). The size token must sit ADJACENT (no space) to a screen
+    # word — either just before it ("11.4型ナビ", "9インチナビ") or just after it
+    # ("ディスプレイオーディオ9型") — so wheel sizes like "アルミ 16インチ" aren't read
+    # as screens. A 6–13" clamp is a second backstop (StepWGN wheels are ≥16"). A
+    # size that's split from its screen word by a space is left unknown on purpose.
+    _SCREEN_WORD = r'ナビ|ディスプレイ|オーディオ|コネクト|モニター|CONNECT'
+    m_sz = re.search(
+        rf'(\d{{1,2}}(?:\.\d)?)\s*(?:型|インチ)[^\s　]{{0,6}}(?:{_SCREEN_WORD})',
+        full_text,
+    ) or re.search(
+        rf'(?:{_SCREEN_WORD})[^\d\s　]{{0,4}}(\d{{1,2}}(?:\.\d)?)\s*(?:型|インチ)',
+        full_text,
+    )
+    if m_sz:
+        try:
+            sz = float(m_sz.group(1))
+            if 6.0 <= sz <= 13.0:
+                details["screen_size"] = sz
+        except ValueError:
+            pass
+
     # Accessories — the multi-view camera (NOT a plain バックカメラ; and NOT
     # CarSensor's "360°画像付" photo badge) is tracked as a cumulative accessory
     # bonus + purple badge rather than a weighted factor.
     details["options"] = [label for label, _, rx in OPTION_PACKAGES if rx.search(full_text)]
+
+    # Registered-but-unused / near-new stock (未使用車 / 登録済未使用車). These sit at
+    # ~0 km and are priced like new — excluded from the Low-KM (Newest) view, which
+    # wants genuinely registered used cars. NOTE: match only 未使用 — do NOT key on
+    # 新車 (as "新車保証" = remaining new-car warranty is common on real used cars).
+    details["unused"] = bool(re.search(r'未使用', full_text))
 
     # Body color — CarSensor puts it as the 2nd <li> in carBodyInfoList
     # (1st item is body type e.g. ミニバン, 2nd is the color name)
@@ -627,7 +661,9 @@ def _clean_vehicle(v: dict) -> dict:
         "warranty":        v.get("warranty"),
         "maintenance":     v.get("maintenance"),
         "navi":            v.get("navi"),
+        "screen_size":     v.get("screen_size"),
         "camera":          v.get("camera"),
+        "unused":          v.get("unused"),
         "options":         v.get("options", []),
         "color":           v.get("color"),
         "photo_url":       v.get("photo_url"),
@@ -853,6 +889,278 @@ def save(data: dict) -> None:
     print(f"  Saved → {DATA_FILE}  ({len(data['snapshots'])} total snapshot(s))")
 
 
+# ── Low-KM ("Newest") view ────────────────────────────────────────────────────
+# A SECOND dataset built from the very same scrape (no extra requests), for a
+# buyer who just wants the freshest possible StepWGN and will pay a premium for
+# it. Three HARD requirements — only cars meeting ALL three ever appear here:
+#   1. a multi-view camera (マルチビュー)     2. a confirmed clean record (修復歴なし)
+#   3. a 7-seat (captain-chair) layout        (verified on the detail page)
+# Scoring is dominated by newness: mileage decays exponentially above a ~5,000 km
+# plateau and the registration year is rewarded heavily. Price still counts
+# (~25%) but never overrides a clearly newer/lower-km car.
+LOWKM_WEIGHTS = {
+    "price":    0.23,
+    "mileage":  0.38,
+    "year":     0.24,
+    "screen":   0.10,   # a bigger factory screen (11.4") ranks above the 9"
+    "shaken":   0.025,
+    "warranty": 0.025,
+}
+LOWKM_MILEAGE_KNEE    = 5_000     # km — the "sweet spot" edge; low-km taper ends here
+LOWKM_KNEE_SCORE      = 9.0       # score at the knee (0 km = 10.0); above it, exp decay
+LOWKM_MILEAGE_TAU     = 10_000    # km — exponential decay constant beyond the knee
+LOWKM_YEAR_STEP       = 2.0       # score points lost per model-year of age
+
+
+def score_vehicle_lowkm(
+    vehicle: dict,
+    price_bounds: dict[str, tuple[float, float]],
+    current_year: int,
+) -> tuple[float, dict]:
+    """Score a camera+clean StepWGN 0–10 for the Low-KM (Newest) view.
+
+    Mileage: a gentle taper from 10 (0 km) down to LOWKM_KNEE_SCORE at the ~5k-km
+    knee — so a 10 km car still beats a 5k car but only slightly, both staying at
+    the top — then 9·e^(−Δkm/τ) exponential fall-off with every extra km above it.
+    Year: newest = 10, losing LOWKM_YEAR_STEP per year of age.
+    Price: relative within the pooled camera+clean set (cheapest = 10).
+    """
+    # ── Price: relative within the pooled camera+clean set (cheapest = 10) ────
+    price_man = vehicle["price_man"]
+    lo, hi    = price_bounds.get(vehicle.get("grade_id", ""), (price_man, price_man))
+    span      = hi - lo
+    price_score = 10.0 if span <= 0 else max(0.0, min(10.0, 10.0 * (hi - price_man) / span))
+
+    # ── Mileage: gentle low-km taper (0 km = 10 → knee = 9.0), then exp decay ──
+    km = vehicle.get("mileage_km")
+    if km is None:
+        mileage_score = 5.0
+    elif km <= LOWKM_MILEAGE_KNEE:
+        # 0 km → 10.0, knee → LOWKM_KNEE_SCORE: a 10 km car edges out a 5k one,
+        # but both stay near the top (not scored identically).
+        mileage_score = 10.0 - (10.0 - LOWKM_KNEE_SCORE) * (km / LOWKM_MILEAGE_KNEE)
+    else:
+        mileage_score = LOWKM_KNEE_SCORE * math.exp(-(km - LOWKM_MILEAGE_KNEE) / LOWKM_MILEAGE_TAU)
+
+    # ── Registration year: newest = 10 ────────────────────────────────────────
+    yr = vehicle.get("year")
+    if yr is None:
+        year_score = 5.0
+    else:
+        year_score = max(0.0, min(10.0, 10.0 - (current_year - yr) * LOWKM_YEAR_STEP))
+
+    # ── Screen: a screen is required to reach this view, so what varies is SIZE.
+    #    Honda CONNECT nav is 9" or 11.4" — the bigger unit ranks higher. When the
+    #    screen is only inferred but the size isn't stated, it lands mid-high. When
+    #    the screen itself is UNSURE (navi None — the "unverified" bucket), it's
+    #    neutral; a confirmed-absent screen scores 0 (never in the main pool). ──
+    navi = vehicle.get("navi")
+    size = vehicle.get("screen_size")
+    if navi is True:
+        if size is not None and size >= 11:
+            screen_score = 10.0          # 11.4" big screen
+        elif size is not None and size <= 9.5:
+            screen_score = 6.0           # 9" standard screen
+        else:
+            screen_score = 8.0           # screen present, size not stated
+    elif navi is None:
+        screen_score = 5.0               # unverified — the "not sure" bucket
+    else:
+        screen_score = 0.0               # confirmed no screen
+
+    # Shaken: 0 months → 2, ≥ 24 months → 10 (same shape as the main view)
+    months = vehicle.get("shaken_months")
+    shaken_score = (2.0 + min(months, 24) / 24.0 * 8.0) if months is not None else 5.0
+
+    # Warranty: present = 8, none = 1, unknown = 4
+    warranty = vehicle.get("warranty")
+    warranty_score = 8.0 if warranty is True else (1.0 if warranty is False else 4.0)
+
+    total = (
+        price_score    * LOWKM_WEIGHTS["price"]    +
+        mileage_score  * LOWKM_WEIGHTS["mileage"]  +
+        year_score     * LOWKM_WEIGHTS["year"]     +
+        screen_score   * LOWKM_WEIGHTS["screen"]   +
+        shaken_score   * LOWKM_WEIGHTS["shaken"]   +
+        warranty_score * LOWKM_WEIGHTS["warranty"]
+    )
+    breakdown = {
+        "price":    round(price_score,    1),
+        "mileage":  round(mileage_score,  1),
+        "year":     round(year_score,     1),
+        "screen":   round(screen_score,   1),
+        "shaken":   round(shaken_score,   1),
+        "warranty": round(warranty_score, 1),
+    }
+    return round(min(10.0, total), 2), breakdown
+
+
+def _default_structure_lowkm() -> dict:
+    base = _default_structure()
+    base["vehicle"]["generation"] = "Current gen e:HEV (2022年05月～) · Newest / Low-KM view"
+    return base
+
+
+def load_existing_lowkm() -> dict:
+    if not LOWKM_DATA_FILE.exists():
+        return _default_structure_lowkm()
+    src = LOWKM_DATA_FILE.read_text(encoding="utf-8")
+    m = re.search(r"window\.STEPWGN_LOWKM_DATA\s*=\s*(\{.*\});", src, re.DOTALL)
+    if not m:
+        print("  [!] Could not parse existing stepwgn_lowkm_data.js — starting fresh")
+        return _default_structure_lowkm()
+    return json.loads(m.group(1))
+
+
+def save_lowkm(data: dict) -> None:
+    LOWKM_DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
+    js = (
+        "// Auto-generated by stepwgn_scraper.py (Low-KM / Newest view) — do not edit manually.\n"
+        "// Same scrape as stepwgn_data.js, re-ranked for newest / lowest-km cars.\n"
+        "// HARD requirements: multi-view camera + installed screen + clean record +\n"
+        "// 7-seat layout, excluding 未使用車. Bigger factory screen (11.4\") ranks higher.\n"
+        f"window.STEPWGN_LOWKM_DATA = {json.dumps(data, ensure_ascii=False, indent=2)};\n"
+    )
+    LOWKM_DATA_FILE.write_text(js, encoding="utf-8")
+    print(f"  Saved → {LOWKM_DATA_FILE}  ({len(data['snapshots'])} total snapshot(s))")
+
+
+def build_and_save_lowkm(all_vehicles: list[dict], ensure_seats, pages_scraped: int) -> None:
+    """Build the Low-KM (Newest) dataset from the already-scraped vehicles and
+    write stepwgn_lowkm_data.js. Reuses `ensure_seats` (a URL→seat-count helper
+    that caches, so seat counts fetched for the main view are not re-fetched)."""
+    current_year = date.today().year
+
+    # ── Cheap hard filters (no extra HTTP) — a car appears only if it has a
+    #    multi-view camera AND an installed screen AND a clean record AND is NOT
+    #    registered-unused (未使用車) near-new stock. (7-seat is verified later.) ──
+    pool = [
+        v for v in all_vehicles
+        if "マルチビュー" in (v.get("options") or [])
+        and v.get("navi") is True          # must have an installed screen/nav
+        and v.get("accident") is False     # confirmed clean record
+        and not v.get("unused")            # exclude 未使用車 / 登録済未使用車
+    ]
+    print(f"\n── Low-KM (Newest) view ── {len(pool)} camera+screen+clean candidate(s)")
+    if not pool:
+        print("  [!] No qualifying StepWGN found — writing empty low-km snapshot")
+
+    # ── "Screen unverified" pool — same requirements EXCEPT the screen could not
+    #    be confirmed from the listing (navi is None). Screen detection is
+    #    imperfect, so rather than silently dropping these we surface them in a
+    #    dedicated section: they'd rank high IF they have a screen — verify first.
+    uncertain_pool = [
+        v for v in all_vehicles
+        if "マルチビュー" in (v.get("options") or [])
+        and v.get("navi") is None           # screen status unknown
+        and v.get("accident") is False
+        and not v.get("unused")
+    ]
+    print(f"   + {len(uncertain_pool)} screen-unverified candidate(s)")
+
+    # ── Per-grade price stats (over the camera+clean pool) ────────────────────
+    by_grade_prices: dict[str, list[float]] = {gid: [] for gid in GRADE_ID_TO_LABEL}
+    for v in pool:
+        by_grade_prices[v["grade_id"]].append(v["price_man"])
+
+    # Price scored across ALL grades POOLED (absolute cheapness), like the main view.
+    all_prices = [p for prices in by_grade_prices.values() for p in prices]
+    if all_prices:
+        _lo = min(all_prices)
+        _hi = _percentile(sorted(all_prices), 0.75)
+        if _hi <= _lo:
+            _hi = _lo * 1.10
+        price_bounds = {gid: (_lo, _hi) for gid in by_grade_prices}
+    else:
+        price_bounds = {}
+
+    for v in pool + uncertain_pool:
+        v["lowkm_score"], v["lowkm_breakdown"] = score_vehicle_lowkm(v, price_bounds, current_year)
+
+    ranked = sorted(pool, key=lambda x: -x["lowkm_score"])
+
+    # ── Third hard requirement — 7-seat layout, verified on the detail page ───
+    print(f"Verifying 7-seat layout for up to {SEAT_CHECK_CAP} candidate(s) (target {TOP_N}) …")
+    top_vehicles: list[dict] = []
+    for v in ranked[:SEAT_CHECK_CAP]:
+        if len(top_vehicles) >= TOP_N:
+            break
+        if ensure_seats(v) == 7:
+            top_vehicles.append(v)
+            km = f"{v['mileage_km']:,}km" if v.get("mileage_km") is not None else "?km"
+            print(f"  ✓ #{len(top_vehicles):2d}  [{v['lowkm_score']}]  "
+                  f"{v.get('year','?')}  {km}  ¥{v['price_man']}万  {v['grade_id']}")
+
+    # ── Category gems (each strictly 7-seat, deduped across categories) ────────
+    GEM_TARGET = 3
+    top_urls = {v.get("url") for v in top_vehicles}
+    non_top  = [v for v in ranked if v.get("url") not in top_urls]
+    used_gem_urls: set[str] = set()
+
+    def _finalize(cands: list[dict], seen: set[str] | None = None) -> list[dict]:
+        """Take up to GEM_TARGET strictly-7-seat cars, skipping any URL already in
+        `seen` (defaults to the shared cross-lane dedup set)."""
+        if seen is None:
+            seen = used_gem_urls
+        out: list[dict] = []
+        for v in cands:
+            url = v.get("url")
+            if url and url in seen:
+                continue
+            if ensure_seats(v) != 7:
+                continue
+            out.append(v)
+            if url:
+                seen.add(url)
+            if len(out) >= GEM_TARGET:
+                break
+        return out
+
+    BIG = 10 ** 12
+    category_gems = {
+        # Freshest registration year (tie-break: fewer km)
+        "newest":     _finalize(sorted(
+            non_top, key=lambda x: (-(x.get("year") or 0), x.get("mileage_km") if x.get("mileage_km") is not None else BIG))),
+        # Absolute lowest odometer
+        "lowest_km":  _finalize(sorted(
+            non_top, key=lambda x: x.get("mileage_km") if x.get("mileage_km") is not None else BIG)),
+        # Cheapest among the camera+clean+fresh set
+        "best_value": _finalize(sorted(
+            non_top, key=lambda x: -x["lowkm_breakdown"]["price"])),
+        # Screen unverified — would rank high, but the screen isn't confirmed.
+        # Ranked by the same score; still strictly 7-seat. Its own dedup set (a
+        # different pool, so it never collides with the confirmed lanes).
+        "screen_unknown": _finalize(
+            sorted(uncertain_pool, key=lambda x: -x["lowkm_score"]), seen=set()),
+    }
+
+    # ── Serialize: _clean_vehicle reads v["score"]/["score_breakdown"], so point
+    #    those at the low-km values (the main dataset is already saved by now). ──
+    for v in pool + uncertain_pool:
+        v["score"]           = v["lowkm_score"]
+        v["score_breakdown"] = v["lowkm_breakdown"]
+
+    snapshot = build_snapshot(by_grade_prices, pages_scraped, top_vehicles, category_gems)
+    data     = load_existing_lowkm()
+    canonical = _default_structure_lowkm()
+    data["vehicle"] = canonical["vehicle"]
+    data["grades"]  = canonical["grades"]
+    data["weights"] = LOWKM_WEIGHTS
+
+    today = str(date.today())
+    data["snapshots"] = [s for s in data["snapshots"] if s["date"] != today]
+    data["snapshots"].append(snapshot)
+    data["snapshots"].sort(key=lambda s: s["date"])
+    save_lowkm(data)
+
+    print("\nLow-KM category gems:")
+    for cat, gems in category_gems.items():
+        print(f"  {cat}:")
+        for g in gems:
+            km = f"{g['mileage_km']:,}km" if g.get("mileage_km") is not None else "km=?"
+            print(f"    [{g['score']}] {g.get('year','?')}  {km}  ¥{g['price_man']}万  {g.get('url','')}")
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def run(max_pages: int | None) -> None:
@@ -914,6 +1222,25 @@ def run(max_pages: int | None) -> None:
     candidates = scored_sorted[:SEAT_CHECK_CAP]
     top_vehicles: list[dict] = []
 
+    # Seat-count fetcher shared by the main pass, the gem pass, and the Low-KM
+    # view — caches by URL so no detail page is fetched twice across all three.
+    _seat_cache: dict[str, int | None] = {}
+
+    def ensure_seats(v: dict) -> int | None:
+        if v.get("seats") is not None:
+            return v["seats"]
+        url = v.get("url")
+        if not url:
+            return None
+        if url in _seat_cache:
+            v["seats"] = _seat_cache[url]
+            return v["seats"]
+        seats = _fetch_seat_count(url)
+        _seat_cache[url] = seats
+        v["seats"] = seats
+        time.sleep(DELAY_SEC)
+        return seats
+
     print(f"\nChecking seating capacity for top {len(candidates)} candidates "
           f"(targeting {TOP_N} with 7 seats) …")
     for v in candidates:
@@ -923,8 +1250,7 @@ def run(max_pages: int | None) -> None:
         if not url:
             top_vehicles.append(v)   # no URL → can't check, include anyway
             continue
-        seats = _fetch_seat_count(url)
-        v["seats"] = seats           # store for display (no scoring impact)
+        seats = ensure_seats(v)      # store for display (no scoring impact)
         if seats == 8:
             print(f"  ✗ skipped  8-seat  ¥{v['price_man']}万  {v['grade_id']}  {url}")
         else:
@@ -932,7 +1258,6 @@ def run(max_pages: int | None) -> None:
             seat_label = f"{seats}名" if seats else "?名"
             print(f"  ✓ #{len(top_vehicles):2d}  [{v['score']}]  {seat_label}  "
                   f"¥{v['price_man']}万  {v['grade_id']}")
-        time.sleep(DELAY_SEC)
 
     # ── Category Gems ─────────────────────────────────────────────────────
     # Vehicles that excel in ONE specific parameter.
@@ -995,10 +1320,8 @@ def run(max_pages: int | None) -> None:
     if gem_by_url:
         print(f"\nFetching seat counts for {len(gem_by_url)} gem vehicle(s) …")
         for u, v in gem_by_url.items():
-            seats = _fetch_seat_count(u)
-            v["seats"] = seats
+            seats = ensure_seats(v)
             print(f"  {u}  → {seats}名" if seats else f"  {u}  → ?")
-            time.sleep(DELAY_SEC)
 
     # ── Finalise: skip 8-seat, deduplicate across categories, trim to target ──
     used_gem_urls: set[str] = set()
@@ -1099,6 +1422,14 @@ def run(max_pages: int | None) -> None:
         print(f"  #{i} [{v['score']:4.1f}] {v['grade_id']:22s}  "
               f"¥{v['price_man']}万  {km}  {shk}  {acc}  {navi}  {cam}")
         print(f"       {v.get('url', '')}")
+
+    # ── Low-KM (Newest) view ──────────────────────────────────────────────
+    # Built from the SAME scrape (the main dataset is already saved above), so
+    # any failure here must never abort the successful main run.
+    try:
+        build_and_save_lowkm(all_vehicles, ensure_seats, limit)
+    except Exception as e:
+        print(f"  [!] Low-KM dataset build failed: {e}")
 
 
 if __name__ == "__main__":
