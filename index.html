@@ -1352,7 +1352,7 @@
   <button class="vehicle-tab active" data-vehicle="freed">🚗 Honda Freed</button>
   <button class="vehicle-tab" data-vehicle="noah">🚐 Toyota Noah</button>
   <button class="vehicle-tab" data-vehicle="stepwgn">🚙 Honda StepWGN</button>
-  <button class="vehicle-tab" data-vehicle="stepwgn_lowkm">✨ StepWGN Newest</button>
+  <button class="vehicle-tab" data-vehicle="stepwgn_lowkm">💰 StepWGN Value</button>
   <button class="vehicle-tab" data-vehicle="voxy">🚐 Toyota Voxy</button>
 </div>
 </div><!-- /.topbar -->
@@ -1737,22 +1737,19 @@ const VEHICLE_CONFIGS = {
     seatIdeal:    7,
     seatBad:      [8],
     nameLeft:     'STEPWGN',
-    nameRight:    'NEWEST',
-    logoModel:    'Honda StepWGN · Newest / Low-KM · Multi-cam + Screen + Clean + 7-seat (未使用車 incl.)',
-    chartSubtitle: 'Multi-view + screen + clean · newest & lowest-km ranked · 未使用車 badged · JPY (¥)',
+    nameRight:    'VALUE',
+    logoModel:    'Honda StepWGN · Best Value · ≤10k km + Clean + Multi-cam + Screen + 7-seat · price-led ranking (未使用車 incl.)',
+    chartSubtitle: 'Gated: ≤10k km + clean + multi-view + screen + 7-seat · ranked by value (price-led) · JPY (¥)',
     missingMsg:   'Could not load stepwgn_lowkm_data.js',
     highMileageDesc: '',   // unused — this tab defines its own gemCategories
-    // Newness-focused Hidden-Gem lanes (override the default price/high-mileage/no-shaken set)
+    // Alternate discovery lanes (override the default price/high-mileage/no-shaken set)
     gemCategories: [
       { key: 'newest',     icon: '✨', title: 'Freshest Registration',
-        desc: 'Newest model-year cars in stock — the closest thing to buying new',
+        desc: 'Newest model-year cars — usually pricier, so the price-led list buries them',
         accent: 'var(--amber)', highlight: 'year' },
       { key: 'lowest_km',  icon: '📉', title: 'Lowest Odometer',
-        desc: 'Absolute fewest kilometres on the clock — barely driven',
+        desc: 'Fewest kilometres among the pricier cars the price-led list buries',
         accent: 'var(--green)', highlight: 'mileage' },
-      { key: 'best_value', icon: '💰', title: 'Best Value, Still Fresh',
-        desc: 'Cheapest of the camera-equipped, clean-record, low-km set',
-        accent: 'var(--blue)', highlight: 'price' },
       { key: 'screen_unknown', icon: '❓', title: 'Screen Unverified',
         desc: 'Would rank high — but the listing didn’t confirm a screen. Verify the head-unit before buying.',
         accent: 'var(--purple)', highlight: 'screen' },
