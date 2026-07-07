@@ -331,6 +331,7 @@ def _extract_details(item) -> dict:
         "warranty":      None,   # True = present, False = none
         "maintenance":   None,   # True = 法定整備付, False = 法定整備無
         "navi":          None,   # True = screen (nav OR display audio) present, False = none, None = unknown
+        "navi_in_title": False,  # True = a screen keyword appears in the listing headline (h3)
         "screen_size":   None,   # float inches (9 / 11.4) parsed from the listing, else None
         "camera":        None,   # legacy field (multi-view camera is now an accessory)
         "unused":        None,   # True = 未使用車 / 登録済未使用車 (near-new, priced like new)
@@ -405,6 +406,12 @@ def _extract_details(item) -> dict:
     full_text = item.get_text(" ", strip=True)
 
     details["navi"], details["screen_size"] = _detect_screen(full_text)
+
+    # Whether a screen is explicitly named in the listing HEADLINE (h3), not just
+    # somewhere in the card. Near-zero-km unregistered cars that don't advertise a
+    # nav in their title are dropped from the Best-Value view (see build_and_save_lowkm).
+    title_el = item.select_one("h3")
+    details["navi_in_title"] = _detect_screen(title_el.get_text(" ", strip=True))[0] is True if title_el else False
 
     # Accessories — the multi-view camera (NOT a plain バックカメラ; and NOT
     # CarSensor's "360°画像付" photo badge) is tracked as a cumulative accessory
@@ -565,9 +572,11 @@ def score_vehicle(vehicle: dict, price_bounds: dict[str, tuple[float, float]]) -
     else:
         mileage_score = max(0.0, min(10.0, 10.0 - km / 10_000.0))
 
-    # Shaken: 0 months → 2,  ≥ 24 months → 10
+    # Shaken (JCI remaining): scales linearly with months left — 0 → 0, and 36
+    # months (a fresh 3-year 車検, the practical max) → 10 — so more remaining
+    # validity always ranks strictly higher, with no early cap at 24.
     months = vehicle.get("shaken_months")
-    shaken_score = (2.0 + min(months, 24) / 24.0 * 8.0) if months is not None else 5.0
+    shaken_score = min(10.0, max(0.0, months / 3.6)) if months is not None else 5.0
 
     # Accident history
     accident = vehicle.get("accident")
@@ -999,9 +1008,10 @@ def score_vehicle_lowkm(
     else:
         screen_score = 0.0               # confirmed no screen
 
-    # Shaken: 0 months → 2, ≥ 24 months → 10 (same shape as the main view)
+    # Shaken (JCI remaining): linear with months left — 0 → 0, 36 months → 10, no
+    # early cap at 24 (same shape as the main view). More validity ranks higher.
     months = vehicle.get("shaken_months")
-    shaken_score = (2.0 + min(months, 24) / 24.0 * 8.0) if months is not None else 5.0
+    shaken_score = min(10.0, max(0.0, months / 3.6)) if months is not None else 5.0
 
     # Warranty: present = 8, none = 1, unknown = 4
     warranty = vehicle.get("warranty")
@@ -1071,11 +1081,18 @@ def build_and_save_lowkm(all_vehicles: list[dict], get_detail, pages_scraped: in
         km = v.get("mileage_km")
         return km is not None and km <= LOWKM_MAX_KM
 
-    # Candidate pool from the trustworthy listing fields only: ≤10k km + clean.
-    # Cheapest-first so detail verification spends its fetches on the cars most
-    # likely to top the price-led ranking.
+    def _drop_unregistered(v: dict) -> bool:
+        """Drop near-zero-km unregistered stock (< 50 km) UNLESS it explicitly names
+        a navi in its listing headline — i.e. keep only the ones clearly equipped."""
+        km = v.get("mileage_km")
+        return km is not None and km < 50 and not v.get("navi_in_title")
+
+    # Candidate pool from the trustworthy listing fields only: ≤10k km + clean, minus
+    # sub-50km unregistered cars that don't advertise a nav in their title. Cheapest-
+    # first so detail verification spends its fetches on the likely top-ranked cars.
     candidates = sorted(
-        (v for v in all_vehicles if v.get("accident") is False and _low_km(v)),
+        (v for v in all_vehicles
+         if v.get("accident") is False and _low_km(v) and not _drop_unregistered(v)),
         key=lambda x: x["price_man"],
     )
     CONFIRM_TARGET = TOP_N + 20      # confirm enough for the top list + gem lanes

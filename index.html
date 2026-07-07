@@ -2682,6 +2682,7 @@ function buildCardHTML({ v, grade, gc, rankHtml, badges, bd,
     </div>
     <div class="deal-card-divider"></div>
     <div class="deal-card-pills">
+      ${v.year ? `<span class="deal-card-pill" title="Year of first registration (年式)">📅 ${v.year}</span>` : ''}
       <span class="deal-card-pill">🛣 ${km}</span>
       <span class="deal-card-pill">🔧 ${shaken}</span>
       ${seatPill(v)}
