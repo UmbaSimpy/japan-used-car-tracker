@@ -526,17 +526,44 @@ def _seats_from_html(html: str) -> int | None:
 
 
 def parse_detail_features(html: str) -> dict:
-    """Authoritative camera / screen / seat read from a DETAIL page — used by the
-    Best-Value view, because listing cards routinely omit or truncate the camera
-    (e.g. "全方位カメ") and other equipment. The camera keyword for the main car sits
-    in the upper spec/PR area; related-inventory blurbs lower down don't repeat the
-    full equipment keywords, so a whole-page scan is safe in practice."""
-    text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html))
-    options = [label for label, _, rx in OPTION_PACKAGES if rx.search(text)]
-    navi, size = _detect_screen(text)
+    """Authoritative camera / screen / seat read from a DETAIL page's STRUCTURED
+    equipment list — used by the Best-Value view. A plain whole-page keyword scan is
+    unreliable: CarSensor's equipment checklist prints every item as a label (全周囲
+    カメラ, ディスプレイオーディオ …) regardless of whether the car has it, and option
+    tables list unfitted options too. So we read the actual field VALUES instead:
+
+      • Camera — "カメラ：<front>/<side>/<rear>"; each slot names a view or is － when
+        absent. A rear-only camera is "－/－/バック"; a multi-view/360 system has a
+        FRONT and/or SIDE view (or an explicit 全周囲/全方位/360 label).
+      • Screen — "カーナビ：<type>" (or a ディスプレイオーディオ line); "－" means none.
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    eq = soup.select_one("div.equipmentList")
+    eqtext = re.sub(r"\s+", " ", eq.get_text(" ", strip=True)) if eq else ""
+
+    # Multi-view / 360 camera — a FRONT or SIDE view present (rear-only ≠ multi-view).
+    m = re.search(r"カメラ[：:]\s*([^\s　]{1,24})", eqtext)
+    cam_field = m.group(1) if m else ""
+    camera = bool(re.search(r"フロント|サイド|全周囲|全方位|３６０|360|マルチビュー|アラウンド", cam_field))
+
+    # Screen present — the "カーナビ：<type>" field is － when there is no nav.
+    m = re.search(r"カーナビ[^：:]{0,10}[：:]\s*([^\s　]{1,14})", eqtext)
+    if m:
+        navi: bool | None = m.group(1) not in ("－", "-", "×")
+    elif "ディスプレイオーディオ" in eqtext:
+        navi = True
+    elif not eqtext:
+        navi = None                         # no equipment list parsed → unknown
+    else:
+        navi = False                        # equipment list present, no nav field
+
+    # Screen size from the seller's headline (the equipment field carries no size).
+    title_el = soup.find("title")
+    _, size = _detect_screen(title_el.get_text() if title_el else "")
+
     return {
-        "camera":      bool(options),
-        "options":     options,
+        "camera":      camera,
+        "options":     (["マルチビュー"] if camera else []),
         "navi":        navi,
         "screen_size": size,
         "seats":       _seats_from_html(html),
@@ -1095,8 +1122,10 @@ def build_and_save_lowkm(all_vehicles: list[dict], get_detail, pages_scraped: in
          if v.get("accident") is False and _low_km(v) and not _drop_unregistered(v)),
         key=lambda x: x["price_man"],
     )
-    CONFIRM_TARGET = TOP_N + 20      # confirm enough for the top list + gem lanes
-    DETAIL_CAP     = 240             # hard ceiling on detail fetches for this view
+    CONFIRM_TARGET = TOP_N + 10      # confirm enough for the top list + gem lanes
+    DETAIL_CAP     = 330             # ceiling on detail fetches — raised because the
+                                     # multi-view camera is uncommon (most StepWGNs
+                                     # have a rear-only camera), so more must be checked
     print(f"\n── Best-Value view ── {len(candidates)} ≤{LOWKM_MAX_KM//1000}k-km clean candidate(s); "
           f"detail-verifying camera+screen+7-seat cheapest-first …")
 

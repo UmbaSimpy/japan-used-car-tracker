@@ -9125,38 +9125,38 @@ window.STEPWGN_DATA = {
     },
     {
       "date": "2026-07-07",
-      "pages_scraped": 52,
+      "pages_scraped": 51,
       "by_grade": {
-        "spada": {
-          "avg": 3816516,
-          "min": 2598000,
-          "max": 4529000,
-          "count": 496
-        },
         "anniversary_30th": {
-          "avg": 4066366,
+          "avg": 4071238,
           "min": 3712000,
           "max": 4611000,
-          "count": 41
+          "count": 42
         },
         "air_ex": {
-          "avg": 4040558,
-          "min": 3659000,
+          "avg": 4049071,
+          "min": 3627000,
           "max": 5024000,
-          "count": 156
+          "count": 155
+        },
+        "spada": {
+          "avg": 3826041,
+          "min": 2598000,
+          "max": 4529000,
+          "count": 487
         },
         "spada_premium": {
-          "avg": 4104405,
-          "min": 2699000,
-          "max": 4831000,
-          "count": 294
+          "avg": 4118577,
+          "min": 2572000,
+          "max": 4968000,
+          "count": 298
         }
       },
       "top_vehicles": [
         {
-          "score": 8.17,
+          "score": 8.1,
           "score_breakdown": {
-            "price": 10.0,
+            "price": 9.8,
             "mileage": 0.3,
             "shaken": 3.3,
             "accident": 10.0,
@@ -9191,9 +9191,9 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7114210987/index.html"
         },
         {
-          "score": 8.14,
+          "score": 8.1,
           "score_breakdown": {
-            "price": 6.7,
+            "price": 6.6,
             "mileage": 9.0,
             "shaken": 4.7,
             "accident": 10.0,
@@ -9226,9 +9226,46 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7148606045/index.html"
         },
         {
-          "score": 7.99,
+          "score": 8.01,
           "score_breakdown": {
-            "price": 8.2,
+            "price": 10.0,
+            "mileage": 3.3,
+            "shaken": 6.1,
+            "accident": 1.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "equipment": 0.3
+          },
+          "grade_id": "spada_premium",
+          "grade_label": "e:HEV スパーダ プレミアムライン",
+          "price_man": 257.2,
+          "new_price_man": 440.4,
+          "year": 2022,
+          "mileage_km": 67000,
+          "shaken_months": 22,
+          "accident": true,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "screen_size": null,
+          "camera": null,
+          "unused": false,
+          "options": [
+            "マルチビュー"
+          ],
+          "color": "真珠",
+          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/165/464/UJ0053165464/UJ0053165464_001L.JPG",
+          "dealer_name": "ユーパーク アリーナ店　ＪＵ適正販売店",
+          "dealer_rating": 4.7,
+          "dealer_reviews": 1594,
+          "seats": 7,
+          "url": "https://www.carsensor.net/usedcar/detail/AU7108904015/index.html"
+        },
+        {
+          "score": 7.93,
+          "score_breakdown": {
+            "price": 8.1,
             "mileage": 2.5,
             "shaken": 4.7,
             "accident": 10.0,
@@ -9261,46 +9298,9 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7148825996/index.html"
         },
         {
-          "score": 7.96,
+          "score": 7.86,
           "score_breakdown": {
-            "price": 9.3,
-            "mileage": 0.7,
-            "shaken": 3.6,
-            "accident": 10.0,
-            "warranty": 4.0,
-            "maintenance": 3.0,
-            "navi": 10.0,
-            "equipment": 0.3
-          },
-          "grade_id": "spada_premium",
-          "grade_label": "e:HEV スパーダ プレミアムライン",
-          "price_man": 269.9,
-          "new_price_man": 440.4,
-          "year": 2022,
-          "mileage_km": 93000,
-          "shaken_months": 13,
-          "accident": false,
-          "warranty": null,
-          "maintenance": false,
-          "navi": true,
-          "screen_size": 11.4,
-          "camera": null,
-          "unused": false,
-          "options": [
-            "マルチビュー"
-          ],
-          "color": "真珠白",
-          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/046/874/UJ0053046874/UJ0053046874_002L.JPG",
-          "dealer_name": "Ｇ－ＡＦＴＥＲ ＭＥＧＡ新潟店",
-          "dealer_rating": 4.7,
-          "dealer_reviews": 64,
-          "seats": 7,
-          "url": "https://www.carsensor.net/usedcar/detail/AU7072569809/index.html"
-        },
-        {
-          "score": 7.93,
-          "score_breakdown": {
-            "price": 10.0,
+            "price": 9.8,
             "mileage": 0.2,
             "shaken": 5.0,
             "accident": 10.0,
@@ -9333,9 +9333,9 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7087178248/index.html"
         },
         {
-          "score": 7.88,
+          "score": 7.84,
           "score_breakdown": {
-            "price": 6.8,
+            "price": 6.7,
             "mileage": 6.1,
             "shaken": 6.7,
             "accident": 10.0,
@@ -9368,9 +9368,9 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU6957884043/index.html"
         },
         {
-          "score": 7.87,
+          "score": 7.82,
           "score_breakdown": {
-            "price": 8.1,
+            "price": 8.0,
             "mileage": 2.4,
             "shaken": 3.3,
             "accident": 10.0,
@@ -9403,44 +9403,9 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU6881966833/index.html"
         },
         {
-          "score": 7.8,
+          "score": 7.69,
           "score_breakdown": {
-            "price": 9.3,
-            "mileage": 1.6,
-            "shaken": 5.0,
-            "accident": 10.0,
-            "warranty": 4.0,
-            "maintenance": 3.0,
-            "navi": 10.0,
-            "equipment": 0.0
-          },
-          "grade_id": "spada",
-          "grade_label": "e:HEV スパーダ",
-          "price_man": 270.9,
-          "new_price_man": 413.5,
-          "year": 2023,
-          "mileage_km": 84000,
-          "shaken_months": null,
-          "accident": false,
-          "warranty": null,
-          "maintenance": false,
-          "navi": true,
-          "screen_size": 11.4,
-          "camera": null,
-          "unused": false,
-          "options": [],
-          "color": "真珠白",
-          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/991/556/UJ0052991556/UJ0052991556_002L.JPG",
-          "dealer_name": "Ｇ－ＡＦＴＥＲ ＭＥＧＡ東岡山店",
-          "dealer_rating": 4.5,
-          "dealer_reviews": 50,
-          "seats": 7,
-          "url": "https://www.carsensor.net/usedcar/detail/AU7062637527/index.html"
-        },
-        {
-          "score": 7.74,
-          "score_breakdown": {
-            "price": 7.7,
+            "price": 7.6,
             "mileage": 2.0,
             "shaken": 5.3,
             "accident": 10.0,
@@ -9473,44 +9438,9 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7151406687/index.html"
         },
         {
-          "score": 7.71,
+          "score": 7.6,
           "score_breakdown": {
-            "price": 6.9,
-            "mileage": 4.9,
-            "shaken": 4.7,
-            "accident": 10.0,
-            "warranty": 8.0,
-            "maintenance": 10.0,
-            "navi": 10.0,
-            "equipment": 0.0
-          },
-          "grade_id": "spada",
-          "grade_label": "e:HEV スパーダ",
-          "price_man": 308.0,
-          "new_price_man": 413.5,
-          "year": 2022,
-          "mileage_km": 51000,
-          "shaken_months": 17,
-          "accident": false,
-          "warranty": true,
-          "maintenance": true,
-          "navi": true,
-          "screen_size": 9.0,
-          "camera": null,
-          "unused": false,
-          "options": [],
-          "color": "黒",
-          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/121/994/UZ0053121994/UZ0053121994_001L.JPG",
-          "dealer_name": "ホンダカーズ埼玉 川越インター店（認定中古車取扱店）",
-          "dealer_rating": 4.9,
-          "dealer_reviews": 24,
-          "seats": 7,
-          "url": "https://www.carsensor.net/usedcar/detail/AU7088904001/index.html"
-        },
-        {
-          "score": 7.65,
-          "score_breakdown": {
-            "price": 7.5,
+            "price": 7.3,
             "mileage": 1.7,
             "shaken": 6.7,
             "accident": 10.0,
@@ -9543,9 +9473,9 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU6598725166/index.html"
         },
         {
-          "score": 7.61,
+          "score": 7.56,
           "score_breakdown": {
-            "price": 6.8,
+            "price": 6.7,
             "mileage": 2.2,
             "shaken": 3.9,
             "accident": 10.0,
@@ -9580,44 +9510,9 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7122614524/index.html"
         },
         {
-          "score": 7.51,
+          "score": 7.47,
           "score_breakdown": {
-            "price": 7.4,
-            "mileage": 1.8,
-            "shaken": 3.3,
-            "accident": 10.0,
-            "warranty": 8.0,
-            "maintenance": 10.0,
-            "navi": 10.0,
-            "equipment": 0.0
-          },
-          "grade_id": "spada",
-          "grade_label": "e:HEV スパーダ",
-          "price_man": 299.7,
-          "new_price_man": 413.5,
-          "year": 2022,
-          "mileage_km": 82000,
-          "shaken_months": 12,
-          "accident": false,
-          "warranty": true,
-          "maintenance": true,
-          "navi": true,
-          "screen_size": 8.0,
-          "camera": null,
-          "unused": false,
-          "options": [],
-          "color": "黒真珠",
-          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/288/013/UZ0053288013/UZ0053288013_001L.JPG",
-          "dealer_name": "Ｈｏｎｄａ　Ｃａｒｓ　香取西 佐原店",
-          "dealer_rating": 4.8,
-          "dealer_reviews": 29,
-          "seats": 7,
-          "url": "https://www.carsensor.net/usedcar/detail/AU7124618357/index.html"
-        },
-        {
-          "score": 7.51,
-          "score_breakdown": {
-            "price": 6.1,
+            "price": 6.0,
             "mileage": 5.2,
             "shaken": 6.7,
             "accident": 10.0,
@@ -9650,9 +9545,44 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU6765608875/index.html"
         },
         {
-          "score": 7.48,
+          "score": 7.46,
           "score_breakdown": {
-            "price": 5.6,
+            "price": 7.3,
+            "mileage": 1.8,
+            "shaken": 3.3,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "equipment": 0.0
+          },
+          "grade_id": "spada",
+          "grade_label": "e:HEV スパーダ",
+          "price_man": 299.7,
+          "new_price_man": 413.5,
+          "year": 2022,
+          "mileage_km": 82000,
+          "shaken_months": 12,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "screen_size": 8.0,
+          "camera": null,
+          "unused": false,
+          "options": [],
+          "color": "黒真珠",
+          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/288/013/UZ0053288013/UZ0053288013_001L.JPG",
+          "dealer_name": "Ｈｏｎｄａ　Ｃａｒｓ　香取西 佐原店",
+          "dealer_rating": 4.8,
+          "dealer_reviews": 29,
+          "seats": 7,
+          "url": "https://www.carsensor.net/usedcar/detail/AU7124618357/index.html"
+        },
+        {
+          "score": 7.45,
+          "score_breakdown": {
+            "price": 5.5,
             "mileage": 6.8,
             "shaken": 6.7,
             "accident": 10.0,
@@ -9685,9 +9615,9 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7098935933/index.html"
         },
         {
-          "score": 7.46,
+          "score": 7.43,
           "score_breakdown": {
-            "price": 6.0,
+            "price": 5.9,
             "mileage": 7.2,
             "shaken": 1.1,
             "accident": 10.0,
@@ -9720,44 +9650,9 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU6928758681/index.html"
         },
         {
-          "score": 7.44,
+          "score": 7.4,
           "score_breakdown": {
-            "price": 7.0,
-            "mileage": 6.5,
-            "shaken": 5.0,
-            "accident": 10.0,
-            "warranty": 4.0,
-            "maintenance": 3.0,
-            "navi": 10.0,
-            "equipment": 0.0
-          },
-          "grade_id": "spada",
-          "grade_label": "e:HEV スパーダ",
-          "price_man": 305.9,
-          "new_price_man": 413.5,
-          "year": 2023,
-          "mileage_km": 35000,
-          "shaken_months": null,
-          "accident": false,
-          "warranty": null,
-          "maintenance": false,
-          "navi": true,
-          "screen_size": 11.4,
-          "camera": null,
-          "unused": false,
-          "options": [],
-          "color": "黒",
-          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/182/175/UJ0053182175/UJ0053182175_001L.JPG",
-          "dealer_name": "Ｇ－ＡＦＴＥＲ ＭＥＧＡ越谷レイクタウン店",
-          "dealer_rating": 4.1,
-          "dealer_reviews": 359,
-          "seats": 7,
-          "url": "https://www.carsensor.net/usedcar/detail/AU7099471331/index.html"
-        },
-        {
-          "score": 7.44,
-          "score_breakdown": {
-            "price": 6.8,
+            "price": 6.7,
             "mileage": 3.0,
             "shaken": 4.4,
             "accident": 10.0,
@@ -9790,9 +9685,9 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU6997952482/index.html"
         },
         {
-          "score": 7.43,
+          "score": 7.38,
           "score_breakdown": {
-            "price": 7.7,
+            "price": 7.6,
             "mileage": 4.4,
             "shaken": 3.6,
             "accident": 10.0,
@@ -9825,7 +9720,7 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU6850897101/index.html"
         },
         {
-          "score": 7.39,
+          "score": 7.36,
           "score_breakdown": {
             "price": 5.4,
             "mileage": 4.9,
@@ -9862,44 +9757,9 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7148834657/index.html"
         },
         {
-          "score": 7.34,
+          "score": 7.29,
           "score_breakdown": {
-            "price": 9.3,
-            "mileage": 7.3,
-            "shaken": 5.0,
-            "accident": 1.0,
-            "warranty": 4.0,
-            "maintenance": 3.0,
-            "navi": 10.0,
-            "equipment": 0.0
-          },
-          "grade_id": "spada",
-          "grade_label": "e:HEV スパーダ",
-          "price_man": 269.9,
-          "new_price_man": 413.5,
-          "year": 2024,
-          "mileage_km": 27000,
-          "shaken_months": null,
-          "accident": true,
-          "warranty": null,
-          "maintenance": false,
-          "navi": true,
-          "screen_size": 11.4,
-          "camera": null,
-          "unused": false,
-          "options": [],
-          "color": "黒真珠",
-          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/294/182/U00053294182/U00053294182_001L.JPG",
-          "dealer_name": "フェニックス 金沢八景センター",
-          "dealer_rating": 4.4,
-          "dealer_reviews": 28,
-          "seats": 7,
-          "url": "https://www.carsensor.net/usedcar/detail/AU7137326236/index.html"
-        },
-        {
-          "score": 7.33,
-          "score_breakdown": {
-            "price": 6.4,
+            "price": 6.3,
             "mileage": 3.4,
             "shaken": 4.7,
             "accident": 10.0,
@@ -9932,46 +9792,9 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7087027471/index.html"
         },
         {
-          "score": 7.32,
+          "score": 7.27,
           "score_breakdown": {
-            "price": 7.1,
-            "mileage": 3.2,
-            "shaken": 3.6,
-            "accident": 10.0,
-            "warranty": 4.0,
-            "maintenance": 3.0,
-            "navi": 10.0,
-            "equipment": 0.3
-          },
-          "grade_id": "spada_premium",
-          "grade_label": "e:HEV スパーダ プレミアムライン",
-          "price_man": 304.9,
-          "new_price_man": 440.4,
-          "year": 2024,
-          "mileage_km": 68000,
-          "shaken_months": 13,
-          "accident": false,
-          "warranty": null,
-          "maintenance": false,
-          "navi": true,
-          "screen_size": 11.4,
-          "camera": null,
-          "unused": false,
-          "options": [
-            "マルチビュー"
-          ],
-          "color": "真珠白",
-          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/141/589/UJ0053141589/UJ0053141589_002L.JPG",
-          "dealer_name": "Ｇ－ＡＦＴＥＲ ＭＥＧＡ佐野厄除大師店",
-          "dealer_rating": 4.5,
-          "dealer_reviews": 209,
-          "seats": 7,
-          "url": "https://www.carsensor.net/usedcar/detail/AU7091866982/index.html"
-        },
-        {
-          "score": 7.31,
-          "score_breakdown": {
-            "price": 6.6,
+            "price": 6.5,
             "mileage": 2.8,
             "shaken": 3.6,
             "accident": 10.0,
@@ -10004,7 +9827,7 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7108743671/index.html"
         },
         {
-          "score": 7.29,
+          "score": 7.26,
           "score_breakdown": {
             "price": 4.8,
             "mileage": 5.4,
@@ -10041,9 +9864,83 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7085275415/index.html"
         },
         {
-          "score": 7.26,
+          "score": 7.25,
           "score_breakdown": {
-            "price": 6.2,
+            "price": 5.0,
+            "mileage": 4.6,
+            "shaken": 6.7,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "equipment": 0.3
+          },
+          "grade_id": "spada",
+          "grade_label": "e:HEV スパーダ",
+          "price_man": 336.7,
+          "new_price_man": 423.5,
+          "year": 2023,
+          "mileage_km": 54000,
+          "shaken_months": 24,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "screen_size": 9.0,
+          "camera": null,
+          "unused": false,
+          "options": [
+            "マルチビュー"
+          ],
+          "color": "青",
+          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/906/564/UZ0052906564/UZ0052906564_001L.JPG",
+          "dealer_name": "（株）ホンダカーズ三重 Ｕ－Ｓｅｌｅｃｔ津みなみ",
+          "dealer_rating": 4.9,
+          "dealer_reviews": 104,
+          "seats": 7,
+          "url": "https://www.carsensor.net/usedcar/detail/AU7041927481/index.html"
+        },
+        {
+          "score": 7.22,
+          "score_breakdown": {
+            "price": 4.4,
+            "mileage": 6.2,
+            "shaken": 6.7,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "equipment": 0.3
+          },
+          "grade_id": "spada",
+          "grade_label": "e:HEV スパーダ",
+          "price_man": 344.9,
+          "new_price_man": 423.5,
+          "year": 2023,
+          "mileage_km": 38000,
+          "shaken_months": 24,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "screen_size": 9.0,
+          "camera": null,
+          "unused": false,
+          "options": [
+            "マルチビュー"
+          ],
+          "color": "紺",
+          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/389/143/UZ0053389143/UZ0053389143_001L.JPG",
+          "dealer_name": "ホンダカーズ大阪 香里店　（Ｈｏｎｄａ認定中古車取扱店）",
+          "dealer_rating": 4.7,
+          "dealer_reviews": 562,
+          "seats": 7,
+          "url": "https://www.carsensor.net/usedcar/detail/AU7148065415/index.html"
+        },
+        {
+          "score": 7.22,
+          "score_breakdown": {
+            "price": 6.1,
             "mileage": 2.9,
             "shaken": 6.7,
             "accident": 10.0,
@@ -10076,9 +9973,9 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7084838780/index.html"
         },
         {
-          "score": 7.25,
+          "score": 7.21,
           "score_breakdown": {
-            "price": 6.0,
+            "price": 5.9,
             "mileage": 5.4,
             "shaken": 1.1,
             "accident": 10.0,
@@ -10111,9 +10008,9 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU6886770167/index.html"
         },
         {
-          "score": 7.22,
+          "score": 7.19,
           "score_breakdown": {
-            "price": 6.1,
+            "price": 6.0,
             "mileage": 3.9,
             "shaken": 3.6,
             "accident": 10.0,
@@ -10146,9 +10043,44 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7148990275/index.html"
         },
         {
-          "score": 7.2,
+          "score": 7.17,
           "score_breakdown": {
-            "price": 6.2,
+            "price": 5.3,
+            "mileage": 5.9,
+            "shaken": 4.4,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "equipment": 0.0
+          },
+          "grade_id": "spada",
+          "grade_label": "e:HEV スパーダ",
+          "price_man": 330.8,
+          "new_price_man": 413.5,
+          "year": 2022,
+          "mileage_km": 41000,
+          "shaken_months": 16,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "screen_size": 9.0,
+          "camera": null,
+          "unused": false,
+          "options": [],
+          "color": "黒真珠",
+          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/368/112/UZ0053368112/UZ0053368112_001L.JPG",
+          "dealer_name": "ホンダカーズ埼玉 Ｕ－Ｓｅｌｅｃｔ南越谷",
+          "dealer_rating": 4.8,
+          "dealer_reviews": 257,
+          "seats": 7,
+          "url": "https://www.carsensor.net/usedcar/detail/AU7142402288/index.html"
+        },
+        {
+          "score": 7.16,
+          "score_breakdown": {
+            "price": 6.1,
             "mileage": 0.7,
             "shaken": 4.2,
             "accident": 10.0,
@@ -10183,7 +10115,7 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7133174562/index.html"
         },
         {
-          "score": 7.19,
+          "score": 7.16,
           "score_breakdown": {
             "price": 4.1,
             "mileage": 7.3,
@@ -10220,7 +10152,7 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7088535942/index.html"
         },
         {
-          "score": 7.19,
+          "score": 7.16,
           "score_breakdown": {
             "price": 4.5,
             "mileage": 6.8,
@@ -10257,9 +10189,9 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7128244934/index.html"
         },
         {
-          "score": 7.17,
+          "score": 7.15,
           "score_breakdown": {
-            "price": 4.5,
+            "price": 4.4,
             "mileage": 5.6,
             "shaken": 6.7,
             "accident": 10.0,
@@ -10294,77 +10226,7 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU6418420875/index.html"
         },
         {
-          "score": 7.15,
-          "score_breakdown": {
-            "price": 5.3,
-            "mileage": 7.0,
-            "shaken": 0.8,
-            "accident": 10.0,
-            "warranty": 8.0,
-            "maintenance": 10.0,
-            "navi": 10.0,
-            "equipment": 0.0
-          },
-          "grade_id": "spada",
-          "grade_label": "e:HEV スパーダ",
-          "price_man": 332.4,
-          "new_price_man": 413.5,
-          "year": 2022,
-          "mileage_km": 30000,
-          "shaken_months": 3,
-          "accident": false,
-          "warranty": true,
-          "maintenance": true,
-          "navi": true,
-          "screen_size": null,
-          "camera": null,
-          "unused": false,
-          "options": [],
-          "color": "白真珠",
-          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/255/764/U00053255764/U00053255764_001L.JPG",
-          "dealer_name": "ビジレンネクスト　枚方店",
-          "dealer_rating": 5.0,
-          "dealer_reviews": 24,
-          "seats": 7,
-          "url": "https://www.carsensor.net/usedcar/detail/AU7116668658/index.html"
-        },
-        {
-          "score": 7.13,
-          "score_breakdown": {
-            "price": 5.5,
-            "mileage": 5.5,
-            "shaken": 3.1,
-            "accident": 10.0,
-            "warranty": 8.0,
-            "maintenance": 10.0,
-            "navi": 10.0,
-            "equipment": 0.0
-          },
-          "grade_id": "spada",
-          "grade_label": "e:HEV スパーダ",
-          "price_man": 329.8,
-          "new_price_man": 413.5,
-          "year": 2022,
-          "mileage_km": 45000,
-          "shaken_months": 11,
-          "accident": false,
-          "warranty": true,
-          "maintenance": true,
-          "navi": true,
-          "screen_size": 11.0,
-          "camera": null,
-          "unused": false,
-          "options": [],
-          "color": "黒",
-          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/655/370/UZ0052655370/UZ0052655370_002L.JPG",
-          "dealer_name": "ガリバー 金沢店",
-          "dealer_rating": 4.6,
-          "dealer_reviews": 48,
-          "seats": 7,
-          "url": "https://www.carsensor.net/usedcar/detail/AU6981770830/index.html"
-        },
-        {
-          "score": 7.13,
+          "score": 7.11,
           "score_breakdown": {
             "price": 4.6,
             "mileage": 7.4,
@@ -10399,11 +10261,11 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7148835826/index.html"
         },
         {
-          "score": 7.12,
+          "score": 7.09,
           "score_breakdown": {
-            "price": 4.7,
-            "mileage": 7.7,
-            "shaken": 4.4,
+            "price": 5.4,
+            "mileage": 5.5,
+            "shaken": 3.1,
             "accident": 10.0,
             "warranty": 8.0,
             "maintenance": 10.0,
@@ -10412,29 +10274,29 @@ window.STEPWGN_DATA = {
           },
           "grade_id": "spada",
           "grade_label": "e:HEV スパーダ",
-          "price_man": 341.8,
+          "price_man": 329.8,
           "new_price_man": 413.5,
           "year": 2022,
-          "mileage_km": 23000,
-          "shaken_months": 16,
+          "mileage_km": 45000,
+          "shaken_months": 11,
           "accident": false,
           "warranty": true,
           "maintenance": true,
           "navi": true,
-          "screen_size": 11.4,
+          "screen_size": 11.0,
           "camera": null,
           "unused": false,
           "options": [],
-          "color": "深紫",
-          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/144/694/UZ0053144694/UZ0053144694_001L.JPG",
-          "dealer_name": "ホンダカーズ埼玉 北本北店（認定中古車取扱店）",
-          "dealer_rating": 4.9,
-          "dealer_reviews": 54,
+          "color": "黒",
+          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/655/370/UZ0052655370/UZ0052655370_002L.JPG",
+          "dealer_name": "ガリバー 金沢店",
+          "dealer_rating": 4.6,
+          "dealer_reviews": 48,
           "seats": 7,
-          "url": "https://www.carsensor.net/usedcar/detail/AU7101303846/index.html"
+          "url": "https://www.carsensor.net/usedcar/detail/AU6981770830/index.html"
         },
         {
-          "score": 7.11,
+          "score": 7.09,
           "score_breakdown": {
             "price": 4.3,
             "mileage": 8.3,
@@ -10469,9 +10331,44 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7146406557/index.html"
         },
         {
-          "score": 7.08,
+          "score": 7.05,
           "score_breakdown": {
-            "price": 5.5,
+            "price": 5.3,
+            "mileage": 5.3,
+            "shaken": 3.9,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "equipment": 0.0
+          },
+          "grade_id": "spada",
+          "grade_label": "e:HEV スパーダ",
+          "price_man": 331.9,
+          "new_price_man": 413.5,
+          "year": 2022,
+          "mileage_km": 47000,
+          "shaken_months": 14,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "screen_size": null,
+          "camera": null,
+          "unused": false,
+          "options": [],
+          "color": "白真珠",
+          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/343/948/UZ0053343948/UZ0053343948_001L.JPG",
+          "dealer_name": "ホンダカーズ千葉 Ｕ－Ｓｅｌｅｃｔ松ヶ丘",
+          "dealer_rating": 4.7,
+          "dealer_reviews": 500,
+          "seats": 7,
+          "url": "https://www.carsensor.net/usedcar/detail/AU7136652642/index.html"
+        },
+        {
+          "score": 7.04,
+          "score_breakdown": {
+            "price": 5.4,
             "mileage": 2.6,
             "shaken": 3.1,
             "accident": 10.0,
@@ -10506,42 +10403,7 @@ window.STEPWGN_DATA = {
           "url": "https://www.carsensor.net/usedcar/detail/AU7141269309/index.html"
         },
         {
-          "score": 7.08,
-          "score_breakdown": {
-            "price": 5.4,
-            "mileage": 5.3,
-            "shaken": 3.9,
-            "accident": 10.0,
-            "warranty": 8.0,
-            "maintenance": 10.0,
-            "navi": 10.0,
-            "equipment": 0.0
-          },
-          "grade_id": "spada",
-          "grade_label": "e:HEV スパーダ",
-          "price_man": 331.9,
-          "new_price_man": 413.5,
-          "year": 2022,
-          "mileage_km": 47000,
-          "shaken_months": 14,
-          "accident": false,
-          "warranty": true,
-          "maintenance": true,
-          "navi": true,
-          "screen_size": null,
-          "camera": null,
-          "unused": false,
-          "options": [],
-          "color": "白真珠",
-          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/343/948/UZ0053343948/UZ0053343948_001L.JPG",
-          "dealer_name": "ホンダカーズ千葉 Ｕ－Ｓｅｌｅｃｔ松ヶ丘",
-          "dealer_rating": 4.7,
-          "dealer_reviews": 500,
-          "seats": 7,
-          "url": "https://www.carsensor.net/usedcar/detail/AU7136652642/index.html"
-        },
-        {
-          "score": 7.07,
+          "score": 7.04,
           "score_breakdown": {
             "price": 3.9,
             "mileage": 6.8,
@@ -10576,14 +10438,156 @@ window.STEPWGN_DATA = {
           "dealer_reviews": 101,
           "seats": 7,
           "url": "https://www.carsensor.net/usedcar/detail/AU7074137761/index.html"
+        },
+        {
+          "score": 7.04,
+          "score_breakdown": {
+            "price": 5.1,
+            "mileage": 4.9,
+            "shaken": 6.7,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "equipment": 0.0
+          },
+          "grade_id": "spada",
+          "grade_label": "e:HEV スパーダ",
+          "price_man": 334.5,
+          "new_price_man": 413.5,
+          "year": 2023,
+          "mileage_km": 51000,
+          "shaken_months": 24,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "screen_size": null,
+          "camera": null,
+          "unused": false,
+          "options": [],
+          "color": "紺",
+          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/258/342/UZ0053258342/UZ0053258342_001L.JPG",
+          "dealer_name": "ホンダカーズ福岡 Ｕ－Ｓｅｌｅｃｔ新宮",
+          "dealer_rating": 4.8,
+          "dealer_reviews": 574,
+          "seats": 7,
+          "url": "https://www.carsensor.net/usedcar/detail/AU7115996616/index.html"
+        },
+        {
+          "score": 7.04,
+          "score_breakdown": {
+            "price": 5.1,
+            "mileage": 5.7,
+            "shaken": 4.7,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "equipment": 0.0
+          },
+          "grade_id": "spada",
+          "grade_label": "e:HEV スパーダ",
+          "price_man": 335.3,
+          "new_price_man": 413.5,
+          "year": 2022,
+          "mileage_km": 43000,
+          "shaken_months": 17,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "screen_size": 11.4,
+          "camera": null,
+          "unused": false,
+          "options": [],
+          "color": "黒",
+          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/353/307/UZ0053353307/UZ0053353307_001L.JPG",
+          "dealer_name": "（株）ホンダカーズ埼玉北 東松山東店　ＵーＳｅｌｅｃｔコーナー",
+          "dealer_rating": 5.0,
+          "dealer_reviews": 20,
+          "seats": 7,
+          "url": "https://www.carsensor.net/usedcar/detail/AU7139450041/index.html"
+        },
+        {
+          "score": 7.02,
+          "score_breakdown": {
+            "price": 4.0,
+            "mileage": 7.3,
+            "shaken": 3.1,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "equipment": 0.3
+          },
+          "grade_id": "spada",
+          "grade_label": "e:HEV スパーダ",
+          "price_man": 351.8,
+          "new_price_man": 423.5,
+          "year": 2022,
+          "mileage_km": 27000,
+          "shaken_months": 11,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "screen_size": null,
+          "camera": null,
+          "unused": false,
+          "options": [
+            "マルチビュー"
+          ],
+          "color": "紺",
+          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/933/709/UZ0052933709/UZ0052933709_001L.JPG",
+          "dealer_name": "ホンダカーズ横浜 Ｕ－Ｓｅｌｅｃｔ港北ニュータウン",
+          "dealer_rating": 4.8,
+          "dealer_reviews": 692,
+          "seats": 7,
+          "url": "https://www.carsensor.net/usedcar/detail/AU7047469207/index.html"
+        },
+        {
+          "score": 7.0,
+          "score_breakdown": {
+            "price": 4.6,
+            "mileage": 6.4,
+            "shaken": 6.7,
+            "accident": 10.0,
+            "warranty": 8.0,
+            "maintenance": 10.0,
+            "navi": 10.0,
+            "equipment": 0.0
+          },
+          "grade_id": "spada",
+          "grade_label": "e:HEV スパーダ",
+          "price_man": 342.9,
+          "new_price_man": 413.5,
+          "year": 2023,
+          "mileage_km": 36000,
+          "shaken_months": 24,
+          "accident": false,
+          "warranty": true,
+          "maintenance": true,
+          "navi": true,
+          "screen_size": null,
+          "camera": null,
+          "unused": false,
+          "options": [],
+          "color": "黒",
+          "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/262/664/UZ0053262664/UZ0053262664_001L.JPG",
+          "dealer_name": "（株）ホンダカーズ神奈川北 都筑桜並木店",
+          "dealer_rating": 5.0,
+          "dealer_reviews": 20,
+          "seats": 7,
+          "url": "https://www.carsensor.net/usedcar/detail/AU7127701294/index.html"
         }
       ],
       "category_gems": {
         "price": [
           {
-            "score": 7.05,
+            "score": 7.0,
             "score_breakdown": {
-              "price": 6.8,
+              "price": 6.7,
               "mileage": 4.7,
               "shaken": 3.3,
               "accident": 10.0,
@@ -10616,9 +10620,9 @@ window.STEPWGN_DATA = {
             "url": "https://www.carsensor.net/usedcar/detail/AU7119809623/index.html"
           },
           {
-            "score": 6.93,
+            "score": 6.89,
             "score_breakdown": {
-              "price": 6.8,
+              "price": 6.7,
               "mileage": 7.9,
               "shaken": 6.7,
               "accident": 1.0,
@@ -10651,10 +10655,10 @@ window.STEPWGN_DATA = {
             "url": "https://www.carsensor.net/usedcar/detail/AU7087180710/index.html"
           },
           {
-            "score": 6.55,
+            "score": 6.87,
             "score_breakdown": {
-              "price": 6.8,
-              "mileage": 4.7,
+              "price": 6.3,
+              "mileage": 9.0,
               "shaken": 6.7,
               "accident": 1.0,
               "warranty": 8.0,
@@ -10664,49 +10668,12 @@ window.STEPWGN_DATA = {
             },
             "grade_id": "spada",
             "grade_label": "e:HEV スパーダ",
-            "price_man": 309.8,
+            "price_man": 315.2,
             "new_price_man": 413.5,
-            "year": 2023,
-            "mileage_km": 53000,
+            "year": 2024,
+            "mileage_km": 10000,
             "shaken_months": 24,
             "accident": true,
-            "warranty": true,
-            "maintenance": true,
-            "navi": true,
-            "screen_size": 11.4,
-            "camera": null,
-            "unused": false,
-            "options": [],
-            "color": "紺Ｍ",
-            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/226/817/U00053226817/U00053226817_001L.JPG",
-            "dealer_name": "ｓｔｙｌｅ　ｃａｒ’ｓ　大阪中環店",
-            "dealer_rating": 4.9,
-            "dealer_reviews": 257,
-            "seats": 7,
-            "url": "https://www.carsensor.net/usedcar/detail/AU7109074984/index.html"
-          }
-        ],
-        "high_mileage": [
-          {
-            "score": 6.98,
-            "score_breakdown": {
-              "price": 6.1,
-              "mileage": 1.9,
-              "shaken": 3.3,
-              "accident": 10.0,
-              "warranty": 8.0,
-              "maintenance": 10.0,
-              "navi": 10.0,
-              "equipment": 0.0
-            },
-            "grade_id": "spada",
-            "grade_label": "e:HEV スパーダ",
-            "price_man": 319.8,
-            "new_price_man": 413.5,
-            "year": 2022,
-            "mileage_km": 81000,
-            "shaken_months": 12,
-            "accident": false,
             "warranty": true,
             "maintenance": true,
             "navi": true,
@@ -10714,18 +10681,20 @@ window.STEPWGN_DATA = {
             "camera": null,
             "unused": false,
             "options": [],
-            "color": "紺",
-            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/156/325/UZ0053156325/UZ0053156325_001L.JPG",
-            "dealer_name": "Ｈｏｎｄａ　Ｃａｒｓ　岩手 Ｕ－Ｓｅｌｅｃｔ盛岡",
-            "dealer_rating": 4.6,
-            "dealer_reviews": 9,
+            "color": "灰",
+            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/224/835/UJ0053224835/UJ0053224835_001L.JPG",
+            "dealer_name": "エフガレージ 所沢店",
+            "dealer_rating": 4.7,
+            "dealer_reviews": 1368,
             "seats": 7,
-            "url": "https://www.carsensor.net/usedcar/detail/AU7098943997/index.html"
-          },
+            "url": "https://www.carsensor.net/usedcar/detail/AU7108906119/index.html"
+          }
+        ],
+        "high_mileage": [
           {
-            "score": 6.96,
+            "score": 6.93,
             "score_breakdown": {
-              "price": 5.7,
+              "price": 5.6,
               "mileage": 3.3,
               "shaken": 3.3,
               "accident": 10.0,
@@ -10758,48 +10727,81 @@ window.STEPWGN_DATA = {
             "url": "https://www.carsensor.net/usedcar/detail/AU7142231939/index.html"
           },
           {
-            "score": 7.0,
+            "score": 6.88,
             "score_breakdown": {
-              "price": 6.2,
-              "mileage": 3.7,
-              "shaken": 3.3,
+              "price": 5.6,
+              "mileage": 3.4,
+              "shaken": 2.5,
               "accident": 10.0,
-              "warranty": 4.0,
-              "maintenance": 3.0,
+              "warranty": 8.0,
+              "maintenance": 10.0,
               "navi": 10.0,
-              "equipment": 0.3
+              "equipment": 0.0
             },
-            "grade_id": "spada_premium",
-            "grade_label": "e:HEV スパーダ プレミアムライン",
-            "price_man": 318.6,
-            "new_price_man": 440.4,
-            "year": 2022,
-            "mileage_km": 63000,
-            "shaken_months": 12,
+            "grade_id": "spada",
+            "grade_label": "e:HEV スパーダ",
+            "price_man": 327.3,
+            "new_price_man": 413.5,
+            "year": 2024,
+            "mileage_km": 66000,
+            "shaken_months": 9,
             "accident": false,
-            "warranty": null,
-            "maintenance": false,
+            "warranty": true,
+            "maintenance": true,
             "navi": true,
-            "screen_size": 9.0,
+            "screen_size": 11.4,
             "camera": null,
             "unused": false,
-            "options": [
-              "マルチビュー"
-            ],
-            "color": "黒",
-            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/330/651/UJ0053330651/UJ0053330651_001L.JPG",
-            "dealer_name": "Ｇ－ＡＦＴＥＲ ＭＥＧＡ千葉北インター店",
-            "dealer_rating": 4.5,
-            "dealer_reviews": 170,
+            "options": [],
+            "color": "青Ｍ",
+            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/390/114/UZ0053390114/UZ0053390114_002L.JPG",
+            "dealer_name": "ホンダカーズ埼玉 鶴ヶ島インター店",
+            "dealer_rating": 4.9,
+            "dealer_reviews": 38,
             "seats": 7,
-            "url": "https://www.carsensor.net/usedcar/detail/AU7133581595/index.html"
+            "url": "https://www.carsensor.net/usedcar/detail/AU7151537985/index.html"
+          },
+          {
+            "score": 6.98,
+            "score_breakdown": {
+              "price": 5.2,
+              "mileage": 4.7,
+              "shaken": 4.7,
+              "accident": 10.0,
+              "warranty": 8.0,
+              "maintenance": 10.0,
+              "navi": 10.0,
+              "equipment": 0.0
+            },
+            "grade_id": "spada",
+            "grade_label": "e:HEV スパーダ",
+            "price_man": 332.9,
+            "new_price_man": 413.5,
+            "year": 2022,
+            "mileage_km": 53000,
+            "shaken_months": 17,
+            "accident": false,
+            "warranty": true,
+            "maintenance": true,
+            "navi": true,
+            "screen_size": 11.4,
+            "camera": null,
+            "unused": false,
+            "options": [],
+            "color": "黒Ｍ",
+            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/143/405/UZ0053143405/UZ0053143405_001L.JPG",
+            "dealer_name": "ネクステージ 新潟東店",
+            "dealer_rating": 4.7,
+            "dealer_reviews": 178,
+            "seats": 7,
+            "url": "https://www.carsensor.net/usedcar/detail/AU7092849516/index.html"
           }
         ],
         "no_shaken": [
           {
-            "score": 7.93,
+            "score": 7.86,
             "score_breakdown": {
-              "price": 10.0,
+              "price": 9.8,
               "mileage": 0.2,
               "shaken": 5.0,
               "accident": 10.0,
@@ -10832,74 +10834,78 @@ window.STEPWGN_DATA = {
             "url": "https://www.carsensor.net/usedcar/detail/AU7087178248/index.html"
           },
           {
-            "score": 7.8,
+            "score": 6.71,
             "score_breakdown": {
-              "price": 9.3,
-              "mileage": 1.6,
+              "price": 3.8,
+              "mileage": 7.4,
               "shaken": 5.0,
               "accident": 10.0,
               "warranty": 4.0,
-              "maintenance": 3.0,
+              "maintenance": 10.0,
               "navi": 10.0,
-              "equipment": 0.0
+              "equipment": 0.3
             },
-            "grade_id": "spada",
-            "grade_label": "e:HEV スパーダ",
-            "price_man": 270.9,
-            "new_price_man": 413.5,
-            "year": 2023,
-            "mileage_km": 84000,
+            "grade_id": "spada_premium",
+            "grade_label": "e:HEV スパーダ プレミアムライン",
+            "price_man": 354.9,
+            "new_price_man": 440.4,
+            "year": 2022,
+            "mileage_km": 26000,
             "shaken_months": null,
             "accident": false,
             "warranty": null,
-            "maintenance": false,
+            "maintenance": true,
             "navi": true,
-            "screen_size": 11.4,
+            "screen_size": null,
             "camera": null,
             "unused": false,
-            "options": [],
-            "color": "真珠白",
-            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/991/556/UJ0052991556/UJ0052991556_002L.JPG",
-            "dealer_name": "Ｇ－ＡＦＴＥＲ ＭＥＧＡ東岡山店",
-            "dealer_rating": 4.5,
-            "dealer_reviews": 50,
+            "options": [
+              "マルチビュー"
+            ],
+            "color": "深紫",
+            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/578/158/U00051578158/U00051578158_002L.JPG",
+            "dealer_name": "ＡＲ　ＭＯＴＯＲＳ",
+            "dealer_rating": 4.1,
+            "dealer_reviews": 16,
             "seats": 7,
-            "url": "https://www.carsensor.net/usedcar/detail/AU7062637527/index.html"
+            "url": "https://www.carsensor.net/usedcar/detail/AU6790248387/index.html"
           },
           {
-            "score": 7.44,
+            "score": 6.63,
             "score_breakdown": {
-              "price": 7.0,
-              "mileage": 6.5,
+              "price": 4.6,
+              "mileage": 5.9,
               "shaken": 5.0,
               "accident": 10.0,
               "warranty": 4.0,
               "maintenance": 3.0,
               "navi": 10.0,
-              "equipment": 0.0
+              "equipment": 0.3
             },
             "grade_id": "spada",
             "grade_label": "e:HEV スパーダ",
-            "price_man": 305.9,
-            "new_price_man": 413.5,
-            "year": 2023,
-            "mileage_km": 35000,
+            "price_man": 343.2,
+            "new_price_man": 423.5,
+            "year": 2022,
+            "mileage_km": 41000,
             "shaken_months": null,
             "accident": false,
             "warranty": null,
             "maintenance": false,
             "navi": true,
-            "screen_size": 11.4,
+            "screen_size": 9.0,
             "camera": null,
             "unused": false,
-            "options": [],
-            "color": "黒",
-            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/182/175/UJ0053182175/UJ0053182175_001L.JPG",
-            "dealer_name": "Ｇ－ＡＦＴＥＲ ＭＥＧＡ越谷レイクタウン店",
-            "dealer_rating": 4.1,
-            "dealer_reviews": 359,
+            "options": [
+              "マルチビュー"
+            ],
+            "color": "黒真珠",
+            "photo_url": "https://ccsrpcma.carsensor.net/CSphoto/bkkn/407/908/U00050407908/U00050407908_001L.JPG",
+            "dealer_name": "フェニックス 金沢八景センター",
+            "dealer_rating": 4.4,
+            "dealer_reviews": 28,
             "seats": 7,
-            "url": "https://www.carsensor.net/usedcar/detail/AU7099471331/index.html"
+            "url": "https://www.carsensor.net/usedcar/detail/AU6585555568/index.html"
           }
         ]
       }
