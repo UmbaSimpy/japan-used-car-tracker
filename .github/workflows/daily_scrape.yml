@@ -12,6 +12,10 @@ jobs:
   scrape:
     runs-on: ubuntu-latest
 
+    # NOTE: Telegram notifications intentionally disabled (car purchased 2026-07).
+    # The scrapers still run and commit data (dashboard keeps updating); with no
+    # TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID env, send_telegram() just skips. To
+    # re-enable, restore the `env:` block with those two secrets on each scraper step.
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4.2.2
@@ -25,27 +29,15 @@ jobs:
         run: pip install requests beautifulsoup4
 
       - name: Run Freed scraper
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python scraper.py
 
       - name: Run Noah scraper
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python noah_scraper.py
 
       - name: Run StepWGN scraper
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python stepwgn_scraper.py
 
       - name: Run Voxy scraper
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python voxy_scraper.py
 
       - name: Commit updated data
